@@ -9330,8 +9330,14 @@ function _findBuildingFootprintExit(map, px, py) {
     for (let dy = 0; dy <= 2; dy++) {
         for (let dx = -1; dx <= 1; dx++) {
             if (dx === 0 && dy === 0) continue; // 扉タイル自体は通常の直接判定側で処理される
-            const ev = map.exits[`${px + dx},${py + dy}`];
-            if (ev) return ev;
+            const tx = px + dx, ty = py + dy;
+            const ev = map.exits[`${tx},${ty}`];
+            if (!ev) continue;
+            // フィールド境界（縁の1行/1列まるごと扉）は建物フットプリントの対象外。
+            // 含めると境界沿いの移動で方向ガードを迂回して往復ループが再発する。
+            const _onBorder = (tx === 0 || tx === map.width - 1 || ty === 0 || ty === map.height - 1);
+            if (_onBorder && /^(map_)?field_/.test(ev.map)) continue;
+            return ev;
         }
     }
     return null;
@@ -9469,7 +9475,19 @@ async function moveParty(dx, dy) {
 
     if (_onField && /^map_field_/.test(partyData.pos.map)) partyData.last_field_pos = { map: partyData.pos.map, x: partyData.pos.x, y: partyData.pos.y };
     drawMap();
-    const _exitDirect = currentMap.exits && currentMap.exits[key];
+    let _exitDirect = currentMap.exits && currentMap.exits[key];
+    if (_exitDirect && /^(map_)?field_/.test(_exitDirect.map)) {
+        // フィールド境界は縁の1行/1列まるごと扉として登録されているため、
+        // 境界を実際に「跨ぐ」方向へ動いた時だけ発動させる。
+        // そうしないと、境界の縁に沿って縦(または横)に歩くたびに隣マップへ
+        // 引き戻され、2つのマップの間に挟まれて往復し続けてしまう。
+        const _onBorder = (nx === 0 || nx === currentMap.width - 1 || ny === 0 || ny === currentMap.height - 1);
+        if (_onBorder) {
+            const _crossingOk = (nx === 0 && dx < 0) || (nx === currentMap.width - 1 && dx > 0) ||
+                                 (ny === 0 && dy < 0) || (ny === currentMap.height - 1 && dy > 0);
+            if (!_crossingOk) _exitDirect = null;
+        }
+    }
     const _exitFp = !_exitDirect && _onField ? _findBuildingFootprintExit(currentMap, nx, ny) : null;
     if (_exitDirect || _exitFp) {
         const exit = _exitDirect || _exitFp;
@@ -12703,7 +12721,7 @@ async function openMainMenu() {
     state = 'MENU'; showWindow('party-status'); updatePartyStatus(); showGoldWindow();
     while(true) {
         let cmd = await selectMenu(['はなす', 'じゅもん', 'どうぐ', 'つよさ', 'ちず', 'ふしぎな台帳'], 'cmd-window', 1, true); if(cmd === -1) break;
-        if(cmd === 0) { hideAllWindows(); await checkAction(); if (state !== 'FIELD') break; showWindow('party-status'); updatePartyStatus(); state = 'MENU'; } 
+        if(cmd === 0) { hideAllWindows(); await checkAction(); break; } 
         else if(cmd === 1) {
             await typeMessage("だれの じゅもん？"); let charIdx = await selectMenu(partyData.members.map(m=>m.name), 'cmd-window', 1, true); if(charIdx === -1) continue; let char = partyData.members[charIdx];
             if(char.hp <= 0) { await typeMessage(`${char.name}は しんでいる！`); continue; } if(!char.spells || char.spells.length === 0) { await typeMessage("じゅもんを しらない！"); continue; }
@@ -12722,12 +12740,12 @@ async function openMainMenu() {
                     }
                     if (spellData.id.includes('zao')) { 
                         if (target.hp > 0) { await typeMessage("しかし なにも おこらなかった！"); continue; } 
-                        char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, target); AudioManager.playSE('heal'); target.hp = Math.floor(target.max_hp / 2); await typeMessage(`${target.name}は いきかえった！`); updatePartyStatus(); 
+                        char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, target); AudioManager.playSE('heal'); target.hp = Math.floor(target.max_hp / 2); await typeMessage(`${target.name}は いきかえった！`); updatePartyStatus(); hideAllWindows(); state = 'FIELD'; drawMap(); return;
                     } else if(spellData.id.includes('kiari') || spellData.id.includes('shana')) {
-                        char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, target); AudioManager.playSE('heal'); target.isPoisoned = false; await typeMessage(`${target.name}の どくや マヒが とけた！`); updatePartyStatus();
-                    } else { 
-                        if (target.hp <= 0) { await typeMessage("しんでいる なかまには きかない！"); continue; } 
-                        char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, target); AudioManager.playSE('heal'); target.hp = Math.min(target.max_hp, target.hp + spellData.value); await typeMessage(`${target.name}の HPが かいふくした！`); updatePartyStatus(); 
+                        char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, target); AudioManager.playSE('heal'); target.isPoisoned = false; await typeMessage(`${target.name}の どくや マヒが とけた！`); updatePartyStatus(); hideAllWindows(); state = 'FIELD'; drawMap(); return;
+                    } else {
+                        if (target.hp <= 0) { await typeMessage("しんでいる なかまには きかない！"); continue; }
+                        char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, target); AudioManager.playSE('heal'); target.hp = Math.min(target.max_hp, target.hp + spellData.value); await typeMessage(`${target.name}の HPが かいふくした！`); updatePartyStatus(); hideAllWindows(); state = 'FIELD'; drawMap(); return;
                     }
                 } else if(spellData.target === 'allies') { 
                     char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, 'allies'); AudioManager.playSE('heal'); 
@@ -12742,7 +12760,7 @@ async function openMainMenu() {
                         partyData.members.forEach(m => { if(m.hp > 0) m.hp = Math.min(m.max_hp, m.hp + spellData.value); });
                         await typeMessage(`なかま ぜんいんの HPが かいふくした！`);
                     }
-                    updatePartyStatus(); 
+                    updatePartyStatus(); hideAllWindows(); state = 'FIELD'; drawMap(); return;
                 }
             } else if(spellData.type === 'field' || spellData.id.includes('rula') || spellData.id.includes('remi') || spellData.id.includes('tohe') || spellData.id.includes('trama')) {
                 if(spellData.id.includes('rula')) {
@@ -12782,8 +12800,8 @@ async function openMainMenu() {
                     }
                 }
                 else if(spellData.id.includes('remi')) { let _rMapId2 = partyData.pos.map || ''; if (_rMapId2.includes('dungeon') || _rMapId2.includes('cave') || _rMapId2.includes('tower') || _rMapId2.includes('demon') || _rMapId2.includes('shrine')) { char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playFieldWarpEffect(spellData.id); const _lfp = partyData.last_field_pos; if (_lfp && externalMapData && externalMapData[_lfp.map]) { partyData.pos.map = _lfp.map; partyData.pos.x = _lfp.x; partyData.pos.y = _lfp.y; currentMap = await loadExternalData('map-' + _lfp.map); } else { partyData.pos.map = "map_field_2_2"; partyData.pos.x = 23; partyData.pos.y = 23; currentMap = await loadExternalData('map-map_field_2_2'); } await typeMessage(`ダンジョンから だしゅつした！`); moveHistory = []; hideAllWindows(); state = 'FIELD'; drawMap(); updateBGM(); return; } else { await typeMessage(`しかし ここでは つかえなかった。\nレミトは ダンジョンや たいせつな しせつの 中で つかえます。`); } } 
-                else if(spellData.id.includes('tohe')) { char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, null); partyData.tohero_steps = 100; await typeMessage(`まものが ちかづかなくなった！`); }
-                else if(spellData.id.includes('trama')) { char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, null); partyData.tramana_steps = 100; await typeMessage(`ダメージゾーンから みをまもる じゅもんを はった！`); }
+                else if(spellData.id.includes('tohe')) { char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, null); partyData.tohero_steps = 100; await typeMessage(`まものが ちかづかなくなった！`); hideAllWindows(); state = 'FIELD'; drawMap(); return; }
+                else if(spellData.id.includes('trama')) { char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, null); partyData.tramana_steps = 100; await typeMessage(`ダメージゾーンから みをまもる じゅもんを はった！`); hideAllWindows(); state = 'FIELD'; drawMap(); return; }
             } else { await typeMessage("ここでは つかえない！"); }
         } else if(cmd === 2) {
             await typeMessage("だれの どうぐ？"); let charIdx = await selectMenu(partyData.members.map(m=>m.name), 'cmd-window', 1, true); if(charIdx === -1) continue; let char = partyData.members[charIdx];
