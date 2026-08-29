@@ -17,6 +17,9 @@
     #party-status { top: 0; left: 0; width: 100%; height: 50px; display: flex; justify-content: space-between; align-items: center; flex-direction: row; flex-wrap: nowrap; font-size: min(13px, 3.2vw); text-align: center; border-top: none; border-left: none; border-right: none; border-radius: 0; padding: 0; margin: 0; }
     #party-status > div { flex: 1; border-right: 1px solid #555; padding: 2px 0; overflow: hidden; white-space: nowrap; text-overflow: clip; }
     #party-status > div:last-child { border-right: none; }
+    /* バトル中は視認性のため表示範囲を約2倍に拡大 */
+    #party-status.battle-size { height: 100px; font-size: min(26px, 6.4vw); }
+    #party-status.battle-size > div { padding: 4px 0; }
     .dead { color: #f55; }
     #gold-window { top: 55px; right: 5px; min-width: 80px; text-align: right; z-index: 15; }
     #map-name-window { top: 55px; left: 5px; min-width: 80px; text-align: center; z-index: 15; }
@@ -6512,7 +6515,7 @@ async function handleFieldInput(key) {
     if(key === 'Enter') { isMoving = true; try { await checkAction(); } finally { isMoving = false; } } 
     if(key === 'Escape') openMainMenu(); 
 }
-function showWindow(id) { document.getElementById(id).style.display = 'flex'; } function hideWindow(id) { document.getElementById(id).style.display = 'none'; } function hideAllWindows() { hideWindow('msg-window'); hideWindow('cmd-window'); hideWindow('party-status'); hideWindow('status-window'); hideWindow('gold-window'); hideWindow('map-name-window'); }
+function showWindow(id) { document.getElementById(id).style.display = 'flex'; } function hideWindow(id) { document.getElementById(id).style.display = 'none'; } function hideAllWindows() { hideWindow('msg-window'); hideWindow('cmd-window'); hideWindow('party-status'); hideWindow('status-window'); hideWindow('gold-window'); hideWindow('map-name-window'); document.getElementById('party-status').classList.remove('battle-size'); }
 async function typeMessage(text) {
     state = 'MSG';
     const _mw = document.getElementById('msg-window'); _mw.style.display = 'block';
@@ -12898,8 +12901,8 @@ async function executeBattle(fixedEnemies = null) {
     { const _tod = _getTimeOfDayInfo(); const _todLayer = _tod.alpha > 0.001 ? `linear-gradient(rgba(${_tod.r},${_tod.g},${_tod.b},${_tod.alpha}), rgba(${_tod.r},${_tod.g},${_tod.b},${_tod.alpha})), ` : '';
       bScreen.style.backgroundImage = `${_todLayer}url('${bgUrl}')`; }
     bScreen.style.backgroundSize = "cover"; bScreen.style.backgroundPosition = "bottom center"; bScreen.style.backgroundRepeat = "no-repeat";
-    showWindow('party-status'); updatePartyStatus();
-    
+    showWindow('party-status'); document.getElementById('party-status').classList.add('battle-size'); updatePartyStatus();
+
     if (fixedEnemies) { if (fixedEnemies.some(id => id.includes('_final') || id.includes('final_boss') || (masterData.monsters[id] && masterData.monsters[id].name.includes('最終形態')))) { AudioManager.playBGM('battle_final'); } else { AudioManager.playBGM('battle_boss'); } } 
     else { AudioManager.playBGM('battle_normal'); }
     
@@ -14258,7 +14261,7 @@ async function showTitleScreen() {
             await typeMessage(`グラマニアの 城下町に 戻った ${_hero}。\n国王グラードが 召集の 知らせを 出したという……`);
             await typeMessage(`────── だが この旅の 果てに\n${_hero}を 待つのは\n誰も 知らない 残酷な 真実だった ──────`);
             _screen.style.transition = ''; _screen.style.opacity = '1';
-            hideAllWindows(); state = 'FIELD'; drawMap(); updateBGM(); updatePartyStatus(); showWindow('party-status'); updateGoldWindow();
+            hideAllWindows(); state = 'FIELD'; drawMap(); updateBGM(); updatePartyStatus(); updateGoldWindow();
             return;
         }
         else if(choiceStr === 'ぼうけんのしょ') {
@@ -14314,7 +14317,7 @@ async function showTitleScreen() {
     if (!partyData.flags.visited_maps) partyData.flags.visited_maps = {};
     moveHistory = [];
     hideAllWindows();
-    showWindow('party-status'); updatePartyStatus(); updateGoldWindow();
+    updatePartyStatus(); updateGoldWindow();
     state = 'FIELD'; drawMap(); updateBGM(); startFieldLoop();
 }
 
