@@ -3636,16 +3636,55 @@ function buildDesertaCastle() {
     return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'南の砂漠城デセルタ'};
 }
 function buildShrineWarp() {
-    const W=12,H=12;
+    // 入口の間(x=1-10)＋奥の祭壇の間(x=12-20)の2部屋構成。
+    // 南入口(6,9)は index.html forceExit 後処理がハードコード参照するため座標固定。
+    const W=22,H=12;
     const t=new Array(W*H).fill(1);
     const S=(x,y,v)=>{if(x>=0&&y>=0&&x<W&&y<H)t[y*W+x]=v;};
     const R=(x1,y1,x2,y2,v)=>{for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++)S(x,y,v);};
-    R(1,1,10,9,9);  // 内部（石床）、エントリ(6,9)を含む
-    S(6,2,3);       // 祭壇
+    R(1,1,10,9,9);   // 入口の間（石床）、エントリ(6,9)を含む
+    S(6,2,3);        // 祭壇（装飾）
+    S(11,5,9);       // 入口の間 ↔ 奥の間 の通路（開口部）
+    R(12,1,20,9,9);  // 奥の祭壇の間（石床）
+    S(19,5,23);      // 隠し通路（祠の裏の石の間へ）
     S(5,10,22);S(6,10,22);
-    const exits={'6,10':{map:'map_field_2_3',x:7,y:7},'5,10':{map:'map_field_2_3',x:7,y:7}};
-    const npcs={'6,3':{id:'npc_priest',name:'神父'},'5,5':{id:'obj_chest_item',name:'祠の宝箱'}};
+    const exits={
+        '6,10':{map:'map_field_2_3',x:7,y:7},
+        '5,10':{map:'map_field_2_3',x:7,y:7},
+        '19,5':{map:'map_shrine_backroom',x:3,y:2},
+    };
+    const npcs={'6,3':{id:'npc_priest',name:'神父'},'15,4':{id:'obj_chest_item',name:'祠の宝箱'}};
     return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'ほこら'};
+}
+function buildShrineBackRoom() {
+    // sq_06: 祠の裏の石の間（ほしのカケラ3つ目）
+    const W=8,H=8;
+    const t=new Array(W*H).fill(1);
+    const S=(x,y,v)=>{if(x>=0&&y>=0&&x<W&&y<H)t[y*W+x]=v;};
+    const R=(x1,y1,x2,y2,v)=>{for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++)S(x,y,v);};
+    R(1,1,6,6,0);    // 隠し部屋（洞窟床、本殿とは異なる質感）
+    S(3,7,22);
+    const exits={'3,7':{map:'map_shrine_warp',x:19,y:4}};
+    const npcs={'4,4':{id:'obj_chest_star_frag3',name:'光る石碑'}};
+    return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'祠の裏の石の間'};
+}
+function buildSageShrine(returnExit) {
+    // 手前の間（旅の案内人・野の賢者）＋奥の書庫（旅の僧侶=sq_08）の2部屋構成
+    const W=20,H=10;
+    const t=new Array(W*H).fill(1);
+    const S=(x,y,v)=>{if(x>=0&&y>=0&&x<W&&y<H)t[y*W+x]=v;};
+    const R=(x1,y1,x2,y2,v)=>{for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++)S(x,y,v);};
+    R(1,1,8,8,0);    // 手前の間
+    S(9,4,0);        // 手前の間 ↔ 奥の書庫 の通路
+    R(10,1,18,8,0);  // 奥の書庫
+    S(5,9,0);        // 南入口
+    const exits={'5,9':returnExit||{map:'map_field_3_0',x:5,y:8}};
+    const npcs={
+        '7,2':{id:'npc_guide_east_tower',name:'旅の案内人'},
+        '4,5':{id:'npc_story_hermit',name:'野の賢者'},
+        '14,4':{id:'npc_field_monk',name:'旅の僧侶'},
+    };
+    return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'賢者の祠'};
 }
 function buildZarmoCastle() {
     const W = 22, H = 20;
@@ -3928,10 +3967,12 @@ if(_bpx+1<x0+45&&world[_bpy*GW+_bpx+1]===5){world[_bpy*GW+_bpx+1]=12;mainComp.ad
         const tiles1D = [], exits = {};
         for(let ty=0;ty<45;ty++) for(let tx=0;tx<45;tx++)
             tiles1D.push(world[(gy*45+ty)*GW+(gx*45+tx)]);
-        if(gy>0) for(let tx=1;tx<44;tx++){const wx=gx*45+tx;if(world[(gy*45)*GW+wx]!==5&&world[(gy*45)*GW+wx]!==25&&world[((gy-1)*45+44)*GW+wx]!==5&&world[((gy-1)*45+44)*GW+wx]!==25)exits[`${tx},0`]={map:`map_field_${gx}_${gy-1}`,x:tx,y:43};}
-        if(gy<8) for(let tx=1;tx<44;tx++){const wx=gx*45+tx;if(world[(gy*45+44)*GW+wx]!==5&&world[(gy*45+44)*GW+wx]!==25&&world[((gy+1)*45)*GW+wx]!==5&&world[((gy+1)*45)*GW+wx]!==25)exits[`${tx},44`]={map:`map_field_${gx}_${gy+1}`,x:tx,y:1};}
-        if(gx>0) for(let ty=1;ty<44;ty++){const wy=gy*45+ty;if(world[wy*GW+gx*45]!==5&&world[wy*GW+gx*45]!==25&&world[wy*GW+(gx-1)*45+44]!==5&&world[wy*GW+(gx-1)*45+44]!==25)exits[`0,${ty}`]={map:`map_field_${gx-1}_${gy}`,x:43,y:ty};}
-        if(gx<8) for(let ty=1;ty<44;ty++){const wy=gy*45+ty;if(world[wy*GW+gx*45+44]!==5&&world[wy*GW+gx*45+44]!==25&&world[wy*GW+(gx+1)*45]!==5&&world[wy*GW+(gx+1)*45]!==25)exits[`44,${ty}`]={map:`map_field_${gx+1}_${gy}`,x:1,y:ty};}
+        // 境界の着地座標はチェック済みの真の端タイル(0/44)に一致させる
+        // （以前は y:43/1・x:43/1 と1マス手前にずれており、境界を跨ぐたびに1マス余分にワープしていた）
+        if(gy>0) for(let tx=1;tx<44;tx++){const wx=gx*45+tx;if(world[(gy*45)*GW+wx]!==5&&world[(gy*45)*GW+wx]!==25&&world[((gy-1)*45+44)*GW+wx]!==5&&world[((gy-1)*45+44)*GW+wx]!==25)exits[`${tx},0`]={map:`map_field_${gx}_${gy-1}`,x:tx,y:44};}
+        if(gy<8) for(let tx=1;tx<44;tx++){const wx=gx*45+tx;if(world[(gy*45+44)*GW+wx]!==5&&world[(gy*45+44)*GW+wx]!==25&&world[((gy+1)*45)*GW+wx]!==5&&world[((gy+1)*45)*GW+wx]!==25)exits[`${tx},44`]={map:`map_field_${gx}_${gy+1}`,x:tx,y:0};}
+        if(gx>0) for(let ty=1;ty<44;ty++){const wy=gy*45+ty;if(world[wy*GW+gx*45]!==5&&world[wy*GW+gx*45]!==25&&world[wy*GW+(gx-1)*45+44]!==5&&world[wy*GW+(gx-1)*45+44]!==25)exits[`0,${ty}`]={map:`map_field_${gx-1}_${gy}`,x:44,y:ty};}
+        if(gx<8) for(let ty=1;ty<44;ty++){const wy=gy*45+ty;if(world[wy*GW+gx*45+44]!==5&&world[wy*GW+gx*45+44]!==25&&world[wy*GW+(gx+1)*45]!==5&&world[wy*GW+(gx+1)*45]!==25)exits[`44,${ty}`]={map:`map_field_${gx+1}_${gy}`,x:0,y:ty};}
         const dist=Math.abs(gx-2)+Math.abs(gy-2);
         const isWestSouth = (gx===0 && gy>=2 && gy<=4);
         // 深部エリア: 既存魔王周辺 + 拡張南東 + 拡張南西果て
@@ -4652,6 +4693,8 @@ function generateDQStyleMaps() {
         m.npcs['3,9']={id:'npc_guard_demon',name:'魔族の兵士'};
         m.npcs['16,9']={id:'npc_guard_demon',name:'魔族の兵士'};
         m.npcs['10,20']={id:'npc_dc_inscription_left',name:'古い碑文'};
+        // 到達可能性修正: 中央通路(x9-10)が左右の部屋(x1-6/x13-18)に繋がっておらず宝箱2つ+碑文が孤立していた
+        [[7,18],[8,18],[11,18],[12,18],[10,19]].forEach(([x,y])=>_dT2(m,x,y,0));
         externalMapData['map_demon_castle_left']=m;
     }
 
@@ -4689,6 +4732,8 @@ function generateDQStyleMaps() {
         m.npcs['3,9']={id:'npc_guard_demon',name:'魔族の兵士'};
         m.npcs['16,9']={id:'npc_guard_demon',name:'魔族の兵士'};
         m.npcs['10,20']={id:'npc_dc_inscription_right',name:'古い碑文'};
+        // 到達可能性修正: 中央通路(x9-10)が左右の部屋(x1-6/x13-18)に繋がっておらず宝箱2つ+碑文が孤立していた
+        [[7,18],[8,18],[11,18],[12,18],[10,19]].forEach(([x,y])=>_dT2(m,x,y,0));
         externalMapData['map_demon_castle_right']=m;
     }
 
@@ -4830,8 +4875,9 @@ function generateDQStyleMaps() {
         }
     }
 
-    // ===== ほこら (12x12) =====
+    // ===== ほこら (22x12, 2部屋) =====
     externalMapData['map_shrine_warp'] = buildShrineWarp();
+    externalMapData['map_shrine_backroom'] = buildShrineBackRoom();
 
     // ===== 竜霊の島 (12x12) =====
     if(!externalMapData['map_dragon_shrine']){
@@ -5661,7 +5707,7 @@ async function fetchExternalMap(url) { const loading = document.getElementById('
                               const _nt = (_townOv2 && _townOv2.tiles && _townOv2.tiles.length > 0) ? _townOv2 : buildGramanTown01();
                               Object.keys(externalMapData).forEach(k => { if(k.includes('town_01')) externalMapData[k] = _nt; });
                               externalMapData['map_town_01'] = _nt;
-                              externalMapData['town_01'] = _nt; } let mapB3FKey = Object.keys(externalMapData).find(k => k.includes('dungeon_b3f')); if (mapB3FKey) { let b3f = externalMapData[mapB3FKey]; let warpA_x = 2, warpA_y = 2; let exitKeys = Object.keys(b3f.exits); if(exitKeys.length > 0) { let [ex, ey] = exitKeys[0].split(',').map(Number); warpA_x = ex; warpA_y = ey + 2; if (warpA_y >= b3f.height - 1) warpA_y = ey - 2; } let warpB_x = Math.floor(b3f.width / 2); let warpB_y = Math.floor(b3f.height / 2); let npcKeys = Object.keys(b3f.npcs); if(npcKeys.length > 0) { let targetNpc = npcKeys[npcKeys.length - 1]; let [nx, ny] = targetNpc.split(',').map(Number); warpB_x = nx; warpB_y = ny + 2; if (warpB_y >= b3f.height - 1) warpB_y = ny - 2; } if (Math.abs(warpA_x - warpB_x) < 3 && Math.abs(warpA_y - warpB_y) < 3) { warpB_x = b3f.width - 3; warpB_y = b3f.height - 3; } const setWarp = (wx, wy, destX, destY) => { wx = Math.max(1, Math.min(wx, b3f.width - 2)); wy = Math.max(1, Math.min(wy, b3f.height - 2)); destX = Math.max(1, Math.min(destX, b3f.width - 2)); destY = Math.max(1, Math.min(destY, b3f.height - 2)); b3f.tiles[wy * b3f.width + wx] = 8; b3f.exits[`${wx},${wy}`] = { map: mapB3FKey, x: destX, y: destY }; b3f.tiles[destY * b3f.width + destX] = 0; if(destY+1 < b3f.height) b3f.tiles[(destY+1) * b3f.width + destX] = 0; if(destX+1 < b3f.width) b3f.tiles[destY * b3f.width + (destX+1)] = 0; if(destX-1 >= 0) b3f.tiles[destY * b3f.width + (destX-1)] = 0; }; setWarp(warpA_x, warpA_y, warpB_x, warpB_y + 1); setWarp(warpB_x, warpB_y, warpA_x, warpA_y + 1); } let mapTown1Key = Object.keys(externalMapData).find(k => k.includes('town_01')); if (mapTown1Key) { let town1 = externalMapData[mapTown1Key]; town1.npcs["12,16"] = { id: "npc_casino_bunny", name: "バニーガール" }; if (16 * town1.width + 12 < town1.tiles.length) { town1.tiles[16 * town1.width + 12] = 9; } if (!externalEntitiesData["npc_casino_bunny"]) { externalEntitiesData["npc_casino_bunny"] = { id: "npc_casino_bunny", name: "バニーガール", type: "casino", msg: "ようこそ カジノへ！" }; } } for (let mapKey in externalMapData) { let map = externalMapData[mapKey]; let isSafeMap = mapKey.includes('town') || mapKey.includes('village') || mapKey.includes('market') || mapKey.includes('castle') || mapKey.includes('shrine'); if (isSafeMap && !mapKey.includes('demon') && !mapKey.includes('death')) { let hasPriest = false; for (let k in map.npcs) { if (map.npcs[k].id.includes('priest') || map.npcs[k].id.includes('church')) { hasPriest = true; break; } } if (!hasPriest) { let placed = false; let startY = Math.floor(map.height / 2) - 2; if (startY < 1) startY = 1; for (let y = startY; y < map.height - 1 && !placed; y++) { for (let x = 2; x < map.width - 2 && !placed; x++) { let tile = map.tiles[y * map.width + x]; let key = `${x},${y}`; if ((tile === 0 || tile === 10 || tile === 11 || tile === 23) && !map.exits[key] && !map.npcs[key] && ![[0,1],[0,-1],[1,0],[-1,0]].some(([dx,dy]) => map.exits[`${x+dx},${y+dy}`])) { map.npcs[key] = { id: "npc_priest", name: "神父" }; placed = true; } } } } } } injectSubStoryData(); if (externalMapData["map_field_2_0"]) externalMapData["map_field_2_0"].npcs["7,3"] = { id: "obj_chest_star_frag", name: "光る地面" }; if (externalMapData["map_town_01"]) externalMapData["map_town_01"].npcs["8,14"] = { id: "npc_sub_rumor", name: "マルコ" }; if(externalMapData['map_field_4_0']) externalMapData['map_field_4_0'].npcs['22,22'] = {id:'obj_chest_star_frag2', name:'光る石碑'}; if(externalMapData['map_field_2_3']) externalMapData['map_field_2_3'].npcs['22,22'] = {id:'obj_chest_star_frag3', name:'光る石碑'}; if(externalMapData['map_field_1_2']) externalMapData['map_field_1_2'].npcs['30,10'] = {id:'obj_tome_arc_1', name:'古びた断章'}; if(externalMapData['map_field_3_0']) externalMapData['map_field_3_0'].npcs['15,30'] = {id:'obj_tome_arc_2', name:'古びた断章'}; if(externalMapData['map_field_4_2']) externalMapData['map_field_4_2'].npcs['10,15'] = {id:'obj_tome_arc_3', name:'古びた断章'}; if(externalMapData['map_field_3_3']) externalMapData['map_field_3_3'].npcs['25,25'] = {id:'obj_tome_arc_4', name:'古びた断章'};
+                              externalMapData['town_01'] = _nt; } let mapB3FKey = Object.keys(externalMapData).find(k => k.includes('dungeon_b3f')); if (mapB3FKey) { let b3f = externalMapData[mapB3FKey]; let warpA_x = 2, warpA_y = 2; let exitKeys = Object.keys(b3f.exits); if(exitKeys.length > 0) { let [ex, ey] = exitKeys[0].split(',').map(Number); warpA_x = ex; warpA_y = ey + 2; if (warpA_y >= b3f.height - 1) warpA_y = ey - 2; } let warpB_x = Math.floor(b3f.width / 2); let warpB_y = Math.floor(b3f.height / 2); let npcKeys = Object.keys(b3f.npcs); if(npcKeys.length > 0) { let targetNpc = npcKeys[npcKeys.length - 1]; let [nx, ny] = targetNpc.split(',').map(Number); warpB_x = nx; warpB_y = ny + 2; if (warpB_y >= b3f.height - 1) warpB_y = ny - 2; } if (Math.abs(warpA_x - warpB_x) < 3 && Math.abs(warpA_y - warpB_y) < 3) { warpB_x = b3f.width - 3; warpB_y = b3f.height - 3; } const setWarp = (wx, wy, destX, destY) => { wx = Math.max(1, Math.min(wx, b3f.width - 2)); wy = Math.max(1, Math.min(wy, b3f.height - 2)); destX = Math.max(1, Math.min(destX, b3f.width - 2)); destY = Math.max(1, Math.min(destY, b3f.height - 2)); b3f.tiles[wy * b3f.width + wx] = 8; b3f.exits[`${wx},${wy}`] = { map: mapB3FKey, x: destX, y: destY }; b3f.tiles[destY * b3f.width + destX] = 0; if(destY+1 < b3f.height) b3f.tiles[(destY+1) * b3f.width + destX] = 0; if(destX+1 < b3f.width) b3f.tiles[destY * b3f.width + (destX+1)] = 0; if(destX-1 >= 0) b3f.tiles[destY * b3f.width + (destX-1)] = 0; }; setWarp(warpA_x, warpA_y, warpB_x, warpB_y + 1); setWarp(warpB_x, warpB_y, warpA_x, warpA_y + 1); } let mapTown1Key = Object.keys(externalMapData).find(k => k.includes('town_01')); if (mapTown1Key) { let town1 = externalMapData[mapTown1Key]; town1.npcs["12,16"] = { id: "npc_casino_bunny", name: "バニーガール" }; if (16 * town1.width + 12 < town1.tiles.length) { town1.tiles[16 * town1.width + 12] = 9; } if (!externalEntitiesData["npc_casino_bunny"]) { externalEntitiesData["npc_casino_bunny"] = { id: "npc_casino_bunny", name: "バニーガール", type: "casino", msg: "ようこそ カジノへ！" }; } } for (let mapKey in externalMapData) { let map = externalMapData[mapKey]; let isSafeMap = mapKey.includes('town') || mapKey.includes('village') || mapKey.includes('market') || mapKey.includes('castle') || mapKey.includes('shrine'); if (isSafeMap && !mapKey.includes('demon') && !mapKey.includes('death')) { let hasPriest = false; for (let k in map.npcs) { if (map.npcs[k].id.includes('priest') || map.npcs[k].id.includes('church')) { hasPriest = true; break; } } if (!hasPriest) { let placed = false; let startY = Math.floor(map.height / 2) - 2; if (startY < 1) startY = 1; for (let y = startY; y < map.height - 1 && !placed; y++) { for (let x = 2; x < map.width - 2 && !placed; x++) { let tile = map.tiles[y * map.width + x]; let key = `${x},${y}`; if ((tile === 0 || tile === 10 || tile === 11 || tile === 23) && !map.exits[key] && !map.npcs[key] && ![[0,1],[0,-1],[1,0],[-1,0]].some(([dx,dy]) => map.exits[`${x+dx},${y+dy}`])) { map.npcs[key] = { id: "npc_priest", name: "神父" }; placed = true; } } } } } } injectSubStoryData(); if (externalMapData["map_field_2_0"]) externalMapData["map_field_2_0"].npcs["7,3"] = { id: "obj_chest_star_frag", name: "光る地面" }; if (externalMapData["map_town_01"]) externalMapData["map_town_01"].npcs["8,14"] = { id: "npc_sub_rumor", name: "マルコ" }; if(externalMapData['map_field_4_0']) externalMapData['map_field_4_0'].npcs['22,22'] = {id:'obj_chest_star_frag2', name:'光る石碑'}; if(externalMapData['map_field_1_2']) externalMapData['map_field_1_2'].npcs['30,10'] = {id:'obj_tome_arc_1', name:'古びた断章'}; if(externalMapData['map_field_3_0']) externalMapData['map_field_3_0'].npcs['15,30'] = {id:'obj_tome_arc_2', name:'古びた断章'}; if(externalMapData['map_field_4_2']) externalMapData['map_field_4_2'].npcs['10,15'] = {id:'obj_tome_arc_3', name:'古びた断章'}; if(externalMapData['map_field_3_3']) externalMapData['map_field_3_3'].npcs['25,25'] = {id:'obj_tome_arc_4', name:'古びた断章'};
             // ── 装飾オブジェクト配置 ────────────────────────────────────────
             (function _injectDecorations() {
                 const _decoSolid=[1,2,4,5,15,16,17,18,19,20];
@@ -5692,20 +5738,56 @@ async function fetchExternalMap(url) { const loading = document.getElementById('
                         if(_decoOk(_sm,_sx,_sy)){_sm.npcs[`${_sx},${_sy}`]={id:'obj_deco_statue_angel',name:'天使の像'};break;}
                     }
                 }
-                // map_town_01: 噴水をコの字形水エリア（tile===5）の重心に配置
+                // map_town_01: 噴水をコの字形水域が囲む「乾いた通路（庭園の道）」の中央に配置
+                // （以前は水タイル自体の座標に強制的にスナップしており、池の端・壁際に寄って庭園の見た目を損ねていた）
                 if(externalMapData['map_town_01']){const _t1=externalMapData['map_town_01'];
-                    const _halfY=Math.floor(_t1.height/2);
-                    let _wt=[];
-                    for(let _y=1;_y<_halfY;_y++)
-                        for(let _x=1;_x<_t1.width-1;_x++)
-                            if(_t1.tiles[_y*_t1.width+_x]===5&&!_t1.npcs[`${_x},${_y}`])
-                                _wt.push([_x,_y]);
-                    if(_wt.length>0){
-                        const _wx=Math.round(_wt.reduce((s,[x])=>s+x,0)/_wt.length);
-                        const _wy=Math.round(_wt.reduce((s,[,y])=>s+y,0)/_wt.length);
-                        const _best=_wt.reduce((a,b)=>Math.abs(b[0]-_wx)+Math.abs(b[1]-_wy)<Math.abs(a[0]-_wx)+Math.abs(a[1]-_wy)?b:a);
-                        _t1.npcs[`${_best[0]},${_best[1]}`]={id:'obj_deco_fountain_s',name:'噴水'};
+                    const _fw=_t1.width, _fh=_t1.height;
+                    const _isW=(x,y)=>x>=0&&y>=0&&x<_fw&&y<_fh&&_t1.tiles[y*_fw+x]===5;
+                    const _existingFountain=Object.entries(_t1.npcs).find(([k,n])=>n.id==='obj_deco_fountain_s');
+                    let _seed=null;
+                    if(_existingFountain){
+                        const [sx,sy]=_existingFountain[0].split(',').map(Number);
+                        if(_isW(sx,sy)) _seed=[sx,sy];
+                        else for(const[dx,dy] of [[0,1],[0,-1],[1,0],[-1,0]]) if(_isW(sx+dx,sy+dy)){_seed=[sx+dx,sy+dy];break;}
                     }
+                    if(!_seed){
+                        _seedSearch: for(let _y=1;_y<Math.floor(_fh/2);_y++) for(let _x=1;_x<_fw-1;_x++) if(_isW(_x,_y)){_seed=[_x,_y];break _seedSearch;}
+                    }
+                    if(_seed){
+                        // 起点から連結した水域だけをBFSで収集（無関係な堀・池を巻き込まない）
+                        const _vis=new Set([`${_seed[0]},${_seed[1]}`]); const _q=[_seed];
+                        let _minX=_seed[0],_maxX=_seed[0],_minY=_seed[1],_maxY=_seed[1],_head=0;
+                        while(_head<_q.length && _vis.size<2000){
+                            const [cx,cy]=_q[_head++];
+                            _minX=Math.min(_minX,cx);_maxX=Math.max(_maxX,cx);_minY=Math.min(_minY,cy);_maxY=Math.max(_maxY,cy);
+                            for(const[dx,dy] of [[0,1],[0,-1],[1,0],[-1,0]]){
+                                const nx=cx+dx,ny=cy+dy,k=`${nx},${ny}`;
+                                if(_vis.has(k)||!_isW(nx,ny)) continue;
+                                _vis.add(k); _q.push([nx,ny]);
+                            }
+                        }
+                        // 水域の外接矩形の中心に最も近い「乾いた」通行可能タイル＝庭園の通路の中央
+                        const _cx=Math.round((_minX+_maxX)/2), _cy=Math.round((_minY+_maxY)/2);
+                        const _solid=[1,2,4,15,16,17,18,19,20,25];
+                        let _best=null, _bestD=Infinity;
+                        for(let _y=_minY;_y<=_maxY;_y++) for(let _x=_minX;_x<=_maxX;_x++){
+                            const _t=_t1.tiles[_y*_fw+_x];
+                            if(_t===5||_solid.includes(_t)) continue;
+                            const _k=`${_x},${_y}`;
+                            if(_t1.npcs[_k] && !(_existingFountain && _k===_existingFountain[0])) continue;
+                            const _d=Math.abs(_x-_cx)+Math.abs(_y-_cy);
+                            if(_d<_bestD){_bestD=_d;_best=[_x,_y];}
+                        }
+                        if(_best){
+                            const _bk=`${_best[0]},${_best[1]}`;
+                            if(_existingFountain && _existingFountain[0]!==_bk) delete _t1.npcs[_existingFountain[0]];
+                            _t1.npcs[_bk]={id:'obj_deco_fountain_s',name:'噴水'};
+                        }
+                    }
+                    // 到達可能性修正: 池の中の島(26-31,17-21)への橋が無く2NPC孤立していた
+                    _t1.tiles[15*_t1.width+28]=11; _t1.tiles[16*_t1.width+28]=11;
+                    // 到達可能性修正: 女神像(44,2)が唯一の通路タイルを塞いでいた → 隣の柱タイル(43,2)へ移動
+                    if(_t1.npcs['44,2'] && !_t1.npcs['43,2']){ _t1.npcs['43,2']=_t1.npcs['44,2']; delete _t1.npcs['44,2']; }
                 }
             })();
             let _castleKey = Object.keys(externalMapData).find(k => k.includes('castle_01') && !k.includes('demon')); if (_castleKey) { let _cM = externalMapData[_castleKey]; const _hasAdv=Object.values(_cM.npcs).some(n=>n.id==='npc_story_advisor'); if(!_hasAdv){ let _cp = false; for (let _y = 2; _y < Math.floor(_cM.height * 0.55) && !_cp; _y++) { for (let _x = 2; _x < _cM.width - 2 && !_cp; _x++) { let _ct = _cM.tiles[_y * _cM.width + _x]; let _ck = `${_x},${_y}`; if ((_ct === 0 || _ct === 9 || _ct === 10) && !_cM.exits[_ck] && !_cM.npcs[_ck]) { _cM.npcs[_ck] = { id: "npc_story_advisor", name: "宮廷賢者バルダック" }; _cp = true; } } } } }
@@ -5937,25 +6019,11 @@ async function fetchExternalMap(url) { const loading = document.getElementById('
                 }
             }
 
-            // ===== 新マップ: 賢者の祠 (10×10) — 旅の僧侶・案内人・野の賢者 =====
+            // ===== 新マップ: 賢者の祠 (20×10, 2部屋: 手前の間＋奥の書庫) =====
             {
-                const _sw=10,_sh=10,_st=[];
-                // 入口は南壁中央1タイル(5,9)のみ。他の境界は全て壁
-                for(let y=0;y<_sh;y++) for(let x=0;x<_sw;x++){
-                    _st.push((y===0||y===_sh-1||x===0||x===_sw-1)&&!(y===_sh-1&&x===5)?1:0);
-                }
                 const _sfp=findLand("map_field_3_0",5,7);
                 const _sret=_sfp?{map:'map_field_3_0',x:_sfp.x,y:_sfp.y}:{map:'map_field_3_0',x:5,y:8};
-                externalMapData['map_sage_shrine']={
-                    width:_sw,height:_sh,tiles:_st,encounters:[],
-                    exits:{'5,9':_sret},
-                    npcs:{
-                        '2,2':{id:'npc_field_monk',name:'旅の僧侶'},
-                        '7,2':{id:'npc_guide_east_tower',name:'旅の案内人'},
-                        '4,5':{id:'npc_story_hermit',name:'野の賢者'},
-                    },
-                    name:'賢者の祠'
-                };
+                externalMapData['map_sage_shrine']=buildSageShrine(_sret);
                 if(_sfp&&externalMapData["map_field_3_0"]){
                     externalMapData["map_field_3_0"].tiles[_sfp.y*(externalMapData["map_field_3_0"].width||45)+_sfp.x]=21;
                     externalMapData["map_field_3_0"].exits[_sfp.k]={map:'map_sage_shrine',x:5,y:8};
@@ -6769,13 +6837,16 @@ function _isWanderingNpc(id) {
     // 固定 NPC（店・教会・宿・ボス・ゲート・サブクエスト等）は動かさない
     if (!id) return false;
     const fixed = ['shop','priest','church','inn','boss','gate','casino','bunny',
-                   'sub_smith','sub_richman','sub_mage','sub_rumor','class_change',
+                   'sub_smith','sub_richman','sub_mage','sub_rumor','sub_2ndloop','class_change',
                    'npc_port','dharma_monk','shrine_priestess','dragon_spirit',
                    'story_','pirate_sailor','guard_01','sky_guard',
                    'obj_chest','npc_tower','npc_maou','npc_sky','king',
-                   'obj_','deco_',
+                   'obj_','deco_','merchant',
                    'castle_guard','castle_soldier','throne_guard','exit_guard',
-                   'advisor_hall','court_noble','town_elder','2nd_survivor','gramnia'];
+                   'advisor_hall','court_noble','town_elder','2nd_survivor','2nd_village_elder','2nd_oracle','gramnia',
+                   'estoria_queen','estoria_knight','estoria_herald','estoria_sage','estoria_soldier',
+                   'deserta_oracle','deserta_soldier','zarmo_knight','zarmo_sorceress',
+                   'north_ghost','north_sage_ghost','north_castle_ghost'];
     return !fixed.some(f => id.includes(f));
 }
 
@@ -6785,16 +6856,26 @@ function _isSafeMapForWander(mapId) {
            (mapId.includes('castle') && !mapId.includes('demon') && !mapId.includes('death'));
 }
 
+// 徘徊パターン: 時計回り(cw) / 反時計回り(ccw) の方向巡回順（突き当たったら次の向きへ）
+const _WANDER_CW  = [[0,-1],[1,0],[0,1],[-1,0]];  // 上→右→下→左
+const _WANDER_CCW = [[0,-1],[-1,0],[0,1],[1,0]];  // 上→左→下→右
+const _WANDER_PATTERNS = ['random', 'cw', 'ccw'];
+
 function initNpcWander() {
     npcWanderState = {};
     if (!currentMap || !currentMap.npcs) return;
     const mapId = partyData && partyData.pos ? partyData.pos.map : '';
     if (!_isSafeMapForWander(mapId)) return;
+    let _seq = 0;
     for (const key of Object.keys(currentMap.npcs)) {
         const npc = currentMap.npcs[key];
         if (!_isWanderingNpc(npc.id)) continue;
         const [x, y] = key.split(',').map(Number);
-        npcWanderState[key] = { homeX: x, homeY: y, id: npc.id, name: npc.name };
+        const pattern = _WANDER_PATTERNS[Math.floor(Math.random() * _WANDER_PATTERNS.length)];
+        // 同名・同IDのNPCが複数いても取り違えないよう、NPCオブジェクト自身に固有キーを刻む
+        const wk = `w${_seq++}`;
+        npc._wk = wk;
+        npcWanderState[wk] = { homeX: x, homeY: y, pattern, dirIdx: Math.floor(Math.random() * 4) };
     }
 }
 
@@ -6804,52 +6885,54 @@ function tickNpcWander() {
     if (!_isSafeMapForWander(mapId) || !currentMap || !currentMap.npcs) return;
 
     const SOLID = [1, 2, 4, 5, 15, 16, 17, 18, 19, 20];
-    const RADIUS = 2;   // ホームから最大2タイルの範囲で徘徊
+    const RADIUS = 3;   // ホームから最大3タイルの範囲で徘徊
     const DIRS = [[0,1],[0,-1],[1,0],[-1,0]];
     const W = currentMap.width, H = currentMap.height;
     const px = partyData.pos.x, py = partyData.pos.y;
 
-    // wander state のキーを現在の NPC 位置から再構築（キーが変わっている場合に対応）
-    const curKeys = Object.keys(npcWanderState);
-    for (const homeKey of curKeys) {
-        const wdata = npcWanderState[homeKey];
-        // 現在の NPC のキーを探す（最初はhomeKey、移動後は別のキー）
-        let curKey = null;
-        for (const k of Object.keys(currentMap.npcs)) {
-            if (currentMap.npcs[k].id === wdata.id &&
-                currentMap.npcs[k].name === wdata.name) {
-                const [kx, ky] = k.split(',').map(Number);
-                if (Math.abs(kx - wdata.homeX) <= RADIUS + 1 &&
-                    Math.abs(ky - wdata.homeY) <= RADIUS + 1) { curKey = k; break; }
-            }
-        }
-        if (!curKey) continue;
+    const canStep = (wdata, x, y) => {
+        if (x < 1 || y < 1 || x >= W-1 || y >= H-1) return false;
+        if (Math.abs(x - wdata.homeX) > RADIUS || Math.abs(y - wdata.homeY) > RADIUS) return false;
+        if (SOLID.includes(currentMap.tiles[y * W + x])) return false;
+        const k = `${x},${y}`;
+        if (currentMap.exits[k] || currentMap.npcs[k]) return false;
+        if (px === x && py === y) return false;
+        return true;
+    };
+    const doStep = (curKey, npc, dx, dy) => {
+        const [curX, curY] = curKey.split(',').map(Number);
+        const nx = curX + dx, ny = curY + dy;
+        const _fd = (dx===1)?3:(dx===-1)?2:(dy===-1)?1:0; npcFacingDir[npc.id] = _fd;
+        delete currentMap.npcs[curKey];
+        currentMap.npcs[`${nx},${ny}`] = npc;
+    };
+
+    for (const curKey of Object.keys(currentMap.npcs)) {
+        const npc = currentMap.npcs[curKey];
+        const wdata = npc && npc._wk ? npcWanderState[npc._wk] : null;
+        if (!wdata) continue;
 
         // 50% でそのターンはスキップ（自然なランダム感）
         if (Math.random() < 0.5) continue;
 
         const [curX, curY] = curKey.split(',').map(Number);
-        // ランダムな方向をシャッフル
-        const dirs = [...DIRS].sort(() => Math.random() - 0.5);
 
-        for (const [dx, dy] of dirs) {
-            const nx = curX + dx, ny = curY + dy;
-            if (nx < 1 || ny < 1 || nx >= W-1 || ny >= H-1) continue;
-            // 半径チェック
-            if (Math.abs(nx - wdata.homeX) > RADIUS || Math.abs(ny - wdata.homeY) > RADIUS) continue;
-            const tile = currentMap.tiles[ny * W + nx];
-            if (SOLID.includes(tile)) continue;
-            const newKey = `${nx},${ny}`;
-            if (currentMap.exits[newKey]) continue;
-            if (currentMap.npcs[newKey]) continue;
-            if (px === nx && py === ny) continue;  // プレイヤーと重ならない
-
-            // 移動実行（向き記録）
-            const npc = currentMap.npcs[curKey];
-            { const _fd = (dx===1)?3:(dx===-1)?2:(dy===-1)?1:0; npcFacingDir[npc.id] = _fd; }
-            delete currentMap.npcs[curKey];
-            currentMap.npcs[newKey] = npc;
-            break;
+        if (wdata.pattern === 'cw' || wdata.pattern === 'ccw') {
+            // 現在の向きから進み、突き当たったら次の向きへ回り込む（最大4回=全方向試行）
+            const order = wdata.pattern === 'cw' ? _WANDER_CW : _WANDER_CCW;
+            for (let tries = 0; tries < 4; tries++) {
+                const [dx, dy] = order[wdata.dirIdx % 4];
+                const nx = curX + dx, ny = curY + dy;
+                if (canStep(wdata, nx, ny)) { doStep(curKey, npc, dx, dy); break; }
+                wdata.dirIdx = (wdata.dirIdx + 1) % 4; // 突き当たり → 次の向きへ
+            }
+        } else {
+            // random: 毎ターン方向をシャッフルして最初に通れた方へ
+            const dirs = [...DIRS].sort(() => Math.random() - 0.5);
+            for (const [dx, dy] of dirs) {
+                const nx = curX + dx, ny = curY + dy;
+                if (canStep(wdata, nx, ny)) { doStep(curKey, npc, dx, dy); break; }
+            }
         }
     }
 }
@@ -8023,6 +8106,34 @@ function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
     }
 }
 
+// ===== 時間帯システム（朝30分・昼60分・夕方30分・夜60分の周期。実時間ベース） =====
+function _getTimeOfDayInfo() {
+    const DAWN_MS = 30*60000, DAY_MS = 60*60000, DUSK_MS = 30*60000, NIGHT_MS = 60*60000;
+    const CYCLE_MS = DAWN_MS + DAY_MS + DUSK_MS + NIGHT_MS;
+    const t = Date.now() % CYCLE_MS;
+    const NIGHT_C = [18, 26, 70], NIGHT_A = 0.42;
+    const DAY_C = [255, 255, 255], DAY_A = 0;
+    const DAWN_MID_C = [255, 178, 118], DAWN_MID_A = 0.18;
+    const DUSK_MID_C = [255, 100, 60], DUSK_MID_A = 0.26;
+    const lerp = (a, b, f) => a + (b - a) * f;
+    const lerpC = (c1, c2, f) => [lerp(c1[0], c2[0], f), lerp(c1[1], c2[1], f), lerp(c1[2], c2[2], f)];
+    let color, alpha, phase;
+    if (t < DAWN_MS) {
+        phase = 'dawn'; const f = t / DAWN_MS;
+        if (f < 0.5) { color = lerpC(NIGHT_C, DAWN_MID_C, f/0.5); alpha = lerp(NIGHT_A, DAWN_MID_A, f/0.5); }
+        else { color = lerpC(DAWN_MID_C, DAY_C, (f-0.5)/0.5); alpha = lerp(DAWN_MID_A, DAY_A, (f-0.5)/0.5); }
+    } else if (t < DAWN_MS + DAY_MS) {
+        phase = 'day'; color = DAY_C; alpha = DAY_A;
+    } else if (t < DAWN_MS + DAY_MS + DUSK_MS) {
+        phase = 'dusk'; const f = (t - DAWN_MS - DAY_MS) / DUSK_MS;
+        if (f < 0.5) { color = lerpC(DAY_C, DUSK_MID_C, f/0.5); alpha = lerp(DAY_A, DUSK_MID_A, f/0.5); }
+        else { color = lerpC(DUSK_MID_C, NIGHT_C, (f-0.5)/0.5); alpha = lerp(DUSK_MID_A, NIGHT_A, (f-0.5)/0.5); }
+    } else {
+        phase = 'night'; color = NIGHT_C; alpha = NIGHT_A;
+    }
+    return { r: Math.round(color[0]), g: Math.round(color[1]), b: Math.round(color[2]), alpha, phase };
+}
+
 function drawMap() {
     // NPC 徘徊: マップ変更を検出して初期化、15フレームに1回移動
     const _curWanderMapId = partyData && partyData.pos ? partyData.pos.map : null;
@@ -8730,9 +8841,13 @@ function drawMap() {
                 else if((_nn_g.includes('神父') || _nn_g.includes('神官')) && externalImages['priest']) { drawSpriteLocal(ctx, externalImages['priest'], px, py, 48); }
                 else if(npc.id.includes('village') || npc.id.includes('dungeon') || npc.id.includes('cave') || npc.id.includes('elder') || npc.id.includes('ship') || npc.id === 'bazaar_guide_1' || npc.id.includes('sub_smith') || npc.id.includes('sub_richman') || npc.id.includes('sub_rumor')) {
                     if(npc.id === 'npc_gar_elder_01') {
+                        // 見た目の多様化: 同じ老人スプライトの量産を避け、村では兵士系を除外
                         const _vrh = getMapRandom(parseInt(nx), parseInt(ny), _rMapId);
-                        if(_vrh < 0.33 && externalImages['guard']) { ctx.save(); ctx.filter='hue-rotate(20deg) saturate(0.85) brightness(1.1)'; drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); ctx.restore(); }
-                        else if(_vrh < 0.66 && externalImages['oldMan']) { ctx.save(); ctx.filter='hue-rotate(70deg) saturate(1.2)'; drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); ctx.restore(); }
+                        const _isVillageCtx = _rMapId.includes('village');
+                        const _variant = Math.floor(_vrh * 4);
+                        if (_variant === 2 && drawAnimatedNpcSprite(ctx, 'man', npc.id, px, py, 48)) { /* npcMan系で描画済み */ }
+                        else if (_variant === 3 && !_isVillageCtx && externalImages['guard']) { ctx.save(); ctx.filter='hue-rotate(20deg) saturate(0.85) brightness(1.1)'; drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); ctx.restore(); }
+                        else if (_variant === 1 && externalImages['oldMan']) { ctx.save(); ctx.filter='hue-rotate(70deg) saturate(1.2)'; drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); ctx.restore(); }
                         else if(externalImages['oldMan']) { drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); }
                     } else if(externalImages['oldMan']) { drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); }
                 }
@@ -8766,7 +8881,11 @@ function drawMap() {
                 else { ctx.font = '28px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🏴‍☠️', px+12, py+12); }
             // ===== 追加キャラクター種別 =====
             } else if (npc.id.includes('gar_woman')) {
-                if (!drawAnimatedNpcSprite(ctx, 'maidB', npc.id, px, py, 48)) {
+                // 見た目の多様化: 全員メイド姿にならないよう、村ではメイドスプライトを使わない
+                const _vrw = getMapRandom(parseInt(nx), parseInt(ny), _rMapId);
+                const _isVillageCtxW = _rMapId.includes('village');
+                const _wType = _isVillageCtxW ? 'woman' : (_vrw < 0.4 ? 'maidB' : (_vrw < 0.7 ? 'woman' : 'nobleF'));
+                if (!drawAnimatedNpcSprite(ctx, _wType, npc.id, px, py, 48)) {
                     const _wSprite = externalImages['innGirl'] || externalImages['oldMan'];
                     if(_wSprite) { ctx.save(); ctx.filter='hue-rotate(310deg) saturate(1.4) brightness(1.05)'; drawSpriteLocal(ctx, _wSprite, px, py, 48); ctx.restore(); }
                 }
@@ -9109,6 +9228,15 @@ function drawMap() {
         ctx.globalCompositeOperation = 'source-over';
     }
 
+    // 時間帯オーバーレイ（朝焼け・夕焼け・夜の色調を画面全体に重ねる）
+    {
+        const _tod = _getTimeOfDayInfo();
+        if (_tod.alpha > 0.001) {
+            ctx.fillStyle = `rgba(${_tod.r}, ${_tod.g}, ${_tod.b}, ${_tod.alpha})`;
+            ctx.fillRect(0, 0, cWidth, cHeight);
+        }
+    }
+
     let mapNameEl = document.getElementById('map-name-window');
     if (state === 'FIELD' || state === 'MSG' || state === 'MENU') {
         mapNameEl.innerText = getMapDisplayName(partyData.pos.map, currentMap);
@@ -9220,8 +9348,10 @@ async function moveParty(dx, dy) {
             // 隣接マップへ遷移するヘルパー
             const _enterMap = (mapId, toX, toY) => {
                 const _m = externalMapData && externalMapData[mapId]; if(!_m) return false;
-                toX = Math.max(1, Math.min(toX, _m.width-2));
-                toY = Math.max(1, Math.min(toY, _m.height-2));
+                // 境界を越えた分ちょうど1マス進むよう、マップ端(0 / width-1)まで許容する
+                // （以前は 1 / width-2 に強制クランプしており、境界を跨ぐたびに1マス余分にワープしていた）
+                toX = Math.max(0, Math.min(toX, _m.width-1));
+                toY = Math.max(0, Math.min(toY, _m.height-1));
                 if([1,2,4,15,16,17,18,25].includes(_m.tiles[toY*_m.width+toX])) return false;
                 _walkPhase = (_walkPhase+1)%8; _lastMoveTime = Date.now();
                 partyData.pos = {map:mapId, x:toX, y:toY};
@@ -9235,8 +9365,8 @@ async function moveParty(dx, dy) {
                 // ── 通常フィールドマップの境界 ──────────────────────────
                 const _gx0=parseInt(_fmM[1]), _gy0=parseInt(_fmM[2]);
                 let _ngx=_gx0, _ngy=_gy0, _nlx=partyData.pos.x, _nly=partyData.pos.y;
-                if(dx>0){_ngx++;_nlx=1;} else if(dx<0){_ngx--;_nlx=currentMap.width-2;}
-                else if(dy>0){_ngy++;_nly=1;} else{_ngy--;_nly=currentMap.height-2;}
+                if(dx>0){_ngx++;_nlx=0;} else if(dx<0){_ngx--;_nlx=currentMap.width-1;}
+                else if(dy>0){_ngy++;_nly=0;} else{_ngy--;_nly=currentMap.height-1;}
 
                 if(_ngx>=0&&_ngx<=8&&_ngy>=0&&_ngy<=8) {
                     // 9×9ワールド内: 通常遷移（バグ修正: 旧コードは0-4に制限していた）
@@ -9244,10 +9374,10 @@ async function moveParty(dx, dy) {
                 } else {
                     // ワールド外周を越えた → 海洋バッファー第1層へ
                     const _px=partyData.pos.x, _py=partyData.pos.y;
-                    if(dy<0&&_ngy<0) _enterMap('map_ocean_n1', _gx0*45+_px, 43); // 北へ出る
-                    else if(dy>0&&_ngy>8) _enterMap('map_ocean_s1', _gx0*45+_px, 1);  // 南へ出る
-                    else if(dx<0&&_ngx<0) _enterMap('map_ocean_w1', 43, _gy0*45+_py); // 西へ出る
-                    else if(dx>0&&_ngx>8) _enterMap('map_ocean_e1', 1,  _gy0*45+_py); // 東へ出る
+                    if(dy<0&&_ngy<0) _enterMap('map_ocean_n1', _gx0*45+_px, 44); // 北へ出る
+                    else if(dy>0&&_ngy>8) _enterMap('map_ocean_s1', _gx0*45+_px, 0);  // 南へ出る
+                    else if(dx<0&&_ngx<0) _enterMap('map_ocean_w1', 44, _gy0*45+_py); // 西へ出る
+                    else if(dx>0&&_ngx>8) _enterMap('map_ocean_e1', 0,  _gy0*45+_py); // 東へ出る
                 }
                 return;
 
@@ -9262,35 +9392,35 @@ async function moveParty(dx, dy) {
 
                 if(_oDir==='n') {
                     if(dy<0) { // 北へ進む（世界から離れる方向）
-                        if(_depth<3) _enterMap(`map_ocean_n${_depth+1}`, _cx, 43);
-                        else _enterMap(`map_field_${_col}_8`, _lx, 43); // 3枚越えて南から出現
+                        if(_depth<3) _enterMap(`map_ocean_n${_depth+1}`, _cx, 44);
+                        else _enterMap(`map_field_${_col}_8`, _lx, 44); // 3枚越えて南から出現
                     } else if(dy>0) { // 南へ戻る（世界へ戻る方向）
-                        if(_depth>1) _enterMap(`map_ocean_n${_depth-1}`, _cx, 1);
-                        else _enterMap(`map_field_${_col}_0`, _lx, 1);
+                        if(_depth>1) _enterMap(`map_ocean_n${_depth-1}`, _cx, 0);
+                        else _enterMap(`map_field_${_col}_0`, _lx, 0);
                     }
                 } else if(_oDir==='s') {
                     if(dy>0) { // 南へ進む（世界から離れる方向）
-                        if(_depth<3) _enterMap(`map_ocean_s${_depth+1}`, _cx, 1);
-                        else _enterMap(`map_field_${_col}_0`, _lx, 1); // 3枚越えて北から出現
+                        if(_depth<3) _enterMap(`map_ocean_s${_depth+1}`, _cx, 0);
+                        else _enterMap(`map_field_${_col}_0`, _lx, 0); // 3枚越えて北から出現
                     } else if(dy<0) { // 北へ戻る（世界へ戻る方向）
-                        if(_depth>1) _enterMap(`map_ocean_s${_depth-1}`, _cx, 43);
-                        else _enterMap(`map_field_${_col}_8`, _lx, 43);
+                        if(_depth>1) _enterMap(`map_ocean_s${_depth-1}`, _cx, 44);
+                        else _enterMap(`map_field_${_col}_8`, _lx, 44);
                     }
                 } else if(_oDir==='w') {
                     if(dx<0) { // 西へ進む（世界から離れる方向）
-                        if(_depth<3) _enterMap(`map_ocean_w${_depth+1}`, 43, _cy);
-                        else _enterMap(`map_field_8_${_row}`, 43, _ly); // 3枚越えて東から出現
+                        if(_depth<3) _enterMap(`map_ocean_w${_depth+1}`, 44, _cy);
+                        else _enterMap(`map_field_8_${_row}`, 44, _ly); // 3枚越えて東から出現
                     } else if(dx>0) { // 東へ戻る（世界へ戻る方向）
-                        if(_depth>1) _enterMap(`map_ocean_w${_depth-1}`, 1, _cy);
-                        else _enterMap(`map_field_0_${_row}`, 1, _ly);
+                        if(_depth>1) _enterMap(`map_ocean_w${_depth-1}`, 0, _cy);
+                        else _enterMap(`map_field_0_${_row}`, 0, _ly);
                     }
                 } else if(_oDir==='e') {
                     if(dx>0) { // 東へ進む（世界から離れる方向）
-                        if(_depth<3) _enterMap(`map_ocean_e${_depth+1}`, 1, _cy);
-                        else _enterMap(`map_field_0_${_row}`, 1, _ly); // 3枚越えて西から出現
+                        if(_depth<3) _enterMap(`map_ocean_e${_depth+1}`, 0, _cy);
+                        else _enterMap(`map_field_0_${_row}`, 0, _ly); // 3枚越えて西から出現
                     } else if(dx<0) { // 西へ戻る（世界へ戻る方向）
-                        if(_depth>1) _enterMap(`map_ocean_e${_depth-1}`, 43, _cy);
-                        else _enterMap(`map_field_8_${_row}`, 43, _ly);
+                        if(_depth>1) _enterMap(`map_ocean_e${_depth-1}`, 44, _cy);
+                        else _enterMap(`map_field_8_${_row}`, 44, _ly);
                     }
                 }
                 return;
@@ -12765,7 +12895,9 @@ async function executeBattle(fixedEnemies = null) {
         else if (_bt === 20) { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/7d62c7d2-a042-44ee-bfe9-1759a6abbbd5.jpeg"; }
     } else if (mapId.includes('desert') || mapId.includes('sabaku') || mapId.startsWith('map_field_4_')) { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/c7ffe62e-dfb7-4de1-9068-2c22160b7384.jpeg"; } else if (mapId.includes('mountain') || mapId === 'map_field_north_2') { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/7d62c7d2-a042-44ee-bfe9-1759a6abbbd5.jpeg"; }
     if (fixedEnemies) { if (fixedEnemies.some(id => id.includes('demon') || id.includes('maou') || id === 'npc_boss_maou' || id.includes('_final') || (masterData.monsters[id] && masterData.monsters[id].name.includes('グラ王')))) { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/c4878090-88c8-4dcc-bb32-068ac77df005.jpeg"; } }
-    bScreen.style.backgroundImage = `url('${bgUrl}')`; bScreen.style.backgroundSize = "cover"; bScreen.style.backgroundPosition = "bottom center"; bScreen.style.backgroundRepeat = "no-repeat";
+    { const _tod = _getTimeOfDayInfo(); const _todLayer = _tod.alpha > 0.001 ? `linear-gradient(rgba(${_tod.r},${_tod.g},${_tod.b},${_tod.alpha}), rgba(${_tod.r},${_tod.g},${_tod.b},${_tod.alpha})), ` : '';
+      bScreen.style.backgroundImage = `${_todLayer}url('${bgUrl}')`; }
+    bScreen.style.backgroundSize = "cover"; bScreen.style.backgroundPosition = "bottom center"; bScreen.style.backgroundRepeat = "no-repeat";
     showWindow('party-status'); updatePartyStatus();
     
     if (fixedEnemies) { if (fixedEnemies.some(id => id.includes('_final') || id.includes('final_boss') || (masterData.monsters[id] && masterData.monsters[id].name.includes('最終形態')))) { AudioManager.playBGM('battle_final'); } else { AudioManager.playBGM('battle_boss'); } } 
@@ -13996,6 +14128,87 @@ async function showTitleScreen() {
         externalMapData['map_castle_deserta'] = buildDesertaCastle();
         externalMapData['map_castle_north']   = buildNorthAbandonedCastle();
         externalMapData['map_shrine_warp']    = buildShrineWarp();
+        externalMapData['map_shrine_backroom'] = buildShrineBackRoom();
+        if (externalMapData['map_sage_shrine']) {
+            externalMapData['map_sage_shrine'] = buildSageShrine(externalMapData['map_sage_shrine'].exits && externalMapData['map_sage_shrine'].exits['5,9']);
+        }
+        // 到達可能性修正: 城下町の池の中の島(2NPC)への橋が無い／女神像が唯一の通路タイルを塞いでいた
+        if (externalMapData['map_town_01']) {
+            const _t1f = externalMapData['map_town_01'];
+            if (_t1f.tiles && _t1f.width) {
+                _t1f.tiles[15 * _t1f.width + 28] = 11;
+                _t1f.tiles[16 * _t1f.width + 28] = 11;
+            }
+            if (_t1f.npcs && _t1f.npcs['44,2'] && !_t1f.npcs['43,2']) {
+                _t1f.npcs['43,2'] = _t1f.npcs['44,2']; delete _t1f.npcs['44,2'];
+            }
+            // 噴水を池が囲む乾いた通路（庭園の道）の中央へ再配置（池の端・壁際に寄っていた見た目を修正）
+            if (_t1f.tiles && _t1f.width) {
+                const _fw = _t1f.width, _fh = _t1f.height;
+                const _isW = (x, y) => x >= 0 && y >= 0 && x < _fw && y < _fh && _t1f.tiles[y * _fw + x] === 5;
+                const _existingFountain = Object.entries(_t1f.npcs || {}).find(([k, n]) => n.id === 'obj_deco_fountain_s');
+                let _seed = null;
+                if (_existingFountain) {
+                    const [sx, sy] = _existingFountain[0].split(',').map(Number);
+                    if (_isW(sx, sy)) _seed = [sx, sy];
+                    else for (const [dx, dy] of [[0,1],[0,-1],[1,0],[-1,0]]) if (_isW(sx+dx, sy+dy)) { _seed = [sx+dx, sy+dy]; break; }
+                }
+                if (_seed) {
+                    const _vis = new Set([`${_seed[0]},${_seed[1]}`]); const _q = [_seed];
+                    let _minX=_seed[0],_maxX=_seed[0],_minY=_seed[1],_maxY=_seed[1],_head=0;
+                    while (_head < _q.length && _vis.size < 2000) {
+                        const [cx, cy] = _q[_head++];
+                        _minX=Math.min(_minX,cx);_maxX=Math.max(_maxX,cx);_minY=Math.min(_minY,cy);_maxY=Math.max(_maxY,cy);
+                        for (const [dx, dy] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+                            const nx=cx+dx, ny=cy+dy, k=`${nx},${ny}`;
+                            if (_vis.has(k) || !_isW(nx, ny)) continue;
+                            _vis.add(k); _q.push([nx, ny]);
+                        }
+                    }
+                    const _cx = Math.round((_minX+_maxX)/2), _cy = Math.round((_minY+_maxY)/2);
+                    const _solid = [1,2,4,15,16,17,18,19,20,25];
+                    let _best = null, _bestD = Infinity;
+                    for (let _y=_minY; _y<=_maxY; _y++) for (let _x=_minX; _x<=_maxX; _x++) {
+                        const _t = _t1f.tiles[_y*_fw+_x];
+                        if (_t===5 || _solid.includes(_t)) continue;
+                        const _k = `${_x},${_y}`;
+                        if (_t1f.npcs[_k] && !(_existingFountain && _k===_existingFountain[0])) continue;
+                        const _d = Math.abs(_x-_cx) + Math.abs(_y-_cy);
+                        if (_d < _bestD) { _bestD = _d; _best = [_x, _y]; }
+                    }
+                    if (_best) {
+                        const _bk = `${_best[0]},${_best[1]}`;
+                        if (_existingFountain && _existingFountain[0] !== _bk) delete _t1f.npcs[_existingFountain[0]];
+                        _t1f.npcs[_bk] = { id: 'obj_deco_fountain_s', name: '噴水' };
+                    }
+                }
+            }
+        }
+        // 到達可能性修正: 魔王城 左右翼の中央通路と部屋の接続漏れ（宝箱2つ+碑文が孤立）
+        ['map_demon_castle_left', 'map_demon_castle_right'].forEach(k => {
+            const mm = externalMapData[k];
+            if (mm && mm.tiles && mm.width) {
+                [[7,18],[8,18],[11,18],[12,18],[10,19]].forEach(([x,y]) => { if (x < mm.width && y < mm.height) mm.tiles[y * mm.width + x] = 0; });
+            }
+        });
+        // 移動の違和感修正: フィールド間境界の出口が「真の端(0/幅-1)」ではなく1マス手前に
+        // 着地させていたため、境界を跨ぐたびに1マス余分にワープしパーティーの足並みが乱れていた。
+        // データの取得元（ローカル生成／外部CDN）に関わらず、最終的な exits を機械的に補正する。
+        for (const mapId of Object.keys(externalMapData)) {
+            if (!/^map_field_\d_\d$/.test(mapId)) continue;
+            const m = externalMapData[mapId];
+            if (!m || !m.exits || !m.width || !m.height) continue;
+            for (const [key, ev] of Object.entries(m.exits)) {
+                if (!ev || !ev.map || !/^map_field_\d_\d$/.test(ev.map)) continue;
+                const [kx, ky] = key.split(',').map(Number);
+                const tm = externalMapData[ev.map];
+                const tw = (tm && tm.width) || m.width, th = (tm && tm.height) || m.height;
+                if (kx === m.width - 1 && ev.x === 1) ev.x = 0;
+                else if (kx === 0 && ev.x === tw - 2) ev.x = tw - 1;
+                if (ky === m.height - 1 && ev.y === 1) ev.y = 0;
+                else if (ky === 0 && ev.y === th - 2) ev.y = th - 1;
+            }
+        }
     }
     _loadPct = 60;
     await loadExternalGrowthDatabase("https://www.gravity.place/share/ugcGame?id=38430");

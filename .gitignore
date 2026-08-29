@@ -1,3 +1,4 @@
 .DS_Store
 maps_override.js
 gravity-ai-prompt.txt
+tools/node_modules/
