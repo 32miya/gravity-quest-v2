@@ -9323,7 +9323,17 @@ function _getBuildingTypeFromDest(destMapId) {
     return 'village';
 }
 function _findBuildingFootprintExit(map, px, py) {
-    // フットプリント判定を廃止 → 入場は直接踏んだ1タイルのみ
+    // 建物グラフィックは扉タイルを中心に左右1マス・上方2マスまで大きく描かれるため
+    // （_drawFieldBuilding参照）、扉タイルそのものを踏んでいなくても
+    // グラフィックの範囲内であれば入場できるようにする。
+    if (!map.exits) return null;
+    for (let dy = 0; dy <= 2; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+            if (dx === 0 && dy === 0) continue; // 扉タイル自体は通常の直接判定側で処理される
+            const ev = map.exits[`${px + dx},${py + dy}`];
+            if (ev) return ev;
+        }
+    }
     return null;
 }
 
