@@ -17,9 +17,9 @@
     #party-status { top: 0; left: 0; width: 100%; height: 50px; display: flex; justify-content: space-between; align-items: center; flex-direction: row; flex-wrap: nowrap; font-size: min(13px, 3.2vw); text-align: center; border-top: none; border-left: none; border-right: none; border-radius: 0; padding: 0; margin: 0; }
     #party-status > div { flex: 1; border-right: 1px solid #555; padding: 2px 0; overflow: hidden; white-space: nowrap; text-overflow: clip; }
     #party-status > div:last-child { border-right: none; }
-    /* バトル中は視認性のため表示範囲を約2倍に拡大 */
-    #party-status.battle-size { height: 100px; font-size: min(26px, 6.4vw); }
-    #party-status.battle-size > div { padding: 4px 0; }
+    /* バトル中は視認性のため表示範囲を拡大（名前/Lv/HP/MP/状態異常の5行を表示） */
+    #party-status.battle-size { height: 160px; font-size: min(15px, 3.7vw); }
+    #party-status.battle-size > div { padding: 4px 0; line-height: 1.5; }
     .dead { color: #f55; }
     #gold-window { top: 55px; right: 5px; min-width: 80px; text-align: right; z-index: 15; }
     #map-name-window { top: 55px; left: 5px; min-width: 80px; text-align: center; z-index: 15; }
@@ -6515,7 +6515,7 @@ async function handleFieldInput(key) {
     if(key === 'Enter') { isMoving = true; try { await checkAction(); } finally { isMoving = false; } } 
     if(key === 'Escape') openMainMenu(); 
 }
-function showWindow(id) { document.getElementById(id).style.display = 'flex'; } function hideWindow(id) { document.getElementById(id).style.display = 'none'; } function hideAllWindows() { hideWindow('msg-window'); hideWindow('cmd-window'); hideWindow('party-status'); hideWindow('status-window'); hideWindow('gold-window'); hideWindow('map-name-window'); document.getElementById('party-status').classList.remove('battle-size'); }
+function showWindow(id) { document.getElementById(id).style.display = 'flex'; } function hideWindow(id) { document.getElementById(id).style.display = 'none'; } function hideAllWindows() { hideWindow('msg-window'); hideWindow('cmd-window'); hideWindow('party-status'); hideWindow('status-window'); hideWindow('gold-window'); hideWindow('map-name-window'); document.getElementById('party-status').classList.remove('battle-size'); document.getElementById('map-name-window').style.top = ''; }
 async function typeMessage(text) {
     state = 'MSG';
     const _mw = document.getElementById('msg-window'); _mw.style.display = 'block';
@@ -6586,14 +6586,19 @@ async function selectMenuPaged(options, containerId, pageSize = 6, cancelable = 
     });
 }
 
-function updatePartyStatus() { 
-    const el = document.getElementById('party-status'); 
-    el.innerHTML = partyData.members.map(m => { 
-        let hpCol = '#fff'; if (m.hp <= m.max_hp / 3 || m.hp === 0) hpCol = '#f55'; else if (m.hp <= m.max_hp / 2) hpCol = '#fa0'; 
-        let mpCol = '#fff'; if (m.max_mp > 0 && m.mp <= m.max_mp / 3) mpCol = '#f55'; else if (m.max_mp > 0 && m.mp <= m.max_mp / 2) mpCol = '#fa0'; 
-        let statIcon = m.isPoisoned ? '<span style="color:#a4f;font-size:10px;">[毒]</span> ' : '';
-        return `<div class="${m.hp<=0?'dead':''}">${statIcon}${m.name} LV.${m.lv}<br><span style="color:${hpCol}">H ${Math.max(0, m.hp)}/${m.max_hp}</span><br><span style="color:${mpCol}">M ${m.mp}/${m.max_mp}</span></div>`; 
-    }).join(''); 
+function updatePartyStatus() {
+    const el = document.getElementById('party-status');
+    el.innerHTML = partyData.members.map(m => {
+        let hpCol = '#fff'; if (m.hp <= m.max_hp / 3 || m.hp === 0) hpCol = '#f55'; else if (m.hp <= m.max_hp / 2) hpCol = '#fa0';
+        let mpCol = '#fff'; if (m.max_mp > 0 && m.mp <= m.max_mp / 3) mpCol = '#f55'; else if (m.max_mp > 0 && m.mp <= m.max_mp / 2) mpCol = '#fa0';
+        const ails = [];
+        if (m.isPoisoned) ails.push('毒');
+        if (m.isAsleep > 0) ails.push('睡眠');
+        if (m.tmpBlind > 0) ails.push('パニック');
+        if (m.tmpSilence > 0) ails.push('封印');
+        const ailText = ails.length ? ails.join('/') : '-';
+        return `<div class="${m.hp<=0?'dead':''}">${m.name}<br>Lv.${m.lv}<br><span style="color:${hpCol}">HP ${Math.max(0, m.hp)}/${m.max_hp}</span><br><span style="color:${mpCol}">MP ${m.mp}/${m.max_mp}</span><br><span style="color:${ails.length?'#a4f':'#888'}">${ailText}</span></div>`;
+    }).join('');
 }
 function getAtk(char) {
     let atk = char.atk;
@@ -9429,11 +9434,12 @@ async function moveParty(dx, dy) {
                 return;
             }
         }
+        drawMap(); // 移動できなくてもその場で向きだけ変える
         return;
     }
     const tile = currentMap.tiles[ny * currentMap.width + nx]; const _onField = partyData.pos.map && (/^map_field_/.test(partyData.pos.map) || /^map_ocean_/.test(partyData.pos.map)); const _hasShip = partyData.flags && partyData.flags.has_ship; const solidTiles = _onField ? (_hasShip ? [1, 2, 4, 15, 16, 17, 18, 25] : [1, 2, 4, 5, 15, 16, 17, 18, 25]) : [1, 2, 4, 5, 15, 16, 17, 18, 19, 20, 25]; // 高山(25)のみ不可・山(20)はフィールドで通行可
-    if(solidTiles.includes(tile)) return;
-    const key = `${nx},${ny}`; const _npcHere = currentMap.npcs && currentMap.npcs[key]; if (_npcHere && !(['obj_deco_rug_red','obj_deco_rug_blue','deco_rug_gold','obj_deco_rug_yellow'].includes(_npcHere.id))) return;
+    if(solidTiles.includes(tile)) { drawMap(); return; } // 移動できなくてもその場で向きだけ変える
+    const key = `${nx},${ny}`; const _npcHere = currentMap.npcs && currentMap.npcs[key]; if (_npcHere && !(['obj_deco_rug_red','obj_deco_rug_blue','deco_rug_gold','obj_deco_rug_yellow'].includes(_npcHere.id))) { drawMap(); return; } // NPCに向き直ってすぐ話しかけられるように
     moveHistory.unshift({x: partyData.pos.x, y: partyData.pos.y, dir: partyData.dir, map: partyData.pos.map}); if(moveHistory.length > 5) moveHistory.pop();
     _walkPhase = (_walkPhase + 1) % 8; _lastMoveTime = Date.now();
     partyData.pos.x = nx; partyData.pos.y = ny;
@@ -12902,6 +12908,7 @@ async function executeBattle(fixedEnemies = null) {
       bScreen.style.backgroundImage = `${_todLayer}url('${bgUrl}')`; }
     bScreen.style.backgroundSize = "cover"; bScreen.style.backgroundPosition = "bottom center"; bScreen.style.backgroundRepeat = "no-repeat";
     showWindow('party-status'); document.getElementById('party-status').classList.add('battle-size'); updatePartyStatus();
+    document.getElementById('map-name-window').style.top = '165px'; // バトル中は拡大したパーティーステータスの下へ
 
     if (fixedEnemies) { if (fixedEnemies.some(id => id.includes('_final') || id.includes('final_boss') || (masterData.monsters[id] && masterData.monsters[id].name.includes('最終形態')))) { AudioManager.playBGM('battle_final'); } else { AudioManager.playBGM('battle_boss'); } } 
     else { AudioManager.playBGM('battle_normal'); }
