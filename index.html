@@ -1696,6 +1696,9 @@ let npcFacingDir = {};         // { npc.id: 0=down,1=up,2=left,3=right }
     }
 })();
 let _lastWanderMapId = null;    // マップ変更検出用
+// フィールドへ出た直後、着地点近傍(建物グラフィックの足元判定範囲)に町等への扉がある場合、
+// そこから完全に離れるまで_findBuildingFootprintExit経由の再入場を抑制するための記憶
+let _footprintGraceDoor = null; // { map, x, y } | null
 let _walkPhase = 0; let _lastMoveTime = 0;
 // 静的タイルキャッシュ（カメラ位置が変わるまで再描画不要な背景レイヤー）
 let _staticTileCache = null; let _staticCacheKey = ''; let _cachedLights = []; let _cachedCanvas = null; let _cachedCtx = null; let _fbImagesVersion = 0;
@@ -9915,7 +9918,23 @@ async function moveParty(dx, dy) {
             if (!_crossingOk) _exitDirect = null;
         }
     }
-    const _exitFp = !_exitDirect && _onField ? _findBuildingFootprintExit(currentMap, nx, ny) : null;
+    // 建物フットプリント猶予: 町等から出た直後の扉についてのみ、足元判定ゾーンを
+    // 完全に離れるまで再入場を抑制する(でないと出た直後の1歩でどの方向でも
+    // 町に押し戻されてしまう)。ゾーンを離れたら通常判定に復帰。
+    let _inFootprintGraceZone = false;
+    if (_footprintGraceDoor) {
+        _inFootprintGraceZone = partyData.pos.map === _footprintGraceDoor.map &&
+            nx >= _footprintGraceDoor.x - 1 && nx <= _footprintGraceDoor.x + 1 &&
+            ny <= _footprintGraceDoor.y && ny >= _footprintGraceDoor.y - 2;
+        if (!_inFootprintGraceZone) _footprintGraceDoor = null; // ゾーンを離れたので通常判定に復帰
+    }
+    let _exitFp = !_exitDirect && _onField ? _findBuildingFootprintExit(currentMap, nx, ny) : null;
+    if (_inFootprintGraceZone) {
+        // 猶予ゾーン内(建物グラフィックの足元範囲)は、扉タイルの直踏み・フットプリント
+        // 経由のどちらも再入場を抑制する。ゾーンを完全に離れるまでは町等へ戻れない。
+        if (_exitDirect && !/^(map_)?field_/.test(_exitDirect.map)) _exitDirect = null;
+        _exitFp = null;
+    }
     if (_exitDirect || _exitFp) {
         const exit = _exitDirect || _exitFp;
             const _toField = /^(map_)?field_/.test(exit.map);
@@ -10032,6 +10051,19 @@ async function moveParty(dx, dy) {
             partyData.pos.map = _normMap;
             if (_toField) { if (!partyData.flags.visited_maps) partyData.flags.visited_maps = {}; partyData.flags.visited_maps[_normMap] = true; }
             partyData.pos.x = _lx; partyData.pos.y = _ly;
+            // フィールドへ出た直後: 着地点近傍(建物グラフィックの足元範囲)に町等への扉があれば、
+            // そこから完全に離れるまで再入場を抑制する対象として記憶する
+            _footprintGraceDoor = null;
+            if (_toField) {
+                const _gExits = nextMap.exits || {};
+                _findGraceDoor: for (let _gdy = 0; _gdy <= 2; _gdy++) {
+                    for (let _gdx = -1; _gdx <= 1; _gdx++) {
+                        const _gx = _lx + _gdx, _gy = _ly + _gdy;
+                        const _gev = _gExits[`${_gx},${_gy}`];
+                        if (_gev && !/^(map_)?field_/.test(_gev.map)) { _footprintGraceDoor = { map: _normMap, x: _gx, y: _gy }; break _findGraceDoor; }
+                    }
+                }
+            }
             if (!(_toField && /^map_field_/.test(_oldMapIdF2F))) moveHistory = []; // フィールド間遷移はmoveHistoryを保持
             drawMap(); updateBGM();
             // 偽王討伐編: マップ入場時に記憶回復チェック
