@@ -3683,7 +3683,7 @@ function buildShrineWarp() {
         '5,10':{map:'map_field_2_3',x:7,y:7},
         '19,5':{map:'map_shrine_backroom',x:3,y:2},
     };
-    const npcs={'6,3':{id:'npc_priest',name:'神父'},'15,4':{id:'obj_chest_item',name:'祠の宝箱'}};
+    const npcs={'6,3':{id:'npc_priest',name:'神父'},'15,4':{id:'obj_chest_item',name:'祠の宝箱'},'3,3':{id:'obj_deco_stone_lantern',name:''},'17,3':{id:'obj_deco_stone_lantern',name:''}};
     return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'ほこら'};
 }
 function buildShrineBackRoom() {
@@ -3695,7 +3695,7 @@ function buildShrineBackRoom() {
     R(1,1,6,6,0);    // 隠し部屋（洞窟床、本殿とは異なる質感）
     S(3,7,22);
     const exits={'3,7':{map:'map_shrine_warp',x:19,y:4}};
-    const npcs={'4,4':{id:'obj_chest_star_frag3',name:'光る石碑'}};
+    const npcs={'4,4':{id:'obj_chest_star_frag3',name:'光る石碑'},'2,2':{id:'obj_deco_rune_circle',name:''}};
     return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'祠の裏の石の間'};
 }
 function buildSageShrine(returnExit) {
@@ -3713,6 +3713,8 @@ function buildSageShrine(returnExit) {
         '7,2':{id:'npc_guide_east_tower',name:'旅の案内人'},
         '4,5':{id:'npc_story_hermit',name:'野の賢者'},
         '14,4':{id:'npc_field_monk',name:'旅の僧侶'},
+        '2,7':{id:'obj_deco_stone_lantern',name:''},
+        '16,7':{id:'obj_deco_stone_lantern',name:''},
     };
     return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'賢者の祠'};
 }
@@ -8039,7 +8041,7 @@ function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
                 ctx.fillStyle = '#3a1400'; ctx.font = 'bold 5px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 ctx.fillText('INN', px + T/2, py + 16);
             }
-        } else if (castle || tower) {
+        } else if (castle || tower || shrine) {
             fr('#3f5060', 0, 0, T, T);
             fr('#506070', 1, 1, T / 2 - 2, T / 2 - 2); fr('#4a5c6c', T / 2 + 1, 1, T / 2 - 2, T / 2 - 2);
             fr('#485868', 1, T / 2 + 1, T / 2 - 2, T / 2 - 2); fr('#4e5c6e', T / 2 + 1, T / 2 + 1, T / 2 - 2, T / 2 - 2);
@@ -8211,7 +8213,7 @@ function drawMap() {
     const isCastle = _mapId.includes('castle') || _mapId.includes('gramani') || _mapId.includes('grakue') || _mapId.includes('palace'); const isTown = _mapId.includes('town') || _mapId.includes('market') || _mapId.includes('village'); const isCave = _mapId.includes('dungeon') || _mapId.includes('cave') || _mapId.includes('ruin') || _mapId.includes('fortress') || _mapId.includes('abyss'); const isMountain = _mapId === 'map_field_north_2';
     // 偽王討伐編: 城下町・グラマニア城を魔王城スタイルで描画
     const _is2ndDarkMap = false; // 2周目暗黒化廃止（1周目完結）
-    const _isDemon = _mapId.includes('demon') || _is2ndDarkMap; const _isTower = _mapId.includes('tower'); const _isShrine = _mapId.includes('shrine');
+    const _isDemon = _mapId.includes('demon') || _is2ndDarkMap; const _isTower = _mapId.includes('tower'); const _isShrine = _mapId.includes('shrine') || _mapId.includes('temple') || _mapId.includes('dharma');
     const _mc = { castle: isCastle && !_isDemon, town: isTown && !_is2ndDarkMap, cave: isCave, demon: _isDemon, tower: _isTower, shrine: _isShrine };
     const _drawNow = Date.now();
     let lights = [];
@@ -8491,6 +8493,7 @@ function drawMap() {
                     'obj_deco_fireplace':   { key:'decoFireplace',  iw:_T*1.5,ih:_T*1.5,  xOff:-_T*0.25, yOff:-_T*0.5 },
                     'obj_deco_bones':       { key:'decoBones',      iw:_T*1.1,ih:_T*0.55, xOff:-_T*0.05, yOff:_T*0.45 },
                     'obj_deco_rune_circle': { key:'decoRuneCircle', iw:_T*1.3,ih:_T*0.5,  xOff:-_T*0.15, yOff:_T*0.5  },
+                    'obj_deco_stone_lantern':{ key:'decoStoneLantern',iw:_T*0.9,ih:_T*1.6, xOff:0,       yOff:-_T*0.6 },
                 };
                 const _decoInfo = _decoMap[npc.id];
                 if (_decoInfo) {
@@ -8658,6 +8661,33 @@ function drawMap() {
                             ctx.beginPath();ctx.arc(_rx,_ry,1.6,0,Math.PI*2);ctx.fill();
                         }
                         ctx.shadowBlur=0;
+                        ctx.restore();
+                    } else if(npc.id==='obj_deco_stone_lantern') {
+                        // 石灯籠 — 祠・神殿の参道に佇む古い灯り
+                        const T=_T,_slx=px+T*0.5,_slTop=py-T*0.6,_flick2=Date.now()/300;
+                        ctx.save();
+                        ctx.fillStyle='rgba(0,0,0,0.24)';ctx.beginPath();ctx.ellipse(_slx,py+T*0.96,T*0.26,T*0.07,0,0,Math.PI*2);ctx.fill();
+                        // 台座
+                        ctx.fillStyle='#6a6660';ctx.beginPath();ctx.moveTo(_slx-T*0.24,py+T*0.98);ctx.lineTo(_slx+T*0.24,py+T*0.98);ctx.lineTo(_slx+T*0.14,py+T*0.82);ctx.lineTo(_slx-T*0.14,py+T*0.82);ctx.closePath();ctx.fill();
+                        // 竿(支柱)
+                        ctx.fillStyle='#78746c';ctx.fillRect(_slx-T*0.07,_slTop+T*0.62,T*0.14,T*0.24);
+                        // 火袋(灯りの箱)
+                        const _fbY=_slTop+T*0.3,_fbH=T*0.34;
+                        ctx.fillStyle='#84807a';ctx.fillRect(_slx-T*0.19,_fbY,T*0.38,_fbH);
+                        const _flk2=0.7+Math.sin(_flick2)*0.22;
+                        const _slg=ctx.createRadialGradient(_slx,_fbY+_fbH*0.5,1,_slx,_fbY+_fbH*0.5,T*0.7);
+                        _slg.addColorStop(0,`rgba(255,205,110,${0.5*_flk2})`);_slg.addColorStop(1,'rgba(255,150,40,0)');
+                        ctx.fillStyle=_slg;ctx.beginPath();ctx.arc(_slx,_fbY+_fbH*0.5,T*0.7,0,Math.PI*2);ctx.fill();
+                        ctx.fillStyle=`rgba(255,${195+Math.floor(Math.sin(_flick2*1.4)*25)},110,0.95)`;
+                        ctx.beginPath();ctx.ellipse(_slx,_fbY+_fbH*0.52,T*0.12,_fbH*0.34,0,0,Math.PI*2);ctx.fill();
+                        ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.lineWidth=1;ctx.strokeRect(_slx-T*0.19,_fbY,T*0.38,_fbH);
+                        // 笠(屋根)
+                        ctx.fillStyle='#8a8680';ctx.beginPath();ctx.moveTo(_slx-T*0.3,_fbY);ctx.lineTo(_slx,_fbY-T*0.22);ctx.lineTo(_slx+T*0.3,_fbY);ctx.closePath();ctx.fill();
+                        ctx.fillStyle='#5a5650';ctx.beginPath();ctx.moveTo(_slx-T*0.08,_fbY-T*0.22);ctx.lineTo(_slx,_fbY-T*0.34);ctx.lineTo(_slx+T*0.08,_fbY-T*0.22);ctx.closePath();ctx.fill();
+                        // 苔の付着(緑の斑点)
+                        ctx.fillStyle='rgba(70,120,50,0.35)';
+                        ctx.beginPath();ctx.arc(_slx-T*0.1,py+T*0.86,3,0,Math.PI*2);ctx.fill();
+                        ctx.beginPath();ctx.arc(_slx+T*0.12,_slTop+T*0.66,2.4,0,Math.PI*2);ctx.fill();
                         ctx.restore();
                     } else {
                         // その他装飾のフォールバック絵文字
