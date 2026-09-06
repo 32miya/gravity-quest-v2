@@ -1246,8 +1246,9 @@ function injectSubStoryData() {
     masterData.monsters["boss_dc_warden_upper_r"] = { name:"死霊王ネクロル", max_hp:1900, atk:230, def:160, spd:108, exp:12000, gold:7000, traits:["boss","dark_element","undead","two_actions","weak_light"] };
     // アイテム
     masterData.items["acc_zarmo_crown"]  = { id:"acc_zarmo_crown",  name:"ザーモの王冠",     type:"accessory", price:0, power:0, effect:"all_stats_up",  desc:"古城ザーモに眠っていた古王の冠。全ステータスが大きく上昇する。" };
-    masterData.items["w_estoria_blade"]  = { id:"w_estoria_blade",  name:"エストリアの覇剣（剣）", type:"weapon", price:0, power:140, element:"light", desc:"東の王国の覇者に授けられる伝説の剣。光属性で闇の敵に絶大な威力を発揮。" };
+    masterData.items["w_estoria_blade"]  = { id:"w_estoria_blade",  name:"エストリアの剣（剣）", type:"weapon", price:0, power:140, element:"light", desc:"木の国エストリアが心から信頼する者にのみ授ける伝説の剣。光属性で闇の敵に絶大な威力を発揮。" };
     masterData.items["a_deserta_robe"]   = { id:"a_deserta_robe",   name:"砂漠の賢者の法衣（鎧）", type:"armor", price:0, power:90, effect:"mp_regen",   desc:"砂漠の封印を解いた者に贈られる法衣。MPが毎ターン少量回復する。" };
+    masterData.items["w_kagane_axe"]     = { id:"w_kagane_axe",     name:"鉄嵐の斧（斧）",     type:"weapon", price:0, power:135, desc:"金の国カガネの鍛冶が打った一振り。一振りで氷すら断つと謳われる、白鋼城の至宝。" };
     masterData.items["meteorite_fragment"] = { id: "meteorite_fragment", name: "いんせきのかけら", type: "tool", price: 5000, desc: "はぐれグラちゃんから手に入る超レアなかけら。ガルドの鍛冶屋に持参すると最強の鎧を作れるという。" };
     masterData.items["dragon_scale_red"]  = { id: "dragon_scale_red",  name: "赤竜の鱗", type: "tool", price: 0, desc: "赤く燃える竜の鱗。試練の洞窟の最奥に眠っていた。竜霊グラドスの呪いを解く三枚の鱗のひとつ。" };
     masterData.items["dragon_scale_blue"] = { id: "dragon_scale_blue", name: "蒼竜の鱗", type: "tool", price: 0, desc: "深海のような蒼い竜の鱗。天空の頂に隠されていた。竜霊グラドスの呪いを解く三枚の鱗のひとつ。" };
@@ -3896,6 +3897,28 @@ function buildZarmoCastle() {
     };
     return {width: W, height: H, tiles: t, exits, npcs, encounters: [], name: "ザーモの氷墓"};
 }
+function buildKaganeCastle() {
+    const W=20,H=17;
+    const t=new Array(W*H).fill(1);
+    const S=(x,y,v)=>{if(x>=0&&y>=0&&x<W&&y<H)t[y*W+x]=v;};
+    const R=(x1,y1,x2,y2,v)=>{for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++)S(x,y,v);};
+    R(1,1,18,4,9);    // 玉座の間（石床）
+    R(8,5,11,12,0);   // 中央通路
+    R(2,6,8,11,0);    // 左の間（鍛冶場、x=8で中央通路と接続）
+    R(11,6,17,11,0);  // 右の間（宝物庫、x=11で中央通路と接続）
+    S(9,13,22);S(10,13,22);
+    const exits={'9,13':{map:'map_field_6_0',x:22,y:23},'10,13':{map:'map_field_6_0',x:22,y:23}};
+    const npcs={
+        '9,2':  {id:'npc_kagane_king',  name:'カガネ王'},
+        '3,3':  {id:'npc_priest',       name:'神父'},
+        '5,8':  {id:'npc_kagane_smith', name:'鍛冶頭ドルバ'},
+        '14,8': {id:'npc_kagane_guard', name:'カガネの衛兵'},
+        '13,9': {id:'obj_chest_kagane_axe', name:'宝箱'},
+        '6,4':  {id:'obj_deco_banner',  name:''},
+        '13,4': {id:'obj_deco_banner',  name:''}
+    };
+    return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'白鋼城カガネ'};
+}
 function generateFieldMapsForGravityQuest() {
     // ワールドグリッド: 405x405タイル (9x9 x 45x45)
     const GW = 405, GH = 405;
@@ -4177,6 +4200,8 @@ if(_bpx+1<x0+45&&world[_bpy*GW+_bpx+1]===5){world[_bpy*GW+_bpx+1]=12;mainComp.ad
     placeBuilding("map_field_3_7", 22, 22, 21, "map_castle_deserta",  8, 13); // 南の砂漠城デセルタ
     externalMapData['map_castle_north'] = buildNorthAbandonedCastle();
     placeBuilding("map_field_0_0", 36, 40, 21, "map_castle_north",   17, 27); // 北の廃城（左上島）
+    externalMapData['map_castle_kagane'] = buildKaganeCastle();
+    placeBuilding("map_field_6_0", 22, 22, 21, "map_castle_kagane",   9, 12); // 白鋼城カガネ（金の国、西の新王国）
 
     // 【新街・村 10箇所】
     placeBuilding("map_field_5_0", 22, 28, 21, "map_town_nord",       10, 14); // 冒険者の港 ノルド
@@ -11664,6 +11689,42 @@ async function checkAction() {
                 state='FIELD'; hideAllWindows(); drawMap(); return;
             }
 
+            // ── 白鋼城カガネ: 金の国NPCたち ──
+            if (npc.id === "npc_kagane_king") {
+                if (!partyData.flags.flag_kagane_met) {
+                    partyData.flags.flag_kagane_met = true;
+                    await typeMessage("【カガネ王】\n……よく ここまで 来た。\n西の 金の国 カガネへ ようこそ。\n鉱山と 鍛冶の 民の 国じゃ。");
+                    await typeMessage("【カガネ王】\n我らは 長らく 南の 炎の国 デセルタの\n炎に 鉱脈を 溶かされることを 恐れ\n国境を 固く 閉ざしてきた。\nだが……お前のような 旅人を 見ると\n少し 心が 動く。");
+                    await typeMessage("【カガネ王】\n宝物庫に 鍛冶頭ドルバが 打った\n一振りが 眠っておる。\n持って行くが よい。\nいつか この国も、他の 四国と\n手を 取り合える 日が 来るじゃろうか……");
+                } else {
+                    await typeMessage("【カガネ王】\nまた 会えたな、境界の 使者よ。\n鉱山の 音は 変わらず 続いておる。\nこの 国にも、いつか 変化が 訪れることを\n願っておる。");
+                }
+                state='FIELD'; hideAllWindows(); drawMap(); return;
+            }
+            if (npc.id === "npc_kagane_smith") {
+                await typeMessage("【鍛冶頭ドルバ】\nこの 白鋼城の 鍛冶場じゃ。\nカガネの 鉄は 硬く、氷すら 断つ 斧に なる。\n宝物庫の 斧は わしの 会心の 出来じゃ。");
+                await typeMessage("【鍛冶頭ドルバ】\n……昔は 木の国 エストリアとも\n鍛冶の 技を 教え合う 仲だったと 聞く。\nまた そんな 日が 来ると いいのう。");
+                state='FIELD'; hideAllWindows(); drawMap(); return;
+            }
+            if (npc.id === "npc_kagane_guard") {
+                await typeMessage("【カガネの衛兵】\n白鋼城へ ようこそ。\n国境は 固く 閉ざしておるが……\nお前のような 旅人になら、道を 譲ろう。");
+                state='FIELD'; hideAllWindows(); drawMap(); return;
+            }
+            if (npc.id === "obj_chest_kagane_axe") {
+                if (partyData.flags.chest_kagane_axe) { await typeMessage("（宝箱は からっぽだ）"); state='FIELD'; hideAllWindows(); drawMap(); return; }
+                partyData.flags.chest_kagane_axe = true;
+                AudioManager.playSE('item_get');
+                const _kgTgt = partyData.members.find(m=>m.inventory.length<8 && m.hp>0) || partyData.members.find(m=>m.inventory.length<8);
+                if (_kgTgt) {
+                    _kgTgt.inventory.push('w_kagane_axe');
+                    await typeMessage("宝物庫の 宝箱を 開けた！\n『鉄嵐の斧』を てにいれた！\nカガネ鍛冶の 技が 込められた 一振りだ。");
+                } else {
+                    await typeMessage("宝箱を 開けたが……\nもちものが いっぱいだ！");
+                    partyData.flags.chest_kagane_axe = false;
+                }
+                state='FIELD'; hideAllWindows(); drawMap(); return;
+            }
+
             // ===== 拡張世界: 新ダンジョンボス =====
 
             // 北の氷窟ボス
@@ -14805,6 +14866,7 @@ async function showTitleScreen() {
         externalMapData['map_castle_estoria'] = buildEstoriaCastle();
         externalMapData['map_castle_deserta'] = buildDesertaCastle();
         externalMapData['map_castle_north']   = buildNorthAbandonedCastle();
+        externalMapData['map_castle_kagane']  = buildKaganeCastle();
         externalMapData['map_shrine_warp']    = buildShrineWarp();
         externalMapData['map_shrine_backroom'] = buildShrineBackRoom();
         if (externalMapData['map_sage_shrine']) {
