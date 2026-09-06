@@ -1646,6 +1646,18 @@ let npcFacingDir = {};         // { npc.id: 0=down,1=up,2=left,3=right }
         _img.src = b64;
     }
 })();
+// ── 宝箱画像（開/閉、GQ由来素材）──────────────────────────
+(function() {
+    const _chestData = {
+        'chestGQ': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAXCAYAAAAYyi9XAAACoUlEQVR4nO1VzU8TURD/vbZIW1pZaUNpiR/gBdMAMSIJHDmaeDExevAPMN48eJQoiScPXvWqV+ONgzc4ERSDeFCIUKoWi1D6QXe73d23b8x7SwmeWGLgorM7mdnZmfm9mfcmjxERTpICJ4qG/4DHQIHjSPpvA7JXD0cply+bky+/Rv0EPJjIaoVStbI/vUSQemueiQBl8d4DOiHIRIRdG26j6Y8287vC20O9lOqM41x6B7GOCLq000j0pJBMpxHVzqBRraCUX1e+db2B1XxB6QsrYZTrBtjz+8PUFW8XNx/PB/0A3hrM0OglB7mCBiHXTYDNpSSIA9UqfY+lPjpg4e17jtDsXA7jI+f9FqgS9Pb34XO+rPRs3y7OZrqRyQ7Ctm1Y1QrsWgW6YWJzu4z5L6eU38CVy5h+N4+Qw11neWVbMMZCRMQPBwQ2cutwRVwlWlqLYXHVAM3O/VERKW6DkA8Rlj8sQghC6PVC4wnQyAOQLT0UUAZ/Woth6GIdMU2Dlkwg2Z1EVzKBel2HYTTQ0HXlW9ooQq/VlD6zBA9wL88Fvy2tNJpIaVGsfOuAu+5AUBEhVlSnkKk9JXDykkvd5gElXeGibNr7gJJcP4A259jY2YXDXbjCa58jANEaDZI2bwzkt7Pno2JdQuDpjYFHAAp+9k8SF4TvVRM/6xZ+1EzkqyYKuyauT3Tj2Yu7uHenH1eHOlExHcUlw8aW7rFuc7CxdJjmis0IETX9AI73dlAqHoZuOeoAtSpS/0YSqqo3M0Uko0FlbwsCFiclt3QOdtQbfywTpWQsAsvhauYsx91vWyuXBGq1sWWX7ZTdObiHvsjL4w24bvFDgSSZXI4G0B7A0StkjIV7wjBk2C8LU35iesKYlHKziakjA/4tnfj19Bu4N8SvfluFTgAAAABJRU5ErkJggg==',
+        'chestOpenGQ': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACIAAAAaCAYAAADSbo4CAAACwElEQVR4nO2Xy2oUQRSG/1PdPdOTiTGihERB8QYBBffZxJXufAB9B59AFH0UV64D7kQYFCErV4LRhUSTmCiTSUzP9KVucqo6k068oEwLs/BfdF26q+rrOpfqJmstxkECYyKBMZHAmEhgTBSOOsG9G1ctASDi64GCqT5u3rmFdy+e4eP6AOsf5A9j+4XB49frVAtId3fXTcgyxsBYC2MBvWYhniy5/qedLcxMNV0/RykHKj9X1cggrDcbPfxMnzrJsL4zKFxZKAvegsJYRILqBWFNNkIIIgSCcPf2nOtLU4U8k8hzjY3PfbxaMWg3ye0K6+teziadBpDUBqKMRSsS7CyuLaWBUhrdXoYiN8hyjUCIQyaRxpn0GoDVkUFMZWISBLLAl63EgeztSQxShUIa8Jq/yOLXAXRGBrGVyeOQ3I4svezDEZW3BAlXjUKLiltUtTgySC41zhyPh22ptAcsIQtlILV1ZmAGZYBMaShvlqFCInpQebuHfwsyf/Y0CqUxyH2e6Gc+OtJCHQE+aOfK19NcYmVn24NgRCVZgeedt9DWQlmgHQgk2iAiwrYxPmew/7i39mM4n7BPX7l0st4U3yDCuYkmWoHAxXaMpiDMxdHwPq8fkQcJCGiIA6h91Ra+FyZidHOJU40Qk4Jwud3Calagxa9OQCzE0HdCIvQqpqoJxGIi9FHRCgLX0ygX5SsDTEcBJsPAmS9RGtr+w9O3JxV2ORoskGqDjdw7rYZ1EA7ZAsfCwIVwWMLWtiNxFGJhcR6ZVJgp+xbK8nxZpoXEt7RA0501GkhSnFDajakNZPn9miuV9vnjqHhhzWFSKuNEUipiz60LpJukiI5sszT8KcDHvQdgjv2jwJXWOj+pHg81pHgg14ez5O8AWAPF3y0+lGsDWd5Mg9kYktfYyvHoT8bMxrjP5WZ28Dz9/6/BYX0HoDVmyIrp0zoAAAAASUVORK5CYII=',
+    };
+    for (const [key, b64] of Object.entries(_chestData)) {
+        const _img = new Image();
+        _img.onload = function() { externalImages[key] = _img; };
+        _img.src = b64;
+    }
+})();
 let _lastWanderMapId = null;    // マップ変更検出用
 let _walkPhase = 0; let _lastMoveTime = 0;
 // 静的タイルキャッシュ（カメラ位置が変わるまで再描画不要な背景レイヤー）
@@ -8993,8 +9005,10 @@ function drawMap() {
                 ctx.restore();
                 })(); } // end fallback
             } else if(npc.id.includes('chest') || npc.id.includes('obj_chest')) {
-                let chestFlag = `chest_${_rMapId}_${nx}_${ny}`; let isOpened = partyData.flags[chestFlag]; ctx.globalAlpha = isOpened ? 0.5 : 1.0;
-                let chestImg = externalImages['chest'] || externalImages['treasure'] || externalImages['treasureBox'];
+                let chestFlag = `chest_${_rMapId}_${nx}_${ny}`; let isOpened = partyData.flags[chestFlag]; ctx.globalAlpha = 1.0;
+                let chestImgClosed = externalImages['chestGQ'] || externalImages['chest'] || externalImages['treasure'] || externalImages['treasureBox'];
+                let chestImgOpen = externalImages['chestOpenGQ'] || chestImgClosed;
+                let chestImg = isOpened ? chestImgOpen : chestImgClosed;
                 if (npc.id === "obj_chest_star_frag") { ctx.font = "24px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("✨", px + TILE_SIZE/2, py + TILE_SIZE/2); }
                 else if (npc.id === "obj_parents_relic") { ctx.font = "22px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("🖼️", px + TILE_SIZE/2, py + TILE_SIZE/2); ctx.globalAlpha = 1.0; }
                 else if(chestImg && chestImg.complete && chestImg.naturalHeight > 0) { ctx.drawImage(chestImg, px, py, TILE_SIZE, TILE_SIZE); } else { ctx.font = "24px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(isOpened ? "🧳" : "🎁", px + TILE_SIZE/2, py + TILE_SIZE/2); } ctx.globalAlpha = 1.0;
