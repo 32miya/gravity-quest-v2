@@ -1769,9 +1769,11 @@ const bossPhantomImg = new Image(); bossPhantomImg.crossOrigin = "Anonymous"; bo
                 const _r = _d[_i], _g = _d[_i+1], _b = _d[_i+2];
                 const _max = Math.max(_r, _g, _b), _min = Math.min(_r, _g, _b);
                 const _sat = _max > 0 ? (_max - _min) / _max : 0;
-                // 白・近白かつ彩度が低いピクセルを透明化
-                if (_max > 215 && _sat < 0.18) {
-                    const _fade = Math.max(0, Math.min(255, (_max - 215) * 4));
+                // 白・近白かつ彩度が低いピクセルを透明化(背景らしさに応じて滑らかにalpha=0まで低下)
+                if (_max > 200 && _sat < 0.18) {
+                    const _close = Math.min(1, Math.max(0, (_max - 200) / 55));
+                    const _satOk = Math.min(1, Math.max(0, (0.18 - _sat) / 0.18));
+                    const _fade = 255 * _close * _satOk;
                     _d[_i+3] = Math.max(0, _d[_i+3] - _fade);
                 }
             }
@@ -1799,8 +1801,10 @@ const bossPhantomImg = new Image(); bossPhantomImg.crossOrigin = "Anonymous"; bo
                 const _r = _d[_i], _g = _d[_i+1], _b = _d[_i+2];
                 const _max = Math.max(_r, _g, _b), _min = Math.min(_r, _g, _b);
                 const _sat = _max > 0 ? (_max - _min) / _max : 0;
-                if (_max > 215 && _sat < 0.18) {
-                    const _fade = Math.max(0, Math.min(255, (_max - 215) * 4));
+                if (_max > 195 && _sat < 0.18) {
+                    const _close = Math.min(1, Math.max(0, (_max - 195) / 60));
+                    const _satOk = Math.min(1, Math.max(0, (0.18 - _sat) / 0.18));
+                    const _fade = 255 * _close * _satOk;
                     _d[_i+3] = Math.max(0, _d[_i+3] - _fade);
                 }
             }
@@ -1828,8 +1832,10 @@ const bossPhantomImg = new Image(); bossPhantomImg.crossOrigin = "Anonymous"; bo
                 const _r = _d[_i], _g = _d[_i+1], _b = _d[_i+2];
                 const _mx = Math.max(_r,_g,_b), _mn = Math.min(_r,_g,_b);
                 const _sat = _mx > 0 ? (_mx - _mn) / _mx : 0;
-                if (_mx > 210 && _sat < 0.20) {
-                    const _fade = Math.max(0, Math.min(255, (_mx - 210) * 5));
+                if (_mx > 195 && _sat < 0.20) {
+                    const _close = Math.min(1, Math.max(0, (_mx - 195) / 60));
+                    const _satOk = Math.min(1, Math.max(0, (0.20 - _sat) / 0.20));
+                    const _fade = 255 * _close * _satOk;
                     _d[_i+3] = Math.max(0, _d[_i+3] - _fade);
                 }
             }
@@ -1857,8 +1863,10 @@ const bossPhantomImg = new Image(); bossPhantomImg.crossOrigin = "Anonymous"; bo
                 const _r = _d[_i], _g = _d[_i+1], _b = _d[_i+2];
                 const _mx = Math.max(_r,_g,_b), _mn = Math.min(_r,_g,_b);
                 const _sat = _mx > 0 ? (_mx - _mn) / _mx : 0;
-                if (_mx > 208 && _sat < 0.18) {
-                    const _fade = Math.max(0, Math.min(255, (_mx - 208) * 5));
+                if (_mx > 195 && _sat < 0.18) {
+                    const _close = Math.min(1, Math.max(0, (_mx - 195) / 60));
+                    const _satOk = Math.min(1, Math.max(0, (0.18 - _sat) / 0.18));
+                    const _fade = 255 * _close * _satOk;
                     _d[_i+3] = Math.max(0, _d[_i+3] - _fade);
                 }
             }
@@ -1895,8 +1903,10 @@ const bossPhantomImg = new Image(); bossPhantomImg.crossOrigin = "Anonymous"; bo
                     const _mx = Math.max(_d[_p], _d[_p+1], _d[_p+2]);
                     const _mn = Math.min(_d[_p], _d[_p+1], _d[_p+2]);
                     const _s = _mx > 0 ? (_mx - _mn) / _mx : 0;
-                    if (_mx > 210 && _s < 0.22) {
-                        const _f = Math.max(0, Math.min(255, (_mx - 210) * 5));
+                    if (_mx > 195 && _s < 0.22) {
+                        const _close = Math.min(1, Math.max(0, (_mx - 195) / 60));
+                        const _satOk = Math.min(1, Math.max(0, (0.22 - _s) / 0.22));
+                        const _f = 255 * _close * _satOk;
                         _d[_p+3] = Math.max(0, _d[_p+3] - _f);
                     }
                 }
