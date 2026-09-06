@@ -3632,7 +3632,9 @@ function buildNorthAbandonedCastle() {
         "3,3":   {"id":"obj_deco_statue_knight", "name":"崩れかけた石像"},
         "3,4":   {"id":"obj_statue_foot",        "name":""},
         "32,3":  {"id":"obj_deco_statue_knight", "name":"崩れかけた石像"},
-        "32,4":  {"id":"obj_statue_foot",        "name":""}
+        "32,4":  {"id":"obj_statue_foot",        "name":""},
+        "4,15":  {"id":"obj_deco_banner",        "name":""},
+        "26,15": {"id":"obj_deco_banner",        "name":""}
     };
     return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:"北の廃城"};
 }
@@ -3648,7 +3650,7 @@ function buildEstoriaCastle() {
     S(3,3,16);S(16,3,16);S(3,9,16);S(16,9,16); // 柱
     S(9,16,22);S(10,16,22);
     const exits={'9,16':{map:'map_field_8_4',x:22,y:23},'10,16':{map:'map_field_8_4',x:22,y:23}};
-    const npcs={'9,2':{id:'npc_estoria_king',name:'エストリア王'},'3,9':{id:'npc_estoria_knight',name:'近衛騎士'},'16,9':{id:'npc_estoria_herald',name:'伝令の使者'},'9,9':{id:'npc_estoria_queen',name:'王妃'},'3,3':{id:'npc_priest',name:'神父'},'16,3':{id:'npc_estoria_sage',name:'宮廷賢者'}};
+    const npcs={'9,2':{id:'npc_estoria_king',name:'エストリア王'},'3,9':{id:'npc_estoria_knight',name:'近衛騎士'},'16,9':{id:'npc_estoria_herald',name:'伝令の使者'},'9,9':{id:'npc_estoria_queen',name:'王妃'},'3,3':{id:'npc_priest',name:'神父'},'16,3':{id:'npc_estoria_sage',name:'宮廷賢者'},'6,4':{id:'obj_deco_banner',name:''},'13,4':{id:'obj_deco_banner',name:''}};
     return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'東の王国城エストリア'};
 }
 function buildDesertaCastle() {
@@ -3662,7 +3664,7 @@ function buildDesertaCastle() {
     R(11,6,15,11,0); // 右の間（x=11で中央通路と接続）
     S(8,14,22);S(9,14,22);
     const exits={'8,14':{map:'map_field_3_7',x:22,y:23},'9,14':{map:'map_field_3_7',x:22,y:23}};
-    const npcs={'8,2':{id:'npc_deserta_king',name:'デセルタ王'},'3,8':{id:'npc_deserta_oracle',name:'砂漠の預言者'},'14,8':{id:'npc_deserta_soldier',name:'砂漠の衛兵'},'3,3':{id:'npc_priest',name:'神父'},'12,8':{id:'obj_chest_deserta_seal',name:'砂漠の宝箱'}};
+    const npcs={'8,2':{id:'npc_deserta_king',name:'デセルタ王'},'3,8':{id:'npc_deserta_oracle',name:'砂漠の預言者'},'14,8':{id:'npc_deserta_soldier',name:'砂漠の衛兵'},'3,3':{id:'npc_priest',name:'神父'},'12,8':{id:'obj_chest_deserta_seal',name:'砂漠の宝箱'},'5,4':{id:'obj_deco_banner',name:''},'12,2':{id:'obj_deco_banner',name:''}};
     return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'南の砂漠城デセルタ'};
 }
 function buildShrineWarp() {
@@ -3758,7 +3760,9 @@ function buildZarmoCastle() {
         "3,12":  {id: "npc_zarmo_knight",      name: "古城の衛兵"},
         "18,12": {id: "npc_zarmo_sorceress",   name: "闇の魔女"},
         "10,12": {id: "boss_zarmo_lich",       name: "暗黒公リッチ"},
-        "14,12": {id: "obj_chest_zarmo_key",   name: "古びた宝箱"}
+        "14,12": {id: "obj_chest_zarmo_key",   name: "古びた宝箱"},
+        "7,2":   {id: "obj_deco_banner",       name: ""},
+        "14,2":  {id: "obj_deco_banner",       name: ""}
     };
     return {width: W, height: H, tiles: t, exits, npcs, encounters: [], name: "北東の古城ザーモ"};
 }
@@ -8495,6 +8499,7 @@ function drawMap() {
                     'obj_deco_rune_circle': { key:'decoRuneCircle', iw:_T*1.3,ih:_T*0.5,  xOff:-_T*0.15, yOff:_T*0.5  },
                     'obj_deco_stone_lantern':{ key:'decoStoneLantern',iw:_T*0.9,ih:_T*1.6, xOff:0,       yOff:-_T*0.6 },
                     'obj_deco_arcane_orb':  { key:'decoArcaneOrb',   iw:_T*0.9,ih:_T*1.5, xOff:0,        yOff:-_T*0.5 },
+                    'obj_deco_banner':      { key:'decoBanner',     iw:_T*0.9,ih:_T*1.7, xOff:0,        yOff:-_T*0.9 },
                 };
                 const _decoInfo = _decoMap[npc.id];
                 if (_decoInfo) {
@@ -8713,6 +8718,40 @@ function drawMap() {
                         ctx.fillStyle='rgba(255,255,255,0.75)';
                         ctx.beginPath();ctx.arc(_aox-T*0.04,_oy-T*0.04,T*0.05,0,Math.PI*2);ctx.fill();
                         ctx.shadowBlur=0;
+                        ctx.restore();
+                    } else if(npc.id==='obj_deco_banner') {
+                        // 城の紋章旗 — 壁に掛かる垂れ幕(緩やかに揺れる)
+                        const T=_T,_bnx=px+T*0.5,_bnTop=py-T*0.9,_bt2=Date.now()/900;
+                        ctx.save();
+                        const _sway=Math.sin(_bt2)*T*0.03;
+                        // 横棒(木製ポール)
+                        ctx.fillStyle='#4a3820';ctx.fillRect(_bnx-T*0.34,_bnTop,T*0.68,T*0.06);
+                        ctx.fillStyle='#6a5030';ctx.beginPath();ctx.arc(_bnx-T*0.34,_bnTop+T*0.03,T*0.05,0,Math.PI*2);ctx.fill();
+                        ctx.beginPath();ctx.arc(_bnx+T*0.34,_bnTop+T*0.03,T*0.05,0,Math.PI*2);ctx.fill();
+                        // 垂れ幕本体(赤字に金の紋章、下端は少し波打つ)
+                        const _bg2=ctx.createLinearGradient(_bnx,_bnTop,_bnx,_bnTop+T*1.5);
+                        _bg2.addColorStop(0,'#8c1c1c');_bg2.addColorStop(1,'#6a1414');
+                        ctx.fillStyle=_bg2;
+                        ctx.beginPath();
+                        ctx.moveTo(_bnx-T*0.3,_bnTop+T*0.06);
+                        ctx.lineTo(_bnx+T*0.3,_bnTop+T*0.06);
+                        ctx.lineTo(_bnx+T*0.3+_sway,_bnTop+T*1.4);
+                        ctx.lineTo(_bnx+T*0.15+_sway,_bnTop+T*1.55);
+                        ctx.lineTo(_bnx+_sway,_bnTop+T*1.35);
+                        ctx.lineTo(_bnx-T*0.15+_sway,_bnTop+T*1.55);
+                        ctx.lineTo(_bnx-T*0.3+_sway,_bnTop+T*1.4);
+                        ctx.closePath();ctx.fill();
+                        ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=0.8;ctx.stroke();
+                        // 金の縁取り
+                        ctx.strokeStyle='rgba(220,180,60,0.55)';ctx.lineWidth=1.2;
+                        ctx.beginPath();ctx.moveTo(_bnx-T*0.24,_bnTop+T*0.14);ctx.lineTo(_bnx-T*0.22+_sway*0.7,_bnTop+T*1.2);ctx.stroke();
+                        ctx.beginPath();ctx.moveTo(_bnx+T*0.24,_bnTop+T*0.14);ctx.lineTo(_bnx+T*0.22+_sway*0.7,_bnTop+T*1.2);ctx.stroke();
+                        // 紋章(獅子風の菱形+星)
+                        const _emx=_bnx+_sway*0.5,_emy=_bnTop+T*0.6;
+                        ctx.fillStyle='#e8c840';
+                        ctx.beginPath();ctx.moveTo(_emx,_emy-T*0.16);ctx.lineTo(_emx+T*0.13,_emy);ctx.lineTo(_emx,_emy+T*0.16);ctx.lineTo(_emx-T*0.13,_emy);ctx.closePath();ctx.fill();
+                        ctx.fillStyle='#8c1c1c';
+                        ctx.beginPath();ctx.arc(_emx,_emy,T*0.05,0,Math.PI*2);ctx.fill();
                         ctx.restore();
                     } else {
                         // その他装飾のフォールバック絵文字
