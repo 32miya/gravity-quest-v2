@@ -8494,6 +8494,7 @@ function drawMap() {
                     'obj_deco_bones':       { key:'decoBones',      iw:_T*1.1,ih:_T*0.55, xOff:-_T*0.05, yOff:_T*0.45 },
                     'obj_deco_rune_circle': { key:'decoRuneCircle', iw:_T*1.3,ih:_T*0.5,  xOff:-_T*0.15, yOff:_T*0.5  },
                     'obj_deco_stone_lantern':{ key:'decoStoneLantern',iw:_T*0.9,ih:_T*1.6, xOff:0,       yOff:-_T*0.6 },
+                    'obj_deco_arcane_orb':  { key:'decoArcaneOrb',   iw:_T*0.9,ih:_T*1.5, xOff:0,        yOff:-_T*0.5 },
                 };
                 const _decoInfo = _decoMap[npc.id];
                 if (_decoInfo) {
@@ -8688,6 +8689,30 @@ function drawMap() {
                         ctx.fillStyle='rgba(70,120,50,0.35)';
                         ctx.beginPath();ctx.arc(_slx-T*0.1,py+T*0.86,3,0,Math.PI*2);ctx.fill();
                         ctx.beginPath();ctx.arc(_slx+T*0.12,_slTop+T*0.66,2.4,0,Math.PI*2);ctx.fill();
+                        ctx.restore();
+                    } else if(npc.id==='obj_deco_arcane_orb') {
+                        // 浮遊する魔法の宝珠 — 塔に佇む台座+ゆっくり上下に浮遊する光球
+                        const T=_T,_aox=px+T*0.5,_aoBaseY=py+T*0.9,_at=Date.now()/1000;
+                        ctx.save();
+                        ctx.fillStyle='rgba(0,0,0,0.24)';ctx.beginPath();ctx.ellipse(_aox,py+T*0.97,T*0.22,T*0.06,0,0,Math.PI*2);ctx.fill();
+                        // 石の台座(先細り)
+                        ctx.fillStyle='#5a5464';ctx.beginPath();ctx.moveTo(_aox-T*0.22,_aoBaseY);ctx.lineTo(_aox+T*0.22,_aoBaseY);ctx.lineTo(_aox+T*0.1,_aoBaseY-T*0.32);ctx.lineTo(_aox-T*0.1,_aoBaseY-T*0.32);ctx.closePath();ctx.fill();
+                        ctx.fillStyle='#6a6474';ctx.beginPath();ctx.ellipse(_aox,_aoBaseY-T*0.32,T*0.11,T*0.04,0,0,Math.PI*2);ctx.fill();
+                        // 浮遊する光球(サイン波で上下浮遊)
+                        const _bob=Math.sin(_at*1.3)*T*0.06;
+                        const _oy=_aoBaseY-T*0.62+_bob;
+                        const _pulse2=0.7+Math.sin(_at*2.1)*0.25;
+                        ctx.strokeStyle=`rgba(120,180,255,${0.5*_pulse2})`;ctx.lineWidth=1;
+                        ctx.beginPath();ctx.moveTo(_aox,_aoBaseY-T*0.32);ctx.lineTo(_aox,_oy+T*0.1);ctx.stroke();
+                        const _og=ctx.createRadialGradient(_aox,_oy,0,_aox,_oy,T*0.5);
+                        _og.addColorStop(0,`rgba(150,210,255,${0.55*_pulse2})`);_og.addColorStop(1,'rgba(80,140,255,0)');
+                        ctx.fillStyle=_og;ctx.beginPath();ctx.arc(_aox,_oy,T*0.5,0,Math.PI*2);ctx.fill();
+                        ctx.shadowColor='#8ec8ff';ctx.shadowBlur=8;
+                        ctx.fillStyle=`rgba(200,230,255,${0.92*_pulse2})`;
+                        ctx.beginPath();ctx.arc(_aox,_oy,T*0.13,0,Math.PI*2);ctx.fill();
+                        ctx.fillStyle='rgba(255,255,255,0.75)';
+                        ctx.beginPath();ctx.arc(_aox-T*0.04,_oy-T*0.04,T*0.05,0,Math.PI*2);ctx.fill();
+                        ctx.shadowBlur=0;
                         ctx.restore();
                     } else {
                         // その他装飾のフォールバック絵文字
