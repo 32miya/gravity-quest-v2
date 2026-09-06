@@ -9429,7 +9429,12 @@ function drawMap() {
                 else if((_nn_fb.includes('神父') || _nn_fb.includes('神官') || _nn_fb.includes('司教')) && externalImages['priest']) { drawSpriteLocal(ctx, externalImages['priest'], px, py, 48); }
                 else if(_nn_fb.includes('王様') || _nn_fb.includes('国王')) { if (!drawAnimatedNpcSprite(ctx, 'king', npc.id, px, py, 48)) { if(externalImages['king']) drawSpriteLocal(ctx, externalImages['king'], px, py, 48); } }
                 else if(_nn_fb.includes('老商人') || (_nn_fb.includes('老') && (_nn_fb.includes('人') || _nn_fb.includes('職')))) { if (!drawAnimatedNpcSprite(ctx, 'elder', npc.id, px, py, 48)) { if(externalImages['oldMan']) drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); } }
-                else if(_nn_fb.includes('露天') || _nn_fb.includes('行商') || _nn_fb.includes('骨董') || _nn_fb.includes('薬草') || _nn_fb.includes('宝石') || _nn_fb.includes('修繕') || _nn_fb.includes('商人')) { if (!drawAnimatedNpcSprite(ctx, 'merchant', npc.id, px, py, 48)) { if(externalImages['itemShop']) drawSpriteLocal(ctx, externalImages['itemShop'], px, py, 48); } }
+                else if(_nn_fb.includes('露天') || _nn_fb.includes('行商') || _nn_fb.includes('骨董') || _nn_fb.includes('薬草') || _nn_fb.includes('宝石') || _nn_fb.includes('修繕') || _nn_fb.includes('商人')) {
+                    // 見た目の多様化: 同じ id/名前系統の商人が並んでも全員同じ顔にならないよう座標ベースで抽選
+                    const _vrm = getMapRandom(parseInt(nx), parseInt(ny), _rMapId);
+                    const _mType = _vrm < 0.55 ? 'merchant' : (_vrm < 0.78 ? 'man' : (_vrm < 0.92 ? 'elder' : 'townWoman'));
+                    if (!drawAnimatedNpcSprite(ctx, _mType, npc.id, px, py, 48)) { if(externalImages['itemShop']) drawSpriteLocal(ctx, externalImages['itemShop'], px, py, 48); }
+                }
                 else if(_nn_fb.includes('踊り子') || _nn_fb.includes('令嬢') || _nn_fb.includes('主婦') || (_nn_fb.includes('女') && !_nn_fb.includes('女神') && !_nn_fb.includes('女性')) || _nn_fb.includes('奥さん') || _nn_fb.includes('娘')) { if (!drawAnimatedNpcSprite(ctx, 'townWoman', npc.id, px, py, 48)) { if(externalImages['innGirl']) drawSpriteLocal(ctx, externalImages['innGirl'], px, py, 48); } }
                 else if (!drawAnimatedNpcSprite(ctx, 'man', npc.id, px, py, 48)) { if(externalImages['oldMan']) { drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); } }
             }
@@ -14564,30 +14569,9 @@ async function showTitleScreen() {
                 else if (ky === 0 && ev.y === th - 2) ev.y = th - 1;
             }
         }
-        // 街道の道標: 町・村の入口そばのフィールドタイルに設置(中世風の世界観演出)
-        const _signpostSpots = [
-            ['map_field_5_0', 26, 29],
-            ['map_field_2_1', 22, 31],
-            ['map_field_4_1', 26, 21],
-            ['map_field_6_1', 22, 23],
-            ['map_field_2_2', 23, 24],
-            ['map_field_4_2', 9, 15],
-            ['map_field_8_2', 3, 4],
-            ['map_field_0_3', 22, 29],
-            ['map_field_1_3', 25, 23],
-            ['map_field_0_4', 14, 31],
-            ['map_field_7_5', 37, 8],
-            ['map_field_1_6', 4, 39],
-            ['map_field_4_6', 18, 27],
-            ['map_field_0_7', 22, 23],
-        ];
-        _signpostSpots.forEach(([_spMapId, _spx, _spy]) => {
-            const _spm = externalMapData[_spMapId];
-            if (!_spm || !_spm.npcs) return;
-            const _spKey = `${_spx},${_spy}`;
-            if (_spm.npcs[_spKey] || (_spm.exits && _spm.exits[_spKey])) return;
-            _spm.npcs[_spKey] = { id: 'obj_deco_signpost', name: '道標' };
-        });
+        // 街道の道標: 町・村の入口付近への設置は、入口周辺の通行帯を塞いで
+        // 移動不能を起こす個体があったため撤去(2026-09-06)。再導入する場合は
+        // 入口から十分離れた安全なタイルであることをBFSで検証してから行うこと。
     }
     _loadPct = 60;
     await loadExternalGrowthDatabase("https://www.gravity.place/share/ugcGame?id=38430");
@@ -14637,7 +14621,7 @@ async function showTitleScreen() {
             await typeMessage(`エニシアの 城下町に 戻った ${_hero}。\nボルド王が「境界の 使者」を 選ぶという 知らせが 届いた……`);
             await typeMessage(`────── だが この旅の 果てに\n${_hero}を 待つのは\n世界を もう一度 繋ぎ直す、長い 長い 道のりだった ──────`);
             _screen.style.transition = ''; _screen.style.opacity = '1';
-            hideAllWindows(); state = 'FIELD'; drawMap(); updateBGM(); updatePartyStatus(); updateGoldWindow();
+            hideAllWindows(); state = 'FIELD'; drawMap(); updateBGM(); updatePartyStatus(); updateGoldWindow(); startFieldLoop();
             return;
         }
         else if(choiceStr === 'ぼうけんのしょ') {
