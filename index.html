@@ -2057,10 +2057,10 @@ const SHEET_COLS = 30; const SHEET_ROWS = 16; const TILE_IMG_MAP = { 3: { cx: 23
 
 function getMapRandom(x, y, mapId) { const _k = x + '|' + y + '|' + (mapId||''); if (_gmrCache[_k] !== undefined) return _gmrCache[_k]; if (_gmrCacheSize > 8000) { const _ks = Object.keys(_gmrCache); for (let _i = 0; _i < 4000; _i++) delete _gmrCache[_ks[_i]]; _gmrCacheSize = Math.max(0, _gmrCacheSize - 4000); } let seed = 0; let mStr = mapId || ""; for(let i=0; i<mStr.length; i++) seed += mStr.charCodeAt(i); _gmrCacheSize++; return (_gmrCache[_k] = Math.abs(Math.sin(x * 12.9898 + y * 78.233 + seed) * 43758.5453) % 1); }
 function getMapDisplayName(mapId, mapObj) { if (mapObj && mapObj.name) return mapObj.name; if (!mapId) return "フィールド";
-    if (mapId.includes('castle_zarmo')) return "北東の古城ザーモ";
-    if (mapId.includes('castle_estoria')) return "東の王国城エストリア";
-    if (mapId.includes('castle_deserta')) return "南の砂漠城デセルタ";
-    if (mapId.includes('castle_north')) return "北の廃城";
+    if (mapId.includes('castle_zarmo')) return "ザーモの氷墓";
+    if (mapId.includes('castle_estoria')) return "木宮エストリア";
+    if (mapId.includes('castle_deserta')) return "炎陽城デセルタ";
+    if (mapId.includes('castle_north')) return "氷結城ノルド（廃都）";
     if (mapId.includes('town_nord')) return "冒険者の港ノルド";
     if (mapId.includes('town_rosalia')) return "花の街ロザリーヒル";
     if (mapId.includes('town_coral')) return "海峡の街コーラル";
@@ -3766,7 +3766,7 @@ function buildNorthAbandonedCastle() {
         "4,15":  {"id":"obj_deco_banner",        "name":""},
         "26,15": {"id":"obj_deco_banner",        "name":""}
     };
-    return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:"北の廃城"};
+    return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:"氷結城ノルド（廃都）"};
 }
 function buildEstoriaCastle() {
     const W=20,H=18;
@@ -3781,7 +3781,7 @@ function buildEstoriaCastle() {
     S(9,16,22);S(10,16,22);
     const exits={'9,16':{map:'map_field_8_4',x:22,y:23},'10,16':{map:'map_field_8_4',x:22,y:23}};
     const npcs={'9,2':{id:'npc_estoria_king',name:'エストリア王'},'3,9':{id:'npc_estoria_knight',name:'近衛騎士'},'16,9':{id:'npc_estoria_herald',name:'伝令の使者'},'9,9':{id:'npc_estoria_queen',name:'王妃'},'3,3':{id:'npc_priest',name:'神父'},'16,3':{id:'npc_estoria_sage',name:'宮廷賢者'},'6,4':{id:'obj_deco_banner',name:''},'13,4':{id:'obj_deco_banner',name:''}};
-    return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'東の王国城エストリア'};
+    return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'木宮エストリア'};
 }
 function buildDesertaCastle() {
     const W=18,H=16;
@@ -3795,7 +3795,7 @@ function buildDesertaCastle() {
     S(8,14,22);S(9,14,22);
     const exits={'8,14':{map:'map_field_3_7',x:22,y:23},'9,14':{map:'map_field_3_7',x:22,y:23}};
     const npcs={'8,2':{id:'npc_deserta_king',name:'デセルタ王'},'3,8':{id:'npc_deserta_oracle',name:'砂漠の預言者'},'14,8':{id:'npc_deserta_soldier',name:'砂漠の衛兵'},'3,3':{id:'npc_priest',name:'神父'},'12,8':{id:'obj_chest_deserta_seal',name:'砂漠の宝箱'},'5,4':{id:'obj_deco_banner',name:''},'12,2':{id:'obj_deco_banner',name:''}};
-    return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'南の砂漠城デセルタ'};
+    return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'炎陽城デセルタ'};
 }
 function buildShrineWarp() {
     // 入口の間(x=1-10)＋奥の祭壇の間(x=12-20)の2部屋構成。
@@ -3894,7 +3894,7 @@ function buildZarmoCastle() {
         "7,2":   {id: "obj_deco_banner",       name: ""},
         "14,2":  {id: "obj_deco_banner",       name: ""}
     };
-    return {width: W, height: H, tiles: t, exits, npcs, encounters: [], name: "北東の古城ザーモ"};
+    return {width: W, height: H, tiles: t, exits, npcs, encounters: [], name: "ザーモの氷墓"};
 }
 function generateFieldMapsForGravityQuest() {
     // ワールドグリッド: 405x405タイル (9x9 x 45x45)
@@ -11538,7 +11538,7 @@ async function checkAction() {
             if (npc.id === "npc_zarmo_king_spirit") {
                 if (!getSQ('sq_11')) {
                     startSQ('sq_11');
-                    await typeMessage("【ザーモ王の霊】\nよくぞ……来てくれた……\nこの 城は 数百年前……\n暗黒公リッチに 乗っ取られた……");
+                    await typeMessage("【ザーモ王の霊】\nよくぞ……来てくれた……\nここは 水の国ノルドの 分家、ザーモ。\nこの 城は 数百年前……\n暗黒公リッチに 乗っ取られた……");
                     await typeMessage("【ザーモ王の霊】\n地下に 封印の鍵が 眠っている……\nリッチを 倒し……この 城を\n解放してくれ……！\n（ふしぎな台帳に 記録された）");
                 } else if (getSQ('sq_11') === 1) {
                     await typeMessage("【ザーモ王の霊】\n地下に 封印の鍵が あるはずだ……\nリッチに 気をつけてくれ……！");
@@ -11604,16 +11604,17 @@ async function checkAction() {
             if (npc.id === "npc_estoria_king") {
                 if (!getSQ('sq_12')) {
                     startSQ('sq_12');
-                    await typeMessage("【エストリア王】\nよくぞ 東の王国 エストリアへ。\n余は 真の 覇者を 探しておる。\n東の 地下迷宮と 魔法使いの塔……\nこの 二つを 制した 者こそ\n真の 覇者と 認めよう！\n（ふしぎな台帳に 記録された）");
+                    await typeMessage("【エストリア王】\nよくぞ 木の国 エストリアへ。\n我らは 長らく 西の 金の国カガネの 斧を\n恐れて 国境を 固めてきた……\nだが お前のような 者になら\n王国を 託せるやもしれぬ。");
+                    await typeMessage("【エストリア王】\n余は 真の 覇者を 探しておる。\n東の 地下迷宮と 魔法使いの塔……\nこの 二つを 制した 者こそ\n真の 覇者と 認めよう！\n（ふしぎな台帳に 記録された）");
                 } else if (getSQ('sq_12') === 1) {
                     await typeMessage("【エストリア王】\n東の 地下迷宮と 魔法使いの塔を\n制してくるのじゃ。\n両方を 制した 者にのみ……\n王国の 全権を 与えよう。");
                 } else if (getSQ('sq_12') === 3 && !isSQDone('sq_12')) {
-                    await typeMessage("【エストリア王】\nなんと……両方を 制したか！！\n真の 覇者よ……！");
+                    await typeMessage("【エストリア王】\nなんと……両方を 制したか！！\nもはや 覇者の 力ではなく、\nお前の 人柄こそを 信じよう……！");
                     advanceSQ('sq_12', 4);
                     await grantSQReward('sq_12');
-                    await typeMessage("【エストリア王】\nエストリアの 覇剣を 授けよう。\nこれは 王国 最強の 剣じゃ……\nよく ぞ やり遂げた！\n（「エストリアの覇者」達成！）");
+                    await typeMessage("【エストリア王】\nエストリアの 剣を 授けよう。\nこれは 王国が 心から 信頼する 者にのみ\n渡す 剣じゃ……\nよく ぞ やり遂げた！\n（「エストリアが託す信頼」達成！）");
                 } else if (isSQDone('sq_12')) {
-                    await typeMessage("【エストリア王】\n覇者よ……これからも\nエストリア王国を よろしく 頼む！");
+                    await typeMessage("【エストリア王】\n信頼する 者よ……これからも\nエストリア王国を よろしく 頼む！");
                 } else {
                     await typeMessage("【エストリア王】\n……まだ 両方は 制してないな。\n地下迷宮と 魔法の塔……\n頑張って くれ！");
                 }
@@ -11628,7 +11629,7 @@ async function checkAction() {
             if (npc.id === "npc_deserta_king") {
                 if (!getSQ('sq_13')) {
                     startSQ('sq_13');
-                    await typeMessage("【デセルタ王】\nようこそ 砂漠の王国 デセルタへ。\nこの 国は 古より 砂嵐の 呪いに\n苦しんでいる……。");
+                    await typeMessage("【デセルタ王】\nようこそ 炎の国 デセルタへ。\nこの 国は 古より 砂嵐の 呪いと\n渇きに 苦しんでいる……。\n北の 水の国ノルドを 頼れぬまま\n長い 年月が 過ぎた。");
                     await typeMessage("【デセルタ王】\n砂漠の 遺跡に ミイラ王が 眠り\n封印の 宝箱を 守っている……\nミイラ王を 倒し 封印を 解いてくれ！\n（ふしぎな台帳に 記録された）");
                 } else if (getSQ('sq_13') === 2 && !isSQDone('sq_13')) {
                     await typeMessage("【デセルタ王】\nミイラ王を 倒したか……！\n次は 預言者から 封印の印を 受け取り\n砂漠の 封印を 完成させてくれ。");
@@ -11636,9 +11637,9 @@ async function checkAction() {
                     await typeMessage("【デセルタ王】\n印を 手に入れたか！\nいよいよ 封印を 完成させる 時が 来た！");
                     advanceSQ('sq_13', 4);
                     await grantSQReward('sq_13');
-                    await typeMessage("【デセルタ王】\n砂嵐が……消えていく……！\nよく やってくれた 勇者よ！\n賢者の 法衣を 受け取ってくれ。\n（「砂漠の封印」達成！）");
+                    await typeMessage("【デセルタ王】\n砂嵐が……消えていく……！\n長年の 渇きが 癒される……\nよく やってくれた 使者よ！\n賢者の 法衣を 受け取ってくれ。\n（「デセルタの渇きを癒す封印」達成！）");
                 } else if (isSQDone('sq_13')) {
-                    await typeMessage("【デセルタ王】\n砂嵐が 消えて……\nデセルタに 平和が 戻った。\nありがとう 勇者よ！");
+                    await typeMessage("【デセルタ王】\n砂嵐が 消えて……\nデセルタに 慈雨のような 平和が 戻った。\nありがとう 使者よ！");
                 } else {
                     await typeMessage("【デセルタ王】\nようこそ デセルタへ。\n砂漠の 遺跡で ミイラ王を 倒してくれ。");
                 }
