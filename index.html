@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>GRAVITY QUEST (全力の一撃 実装版)</title>
+<title>GRAVITY QUEST v2.0 -旅の絆-</title>
 <!-- マップエディタ上書きファイル。editor.html で「index.htmlに書き出す」で生成 -->
 <script src="maps_override.js"></script>
 <style>
@@ -45,6 +45,7 @@
     @keyframes effScreenFlash { 0% { opacity: 0; } 20% { opacity: 0.4; } 100% { opacity: 0; } }
     .eff-float-up { animation: effFloatUp ease-out forwards; } .eff-burst { animation: effBurst ease-out forwards; } .eff-shatter { animation: effShatter ease-in forwards; } .eff-slash { animation: effSlash linear forwards; } .eff-flash { animation: effFlash linear forwards; } .eff-aura { animation: effAura ease-out forwards; } .eff-screen-flash { animation: effScreenFlash ease-out forwards; animation-duration: 500ms !important; }
     #title-menu-box { border: 2px solid #fff; padding: 10px; border-radius: 4px; background: rgba(0,0,0,0.8); font-size: 16px; max-width: 90%; }
+    #title-version { color: #ffe066; font-size: 11px; letter-spacing: 2px; margin-bottom: 8px; text-shadow: 0 0 4px rgba(0,0,0,0.9); }
     .blink { animation: blink 1s step-end infinite; } @keyframes blink { 50% { opacity: 0; } }
     #gamepad { width: 100%; max-width: 500px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 6px 10px 14px 10px; box-sizing: border-box; }
     .dpad { display: grid; grid-template-columns: 52px 52px 52px; grid-template-rows: 52px 52px 52px; gap: 5px; }
@@ -773,7 +774,7 @@ window.SOUND_DATABASE = {
     <div id="loading-overlay"><div class="lo-title">GRAVITY QUEST</div><div id="loading-text"></div></div>
     <div id="game-container">
         <canvas id="screen"></canvas>
-        <div id="title-screen"><div id="title-menu-box"></div></div>
+        <div id="title-screen"><div id="title-version">v2.0 -旅の絆-</div><div id="title-menu-box"></div></div>
         <div id="battle-screen" style="display:none;"><div id="enemies-area"></div></div>
         <div id="global-effect-layer"></div>
         <div id="party-status" class="window"></div>
@@ -7942,9 +7943,20 @@ function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
             // 汚れ（たまに）
             if (rand < 0.08) fr('rgba(0,0,0,0.15)', fl(rand*16)+2, fl(rand*16)+2, 3, 2);
         } else if (castle || tower || shrine) {
+            // 石床 DQ4スタイル: 市松タイル + 目地 + 微細テクスチャ + 上面ハイライト
             let ev = (fl(px / T) + fl(py / T)) % 2;
             fr(ev ? '#8898a8' : '#9aaabe', 0, 0, T, T);
             ctx.strokeStyle = 'rgba(60,80,100,0.35)'; ctx.lineWidth = 0.7; ctx.strokeRect(px + 1, py + 1, T - 2, T - 2);
+            // 石目の微細テクスチャ（明暗の斑点）
+            ctx.fillStyle = 'rgba(255,255,255,0.10)';
+            for (let di = 0; di < 4; di++) ctx.fillRect(px + fl((rand * 9.7 + di * 7.3) % (T - 2)) + 1, py + fl((rand * 7.1 + di * 6.1) % (T - 2)) + 1, 2, 1);
+            ctx.fillStyle = 'rgba(20,30,40,0.14)';
+            for (let di = 0; di < 4; di++) ctx.fillRect(px + fl((rand * 8.3 + di * 6.7) % (T - 2)) + 1, py + fl((rand * 6.9 + di * 5.3) % (T - 2)) + 1, 2, 1);
+            // 上からの採光を感じさせるベベル（上端明・下端暗）
+            ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(px + 1, py + 1, T - 2, 1);
+            ctx.fillStyle = 'rgba(0,0,0,0.14)'; ctx.fillRect(px + 1, py + T - 2, T - 2, 1);
+            // まれに石のひび（経年感）
+            if (rand > 0.93) { ctx.strokeStyle = 'rgba(30,40,50,0.3)'; ctx.lineWidth = 0.6; ctx.beginPath(); ctx.moveTo(px + fl(rand * 10) + 6, py + fl(rand * 8) + 6); ctx.lineTo(px + fl(rand * 10) + 16, py + fl(rand * 10) + 14); ctx.stroke(); }
         } else if (demon) {
             fr('#271230', 0, 0, T, T); fr('#311838', 4, 4, T - 8, T - 8);
             if (rand < 0.07) { ln('#7722bb', 1, fl(rand * T), 0, fl((1 - rand) * T), T); ctx.strokeStyle = 'rgba(100,20,180,0.22)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(px + fl(rand * T), py); ctx.lineTo(px + fl((1 - rand) * T), py + T); ctx.stroke(); }
@@ -10031,12 +10043,12 @@ async function checkAction() {
                 ];
                 // 賢者3: 世界の謎・伏線
                 const _adv3 = [
-                    "【宮廷賢者③】\nこの 王国には 古くから 伝わる 言葉がある。\n「選ばれし 者のみが 世界を 変える」……\nじゃが 世界を 変えるのは 本当に「選ばれた者」だけか？\nわしには 分からなくなってきた……。",
+                    "【宮廷賢者③】\nこの 王国には 古くから 伝わる 言葉がある。\n「境界を 越えた 者のみが 世界を 変える」……\nじゃが 世界を 変えるのは 本当に「選ばれた者」だけか？\nわしには 分からなくなってきた……。",
                     "【宮廷賢者③】\n各地には 聖なる 祠がある。\n転職や 情報収集に 役立てるのじゃ。\n旅の 中で 立ち寄れば 必ず 助けに なるぞ。",
-                    "【宮廷賢者③】\nこの 世界の 闇は 一体 どこから 来たのか……\n古い 文献を 読めば 読むほど\n不思議な 点が 増えていく。\n旅の 途中で その 答えが 分かるかもしれんぞ。",
-                    "【宮廷賢者③】\n王国の 歴史は 百年前に 一度 大きく 変わった。\nその 前後で 何が 起きたのか……\nラムダスという 大魔導士が 知っているらしい。\nいずれ 出会う 機会が あるじゃろう。",
-                    "【宮廷賢者③】\n魔王城の 奥に 何が 待つかは 誰も 知らない。\n……いや、一人だけ 知っておる 者がいるかもしれぬが。\n真実を 見つけるのは お前たちじゃ。",
-                    "【宮廷賢者③】\nお前たちは 伝説を 作った。\nじゃが その 伝説は まだ 続く……\nこの 世界に 残された 謎を\n自分の 足で 解き 明かすのじゃ。"
+                    "【宮廷賢者③】\nこの 世界を 隔てる「壁」は 一体 いつから あったのか……\n古い 文献を 読めば 読むほど\n『元は ひとつの 世界だった』という 記述が 増えていく。\n旅の 途中で その 答えが 分かるかもしれんぞ。",
+                    "【宮廷賢者③】\n王国の 国境は 百年前に 一度 固く 閉ざされた。\nその 前後で 何が 起きたのか……\n海の 向こうを 知る 者だけが\n本当のことを 知っているらしい。\nいずれ 出会う 機会が あるじゃろう。",
+                    "【宮廷賢者③】\n分断の 果てに 何が 待つかは 誰も 知らない。\n……いや、一人だけ 知っておる 者が いるかもしれぬが。\n真実を 見つけるのは お前たちじゃ。",
+                    "【宮廷賢者③】\nお前たちは 世界を 繋ぎ直す 旅を 成し遂げた。\nじゃが その 旅は まだ 続く……\n断たれた 絆を 自分の 足で\n結び 直すのじゃ。"
                 ];
                 const _safeIdx = Math.min(_advSt, 5);
                 const _advMsg = _hi === '1' ? _adv1[_safeIdx] : (_hi === '2' ? _adv2[_safeIdx] : _adv3[_safeIdx]);
@@ -14288,13 +14300,13 @@ async function showTitleScreen() {
             await new Promise(r => setTimeout(r, 200));
             _screen.style.transition = 'opacity 1.2s'; _screen.style.opacity = '1';
             await new Promise(r => setTimeout(r, 1000));
-            await typeMessage("────── グラマニア王国 ──────");
-            await typeMessage("国王グラードの 元、民は 穏やかに 暮らしていた。\n誰も 不満を 口に しなかった。\nただ……ひとつだけ 奇妙な ことが あった。");
-            await typeMessage("この国では 時折、「選ばれし 者」が\n王の もとへ 召集される。\n王は 彼らを「希望の 勇者」と 呼び\n世界へと 旅立たせた。\nしかし……その者たちは\n誰一人 帰ってこなかった。");
-            await typeMessage(`${_hero}も そんな「選ばれし 者」の ひとりだった。\n旅立ちの 前夜……\n幼い頃から 知る 古兵が 小声で 囁いた。\n「……気をつけろ。 あの 王の 目は\n信じた 者の 目じゃない」`);
-            await typeMessage(`「いつか 必ず 真実を 確かめる。\n────── それが わたしの 誓いだ。」`);
-            await typeMessage(`グラマニアの 城下町に 戻った ${_hero}。\n国王グラードが 召集の 知らせを 出したという……`);
-            await typeMessage(`────── だが この旅の 果てに\n${_hero}を 待つのは\n誰も 知らない 残酷な 真実だった ──────`);
+            await typeMessage("────── エニシア王国 ──────");
+            await typeMessage("ボルド王の 治める この国は、高い 城壁と 閉ざされた 国境に 守られ、平穏だった。\n誰も 争いを 望まなかった。\nただ……ひとつだけ 誰も 口に しない ことが あった。");
+            await typeMessage("国境の 外へ 出た 者は、二度と 戻らない。\n何百年も 前、世界は 一つに 繋がっていたと いう。\nだが 大いなる「分断」が 世界を 引き裂いて 以来\n隣国は 敵、外は 死の 世界だと 教えられてきた。");
+            await typeMessage(`${_hero}は 国境の 見張り台の そばで 育った 若者だった。\n旅立ちの 前夜……\n幼い頃から 世話に なった 老いた 門番が 小声で 囁いた。\n「……本当は 見た ことが あるんじゃ。\n壁の 向こうにも、同じように 笑う 人々が いるのを」`);
+            await typeMessage(`「いつか この目で 確かめる。\n────── 壁の 向こうに 何が あるのかを。」`);
+            await typeMessage(`エニシアの 城下町に 戻った ${_hero}。\nボルド王が「境界の 使者」を 選ぶという 知らせが 届いた……`);
+            await typeMessage(`────── だが この旅の 果てに\n${_hero}を 待つのは\n世界を もう一度 繋ぎ直す、長い 長い 道のりだった ──────`);
             _screen.style.transition = ''; _screen.style.opacity = '1';
             hideAllWindows(); state = 'FIELD'; drawMap(); updateBGM(); updatePartyStatus(); updateGoldWindow();
             return;
