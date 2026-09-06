@@ -7987,7 +7987,18 @@ function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
             fr('#271230', 0, 0, T, T); fr('#311838', 4, 4, T - 8, T - 8);
             if (rand < 0.07) { ln('#7722bb', 1, fl(rand * T), 0, fl((1 - rand) * T), T); ctx.strokeStyle = 'rgba(100,20,180,0.22)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(px + fl(rand * T), py); ctx.lineTo(px + fl((1 - rand) * T), py + T); ctx.stroke(); }
         } else if (cave) {
-            fr('#373340', 0, 0, T, T); fr('#413d4c', 3, 3, T - 6, T - 6);
+            // 洞窟床 DQ4スタイル: 岩肌の粒状テクスチャ + 苔 + ひび割れ
+            const _cfBase = rand<0.33?'#373340':rand>0.67?'#3f3b4a':'#3a3644';
+            fr(_cfBase, 0, 0, T, T); fr('#413d4c', 3, 3, T - 6, T - 6);
+            ctx.fillStyle='rgba(0,0,0,0.28)';
+            for(let di=0;di<10;di++) ctx.fillRect(px+fl((rand*11+di*3.4)%(T-2))+1,py+fl((rand*9+di*2.7)%(T-2))+1,fl(rand*2)+1,fl(rand*2)+1);
+            ctx.fillStyle='rgba(150,140,160,0.16)';
+            for(let di=0;di<6;di++) ctx.fillRect(px+fl((rand*8+di*4.6)%(T-2))+1,py+fl((rand*6+di*3.8)%(T-2))+1,2,1);
+            if(rand<0.35){
+                ctx.fillStyle='rgba(60,110,40,0.32)';
+                for(let mi=0;mi<3;mi++) ctx.fillRect(px+fl((rand*13+mi*7.1)%(T-4))+2,py+fl((rand*10+mi*5.3)%(T-4))+2,fl(rand*3)+2,fl(rand*2)+1);
+            }
+            if (rand > 0.9) { ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 0.7; ctx.beginPath(); ctx.moveTo(px + fl(rand * 10) + 6, py + fl(rand * 8) + 6); ctx.lineTo(px + fl(rand * 10) + 16, py + fl(rand * 10) + 14); ctx.stroke(); }
             if (rand < 0.08) fr('rgba(0,0,0,0.35)', fl(rand * (T - 8)) + 2, fl(rand * (T - 6)) + 2, fl(rand * 4) + 4, fl(rand * 2) + 3);
         } else {
             // Field sand/desert (DQ3 style)
@@ -8052,7 +8063,14 @@ function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
                 lights.push({ x: px + 16, y: py + 6, radius: 44 + rand * 14, color: 'rgba(160,30,220,0.23)' });
             }
         } else if (cave) {
-            fr('#201e2c', 0, 0, T, T); fr('#2a2835', 1, 0, T - 2, 5); fr('#1a1826', 1, 5, T - 2, T - 6);
+            const _cwBase = rand<0.4?'#201e2c':'#241f30';
+            fr(_cwBase, 0, 0, T, T); fr('#2a2835', 1, 0, T - 2, 5); fr('#1a1826', 1, 5, T - 2, T - 6);
+            ctx.fillStyle='rgba(0,0,0,0.25)';
+            for(let di=0;di<6;di++) ctx.fillRect(px+fl((rand*10+di*4.2)%(T-4))+2,py+fl((rand*11+di*3.6)%(T-4))+6,fl(rand*3)+2,fl(rand*2)+2);
+            if(rand>0.85 && rand<0.9){
+                ctx.strokeStyle='rgba(150,180,255,0.22)'; ctx.lineWidth=1;
+                ctx.beginPath(); ctx.moveTo(px+fl(rand*8)+4, py+fl(rand*6)+8); ctx.lineTo(px+fl(rand*8)+18, py+fl(rand*10)+16); ctx.stroke();
+            }
             if (rand < 0.22) fr('#343042', fl(rand * 14) + 2, fl(rand * 8) + 4, fl(rand * 4) + 4, fl(rand * 3) + 3);
             if (rand < 0.09) {
                 fr('#302', 12, 10, 8, 14); fr('#100', 10, 8, 12, 4);
@@ -8190,7 +8208,7 @@ function drawMap() {
     if (!_cachedCanvas || !_cachedCanvas.isConnected) { _cachedCanvas = document.getElementById('screen'); _cachedCtx = _cachedCanvas.getContext('2d', {alpha:false}); } const canvas = _cachedCanvas; const ctx = _cachedCtx; const cWidth = canvas.width; const cHeight = canvas.height; ctx.clearRect(0, 0, cWidth, cHeight); ctx.fillStyle='#0a0812'; ctx.fillRect(0,0,cWidth,cHeight);
     const camX = partyData.pos.x * TILE_SIZE - cWidth/2 + TILE_SIZE/2; const camY = partyData.pos.y * TILE_SIZE - Math.floor(cHeight * 0.3) + TILE_SIZE/2;
     const _mapId = partyData.pos.map;
-    const isCastle = _mapId.includes('castle') || _mapId.includes('gramani') || _mapId.includes('grakue') || _mapId.includes('palace'); const isTown = _mapId.includes('town') || _mapId.includes('market') || _mapId.includes('village'); const isCave = _mapId.includes('dungeon') || _mapId.includes('cave'); const isMountain = _mapId === 'map_field_north_2';
+    const isCastle = _mapId.includes('castle') || _mapId.includes('gramani') || _mapId.includes('grakue') || _mapId.includes('palace'); const isTown = _mapId.includes('town') || _mapId.includes('market') || _mapId.includes('village'); const isCave = _mapId.includes('dungeon') || _mapId.includes('cave') || _mapId.includes('ruin') || _mapId.includes('fortress') || _mapId.includes('abyss'); const isMountain = _mapId === 'map_field_north_2';
     // 偽王討伐編: 城下町・グラマニア城を魔王城スタイルで描画
     const _is2ndDarkMap = false; // 2周目暗黒化廃止（1周目完結）
     const _isDemon = _mapId.includes('demon') || _is2ndDarkMap; const _isTower = _mapId.includes('tower'); const _isShrine = _mapId.includes('shrine');
@@ -8471,6 +8489,8 @@ function drawMap() {
                     'obj_deco_rug_red':     { key:'decoRugRed',     iw:_T*2,  ih:_T,      xOff:-_T*0.5,  yOff:0       },
                     'obj_deco_rug_blue':    { key:'decoRugBlue',    iw:_T*2,  ih:_T,      xOff:-_T*0.5,  yOff:0       },
                     'obj_deco_fireplace':   { key:'decoFireplace',  iw:_T*1.5,ih:_T*1.5,  xOff:-_T*0.25, yOff:-_T*0.5 },
+                    'obj_deco_bones':       { key:'decoBones',      iw:_T*1.1,ih:_T*0.55, xOff:-_T*0.05, yOff:_T*0.45 },
+                    'obj_deco_rune_circle': { key:'decoRuneCircle', iw:_T*1.3,ih:_T*0.5,  xOff:-_T*0.15, yOff:_T*0.5  },
                 };
                 const _decoInfo = _decoMap[npc.id];
                 if (_decoInfo) {
@@ -8598,6 +8618,46 @@ function drawMap() {
                         ctx.font=`${Math.floor(T*0.28)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
                         const _signIcon = npc.id.includes('inn') ? '🛏' : npc.id.includes('potion') ? '🧪' : '⚔';
                         ctx.fillText(_signIcon,_sx2+T*0.26,_topY2+T*0.3);
+                        ctx.restore();
+                    } else if(npc.id==='obj_deco_bones') {
+                        // 朽ちた骨(頭蓋骨＋骨片) — ダンジョンの床に散らばる残骸
+                        const T=_T,_bx3=px+T*0.5,_by3=py+T*0.72;
+                        ctx.save();
+                        ctx.fillStyle='rgba(0,0,0,0.22)';ctx.beginPath();ctx.ellipse(_bx3,py+T*0.9,T*0.32,T*0.08,0,0,Math.PI*2);ctx.fill();
+                        // 長骨2本(交差)
+                        ctx.strokeStyle='#d8cfae';ctx.lineWidth=3.2;ctx.lineCap='round';
+                        ctx.beginPath();ctx.moveTo(_bx3-T*0.28,_by3+T*0.1);ctx.lineTo(_bx3+T*0.05,_by3-T*0.14);ctx.stroke();
+                        ctx.beginPath();ctx.moveTo(_bx3-T*0.05,_by3+T*0.12);ctx.lineTo(_bx3+T*0.3,_by3-T*0.1);ctx.stroke();
+                        ctx.fillStyle='#e8e0c8';
+                        [[-T*0.28,T*0.1],[T*0.05,-T*0.14],[-T*0.05,T*0.12],[T*0.3,-T*0.1]].forEach(([ox,oy])=>{ctx.beginPath();ctx.arc(_bx3+ox,_by3+oy,2.6,0,Math.PI*2);ctx.fill();});
+                        // 頭蓋骨
+                        const _skx=_bx3-T*0.02,_sky=_by3-T*0.05;
+                        ctx.fillStyle='#e8e2c8';ctx.beginPath();ctx.ellipse(_skx,_sky,T*0.16,T*0.14,0,0,Math.PI*2);ctx.fill();
+                        ctx.fillStyle='#d8d0b0';ctx.beginPath();ctx.ellipse(_skx,_sky+T*0.1,T*0.09,T*0.06,0,0,Math.PI*2);ctx.fill();
+                        ctx.fillStyle='#2a2620';ctx.beginPath();ctx.ellipse(_skx-T*0.06,_sky-T*0.01,T*0.035,T*0.045,0,0,Math.PI*2);ctx.fill();
+                        ctx.beginPath();ctx.ellipse(_skx+T*0.06,_sky-T*0.01,T*0.035,T*0.045,0,0,Math.PI*2);ctx.fill();
+                        ctx.fillStyle='#1a1712';ctx.beginPath();ctx.moveTo(_skx-T*0.02,_sky+T*0.06);ctx.lineTo(_skx+T*0.02,_sky+T*0.06);ctx.lineTo(_skx,_sky+T*0.11);ctx.closePath();ctx.fill();
+                        ctx.restore();
+                    } else if(npc.id==='obj_deco_rune_circle') {
+                        // 光るルーン円陣 — 回転する魔法陣(2025年風グロー演出)
+                        const T=_T,_rcx=px+T*0.5,_rcy=py+T*0.82,_rt=Date.now()/1000;
+                        ctx.save();
+                        const _pulse=0.65+Math.sin(_rt*1.6)*0.25;
+                        const _rg=ctx.createRadialGradient(_rcx,_rcy,0,_rcx,_rcy,T*0.62);
+                        _rg.addColorStop(0,`rgba(140,110,255,${0.30*_pulse})`);_rg.addColorStop(1,'rgba(90,60,200,0)');
+                        ctx.fillStyle=_rg;ctx.beginPath();ctx.ellipse(_rcx,_rcy,T*0.62,T*0.22,0,0,Math.PI*2);ctx.fill();
+                        ctx.strokeStyle=`rgba(170,140,255,${0.85*_pulse})`;ctx.lineWidth=1.4;
+                        ctx.shadowColor='#a888ff';ctx.shadowBlur=6;
+                        ctx.beginPath();ctx.ellipse(_rcx,_rcy,T*0.42,T*0.15,0,0,Math.PI*2);ctx.stroke();
+                        ctx.beginPath();ctx.ellipse(_rcx,_rcy,T*0.28,T*0.1,0,0,Math.PI*2);ctx.stroke();
+                        // 円周上のルーン記号(回転)
+                        for(let ri=0;ri<6;ri++){
+                            const _ang=_rt*0.7+ri*Math.PI/3;
+                            const _rx=_rcx+Math.cos(_ang)*T*0.42,_ry=_rcy+Math.sin(_ang)*T*0.15;
+                            ctx.fillStyle=`rgba(200,180,255,${0.9*_pulse})`;
+                            ctx.beginPath();ctx.arc(_rx,_ry,1.6,0,Math.PI*2);ctx.fill();
+                        }
+                        ctx.shadowBlur=0;
                         ctx.restore();
                     } else {
                         // その他装飾のフォールバック絵文字
