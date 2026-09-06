@@ -7898,7 +7898,7 @@ function getEnemyImageHtml(enemyId) {
 
 function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
     const T = TILE_SIZE;
-    const { castle, town, cave, demon, tower, shrine } = mc;
+    const { castle, town, cave, demon, tower, shrine, smallTown, capitalTown } = mc;
     const fl = Math.floor;
     const fr = (c, rx, ry, rw, rh) => { ctx.fillStyle = c; ctx.fillRect(px + rx, py + ry, rw, rh); };
     const ln = (c, lw, x1, y1, x2, y2) => { ctx.strokeStyle = c; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(px + x1, py + y1); ctx.lineTo(px + x2, py + y2); ctx.stroke(); };
@@ -8146,8 +8146,76 @@ function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
             for (let di = 0; di < 5; di++) ctx.fillRect(px+fl((rand*7.8+di*5.2)%(T-2))+1, py+fl((rand*6.4+di*4.1)%(T-2))+1, 2, 2);
         }
     } else if (tile === 1 || tile === 4) {
-        if (town) {
-            // DQスタイルグレー石壁
+        if (town && smallTown) {
+            // 小規模集落: 丸太の木柵/木造壁
+            fr('#3a2712', 0, 0, T, T); // 目地（暗い茶）
+            const logCols = [0, 6, 12, 18];
+            const logShades = ['#8a5a30','#7d4f28','#916138','#83552c'];
+            for (let li = 0; li < 4; li++) {
+                let lx = logCols[li];
+                let lw = 6;
+                let lc = logShades[(li + fl(rand * 4)) % 4];
+                fr(lc, lx, 0, lw - 1, T);
+                fr('rgba(255,220,160,0.25)', lx, 0, 1, T); // 丸太ハイライト（左）
+                fr('rgba(0,0,0,0.28)', lx + lw - 2, 0, 1, T); // 丸太陰影（右）
+                ctx.fillStyle = 'rgba(60,35,15,0.4)';
+                for (let ny = 3; ny < T; ny += 7) ctx.fillRect(px + lx + 1, py + ny, lw - 3, 1);
+            }
+            // 横の結束材（上下2本）
+            fr('#5c3d1c', 0, 4, T, 3); fr('rgba(0,0,0,0.25)', 0, 6, T, 1);
+            fr('#5c3d1c', 0, T - 9, T, 3); fr('rgba(0,0,0,0.25)', 0, T - 7, T, 1);
+            // 丸太先端の尖り
+            if (rand > 0.5) {
+                ctx.fillStyle = '#241608';
+                for (let li = 0; li < 4; li++) {
+                    let lx = logCols[li];
+                    ctx.beginPath();
+                    ctx.moveTo(px + lx, py + 3); ctx.lineTo(px + lx + 3, py); ctx.lineTo(px + lx + 6, py + 3);
+                    ctx.closePath(); ctx.fill();
+                }
+            }
+            // たまにドアや看板
+            if (rand > 0.88) {
+                fr('#5a3510', T/2 - 5, T - 14, 10, 13);
+                fr('#7a4a20', T/2 - 4, T - 13, 8, 11);
+                fr('#e8c060', T/2 - 1, T - 10, 2, 2);
+            } else if (rand > 0.76) {
+                fr('#3a2008', 4, 8, 24, 2);
+                fr('#c07030', 4, 10, 24, 12);
+                fr('#e8e070', 6, 12, 20, 8);
+                ctx.fillStyle = '#3a1400'; ctx.font = 'bold 5px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('INN', px + T/2, py + 16);
+            }
+        } else if (town && capitalTown) {
+            // 首都: ひときわ重厚な大型切石壁
+            fr('#333333', 0, 0, T, T); // 目地（濃いグレー）
+            let gsc2 = ['#8c8c8c','#80807e','#868482','#787876','#838381'];
+            for (let row = 0; row < 3; row++) {
+                let off = (row % 2) * 12;
+                let by2 = row * fl(T / 3) + 1;
+                let rh = fl(T / 3) - 2;
+                for (let col = -1; col <= 1; col++) {
+                    let bx2 = col * 24 + off;
+                    let x1 = Math.max(0, bx2), x2 = Math.min(T, bx2 + 22);
+                    if (x2 <= x1) continue;
+                    let bc = gsc2[(fl(rand * 4) + row * 2 + col + 8) % 5];
+                    fr(bc, x1, by2, x2 - x1, rh);
+                    fr('rgba(255,255,255,0.2)', x1, by2, x2 - x1, 1);
+                    fr('rgba(0,0,0,0.22)', x1, by2 + rh - 1, x2 - x1, 1);
+                }
+            }
+            // 補強金属帯
+            if (rand > 0.7) { fr('#3a3a3a', 0, T/2 - 2, T, 3); fr('rgba(255,255,255,0.15)', 0, T/2 - 2, T, 1); }
+            // たまに紋章旗、またはドア/看板
+            if (rand > 0.9) {
+                fr('#7a1010', T/2 - 4, 4, 8, 12); fr('#c8a020', T/2 - 4, 4, 8, 2);
+            } else if (rand > 0.8) {
+                fr('#6a3a10', T/2 - 5, T - 14, 10, 13);
+                fr('#8a5020', T/2 - 4, T - 13, 8, 11);
+                fr('#e8c060', T/2 - 1, T - 10, 2, 2);
+            }
+        } else if (town) {
+            // DQスタイルグレー石壁（中規模: 現状維持）
             fr('#404040', 0, 0, T, T); // 目地（暗いグレー）
             let gsc = ['#787878','#6e6e6e','#747474','#666666','#717171'];
             for (let row = 0; row < 4; row++) {
@@ -8346,10 +8414,15 @@ function drawMap() {
     const _mapId = partyData.pos.map;
     const isCastle = _mapId.includes('castle') || _mapId.includes('gramani') || _mapId.includes('grakue') || _mapId.includes('palace'); const isTown = _mapId.includes('town') || _mapId.includes('market') || _mapId.includes('village'); const isCave = _mapId.includes('dungeon') || _mapId.includes('cave') || _mapId.includes('ruin') || _mapId.includes('fortress') || _mapId.includes('abyss'); const isMountain = _mapId === 'map_field_north_2';
     const _isDesertMap = _mapId.includes('desert') || _mapId.includes('oasis') || _mapId.includes('sand');
+    // 都市規模による壁材の違い: 小規模集落は木の柵、首都(城下町グラマニア)は最も重厚な石壁、
+    // それ以外の町は中間の煉瓦壁(既存)のまま。
+    const _SMALL_TOWN_IDS = ['map_fishing_village_nw','map_town_port','map_market_east','map_village_border','map_waypoint_village','map_frontier_village','map_abandoned_house'];
+    const _isSmallTown = isTown && _SMALL_TOWN_IDS.some(k => _mapId.includes(k.replace('map_','')));
+    const _isCapitalTown = isTown && (_mapId.includes('town_01') || _mapId === 'town_01');
     // 偽王討伐編: 城下町・グラマニア城を魔王城スタイルで描画
     const _is2ndDarkMap = false; // 2周目暗黒化廃止（1周目完結）
     const _isDemon = _mapId.includes('demon') || _is2ndDarkMap; const _isTower = _mapId.includes('tower'); const _isShrine = _mapId.includes('shrine') || _mapId.includes('temple') || _mapId.includes('dharma');
-    const _mc = { castle: isCastle && !_isDemon, town: isTown && !_is2ndDarkMap, cave: isCave, demon: _isDemon, tower: _isTower, shrine: _isShrine };
+    const _mc = { castle: isCastle && !_isDemon, town: isTown && !_is2ndDarkMap, cave: isCave, demon: _isDemon, tower: _isTower, shrine: _isShrine, smallTown: _isSmallTown, capitalTown: _isCapitalTown };
     const _drawNow = Date.now();
     let lights = [];
     const _fieldMatch = _mapId && _mapId.match(/^map_field_(\d)_(\d)$/);
@@ -8409,7 +8482,7 @@ function drawMap() {
             let floorKeys = _tileIsCastle ? ['castleFloorGQ', 'castleFloor', 'floor'] : (_tileIsTown ? ['townFloorGQ', 'townFloor', 'floor', 'townPath'] : (isCave ? ['caveFloorGQ', 'caveFloor', 'ground', 'floor'] : (_isTower || _isDemon || _isShrine ? [] : ['fieldGrass', 'grass']))); if(isMountain) floorKeys = ['northMountainFloor', 'mountainFloor', 'plainRock', 'rock']; if(_isDesertMap) floorKeys = ['desertFloorGQ'].concat(floorKeys);
             for(let k of floorKeys) { if(externalImages[k] && externalImages[k].complete && externalImages[k].naturalHeight > 0) { bgImg = externalImages[k]; break; } }
             if (tile === 1 || tile === 4) {
-               let wallKeys = _tileIsCastle ? ['castleWall', 'wall'] : (_tileIsTown ? ['townWall', 'wall', 'brickWall'] : (isCave ? ['caveWall', 'rockWall', 'wall'] : ['plainRock', 'rock', 'mountainWall'])); if(isMountain) wallKeys = ['northMountainWall', 'mountainWall', 'plainRock', 'rock'];
+               let wallKeys = _tileIsCastle ? ['castleWall', 'wall'] : (_tileIsTown ? (_isSmallTown ? ['smallTownWallGQ', 'townWall', 'wall', 'brickWall'] : (_isCapitalTown ? ['capitalTownWallGQ', 'townWall', 'wall', 'brickWall'] : ['townWall', 'wall', 'brickWall'])) : (isCave ? ['caveWall', 'rockWall', 'wall'] : ['plainRock', 'rock', 'mountainWall'])); if(isMountain) wallKeys = ['northMountainWall', 'mountainWall', 'plainRock', 'rock'];
                bgImg = null; for(let k of wallKeys) { if(externalImages[k] && externalImages[k].complete && externalImages[k].naturalHeight > 0) { bgImg = externalImages[k]; break; } } if (tile === 1 && _tileIsCastle) color = '#555';
             } else if (tile === 2) { let k = externalImages['townCounter'] ? 'townCounter' : 'counter'; if(externalImages[k]) fgImg = externalImages[k]; else { bgImg = null; color = '#3366ff'; } 
             } else if (tile === 3 || tile === 6 || tile === 7 || tile === 8) { bgImg = null; if (tile === 3) color = '#cccc00'; if (tile === 6 || tile === 7) color = '#800080'; if (tile === 8) color = '#ff00ff';
