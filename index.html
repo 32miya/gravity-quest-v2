@@ -1268,43 +1268,43 @@ function injectSubStoryData() {
 
 // ===== サブストーリー定義 =====
 const SUBSTORIES = [
-    { id:'sq_01', title:'天空の剣の試練',
+    { id:'sq_01', title:'高天原の剣訓',
       steps:{ 1:'天空の塔の守護者が試練の剣について語った', 2:'天空の王を打ち倒した' },
       doneText:'天空のつるぎを手に入れた', reward:'w06', rewardMember:0 },
-    { id:'sq_02', title:'王者の剣の継承',
+    { id:'sq_02', title:'王より民を継ぐ剣',
       steps:{ 1:'引退した冒険者ゴルが王者の剣の伝承を語った', 2:'砂漠の商人カリバンを救出した', 3:'試練の洞窟の守護霊を倒した' },
       doneText:'王者のつるぎを受け継いだ', reward:'w28', rewardMember:0 },
-    { id:'sq_03', title:'海賊王の遺言',
+    { id:'sq_03', title:'潮騒の遺言',
       steps:{ 1:'海賊王バルゴを倒し、秘密の遺言を聞いた', 2:'海賊の部下から古い海図を手に入れた' },
       doneText:'海竜の鎧を手に入れた', reward:'a_sea_armor' },
-    { id:'sq_04', title:'竜霊グラドスの浄化',
+    { id:'sq_04', title:'竜脈グラドス・五行の浄化',
       steps:{ 1:'竜霊グラドスと話し、浄化の方法を知った', 2:'赤竜の鱗を入手（1/3）', 3:'蒼竜の鱗を入手（2/3）', 4:'金竜の鱗を入手（3/3）' },
       doneText:'グラドスを浄化し、英雄のヤリを授かった', reward:'w_spear_11', rewardMember:1 },
-    { id:'sq_05', title:'鍛冶師ガルドの宿願',
+    { id:'sq_05', title:'カガネが唄う星屑',
       steps:{ 1:'鍛冶師ガルドが隕石の欠片を求めていると知った', 2:'はぐれグラちゃんを倒しいんせきのかけらを入手した' },
       doneText:'メタルキングの鎧が完成した', reward:'a26', rewardMember:1 },
-    { id:'sq_06', title:'ほしのカケラ伝説',
+    { id:'sq_06', title:'五行を継ぐ星のカケラ',
       steps:{ 1:'宮廷賢者バルダックから星の伝承を聞いた', 2:'北の洞窟でほしのカケラを発見（1/3）', 3:'西の森でほしのカケラを発見（2/3）', 4:'南の祠でほしのカケラを発見（3/3）' },
       doneText:'三つのカケラが合わさり、星砕きの剣と星降る腕輪を入手した', reward:'w_star_sword', reward2:'acc_star_bracelet' },
-    { id:'sq_07', title:'呪われた魔斧の行方',
+    { id:'sq_07', title:'澱みを宿す魔斧',
       steps:{ 1:'野の賢者ガンダから廃屋の話を聞いた', 2:'廃屋で魔人の斧を発見した', 3:'ダーマの神殿で呪い解除を依頼した', 4:'呪いの源・暗黒の魔将を倒した' },
       doneText:'魔人の斧の呪いが解け、真の力が目覚めた', reward:'w27' },
-    { id:'sq_08', title:'大賢者アークの遺訓',
+    { id:'sq_08', title:'五行を綴りし賢者の遺文',
       steps:{ 1:'賢者の祠で大賢者アークの存在を知った', 2:'第1の断章を発見（1/4）', 3:'第2の断章を発見（2/4）', 4:'第3の断章を発見（3/4）', 5:'第4の断章を発見（4/4）' },
       doneText:'遺訓が集まり、隠れ里エデンへの道が開いた', reward:null },
-    { id:'sq_09', title:'エデンの誓い',
+    { id:'sq_09', title:'隠れ里エデン・和解の誓い',
       steps:{ 1:'隠れ里エデンに到達し、長老ガルドスと話した', 2:'反乱軍の隊長の依頼を受けた', 3:'偽王の証拠「封印の書状」を入手した', 4:'真実を証明する「聖印」を見つけた' },
       doneText:'偽王ボルドの正体が判明した。いよいよ決戦の時だ', reward:'a05', rewardMember:0 },
-    { id:'sq_10', title:'異世界の旅人',
+    { id:'sq_10', title:'境界を越えた旅人',
       steps:{ 1:'謎の旅人の噂が各地に広まっている', 2:'旅人の目撃情報を集めた（2/3）', 3:'旅人の目撃情報を全て集めた（3/3）' },
       doneText:'異世界の旅人を撃破した', reward:'w_2nd_03' },
-    { id:'sq_11', title:'封印の古城ザーモ',
+    { id:'sq_11', title:'ザーモの氷墓・鎮魂',
       steps:{ 1:'ロザリーヒルの住人から古城ザーモの話を聞いた', 2:'古城の地下で封印の鍵を発見した', 3:'暗黒公リッチを撃破した', 4:'ザーモ王の霊を解放した' },
       doneText:'ザーモの呪縛が解かれ、王の霊は永遠の眠りについた', reward:'acc_zarmo_crown', rewardMember:0 },
-    { id:'sq_12', title:'エストリアの覇者',
+    { id:'sq_12', title:'エストリアが託す信頼',
       steps:{ 1:'エストリア王から覇者の称号への挑戦を求められた', 2:'東の地下迷宮を制した（1/2）', 3:'魔法使いの塔を制した（2/2）', 4:'エストリア王に勝利を報告した' },
       doneText:'エストリアの覇者の称号を得た！王国の全権を任された', reward:'w_estoria_blade', rewardMember:0 },
-    { id:'sq_13', title:'砂漠の封印',
+    { id:'sq_13', title:'デセルタの渇きを癒す封印',
       steps:{ 1:'デセルタ王から砂漠の封印の話を聞いた', 2:'砂漠の遺跡でミイラ王を倒した', 3:'預言者から封印の印を授かった', 4:'砂漠の封印を完成させた' },
       doneText:'砂漠の封印が完成し、大砂漠嵐は消え去った', reward:'a_deserta_robe', rewardMember:2 },
 ];
@@ -11425,8 +11425,8 @@ async function checkAction() {
                     await typeMessage("【案内人】\n記憶が 戻りつつあるようですね……！\n試練の 洞窟は 南西の 半島の 先です。\nあの 洞窟で 何かを 受け取ったはず……");
                 } else if (_is2N) {
                     await typeMessage("【案内人】\n城下町に 向かってください……！\nそこに あなたたちの 戦いが 待っています！");
-                } else if (partyData.flags.flag_dungeon_cleared) { await typeMessage("【案内人】\n洞窟を 制覇しましたね！\n浜辺に 船が あるはずです。\nその 船で 各地の 孤島へ 渡れます。\n次は 東の 島、天空の 塔を 目指しましょう！"); }
-                else { await typeMessage("【案内人】\nこの 先 南西へ 進むと\n試練の 洞窟があります。\nまずは そこで 力を 試してみては？"); }
+                } else if (partyData.flags.flag_dungeon_cleared) { await typeMessage("【道しるべの老人】\n堰を 破りましたね！\n浜辺に 海路の 舟が 戻っているはずです。\nその 舟で 各地の 孤島へ 渡れます。\n次は 東の 島、高天原の 塔を 目指しましょう！"); }
+                else { await typeMessage("【道しるべの老人】\n北へ 向かえば、氷の 海峡の 向こうに\n水の 国ノルドの 民が 暮らしておる。\n……疑うでない。\nあの者たちが 恐れておるのは、我らが\n水源を 堰き止めておるという、古い 言い伝えじゃ。\nまずは 南西の 試練の 洞窟で\n力を 試してみては？"); }
                 state = 'FIELD'; hideAllWindows(); drawMap(); return;
             }
             if (npc.id === "npc_guide_east_tower") {
@@ -11439,9 +11439,9 @@ async function checkAction() {
                 } else if (_is2E && partyData.flags['2nd_mem_shrine']) {
                     await typeMessage("【案内人】\n天空の 塔は 東の 島の 北側にあります。\n記憶を たどって 登ってみてください……！\n龍の 力が あなたを 待っています。");
                 } else if (partyData.flags.flag_mage_trial_cleared) { await typeMessage("【案内人】\n究極の魔法まで 手に入れたか！\n後は 東南の 海の 果て、\n魔王城へ 向かうのみです！\nご武運を……！"); }
-                else if (partyData.flags.flag_weapon_forged) { await typeMessage("【案内人】\n伝説の剣を 手に入れましたか！\nこの島の 南に 大魔導士 ラムダスの\n隠れ家が あります。\n究極の 魔法を 授けてもらいましょう！"); }
-                else if (partyData.flags.flag_tower_cleared) { await typeMessage("【案内人】\n天空の 塔を 制覇しましたか！\n次は 西の 大森林へ 向かってください。\n伝説の 鍛冶屋が 最強の 剣を 鍛えてくれます。\n剣が 揃ったら また 東へ！"); }
-                else { await typeMessage("【案内人】\n東の 大陸の 北に\n天空の 塔が そびえています。\n塔の 頂には 伝説の 守護者が いるそうですよ。"); }
+                else if (partyData.flags.flag_weapon_forged) { await typeMessage("【旅の案内人】\n伝説の剣を 手に入れましたか！\nこの島の 南に 大魔導士 ラムダスの\n隠れ家が あります。\nかつて 早すぎた 和解を 説いて\n追放された 賢者だとか……\n究極の 魔法を 授けてもらいましょう！"); }
+                else if (partyData.flags.flag_tower_cleared) { await typeMessage("【旅の案内人】\n高天原の 塔を 制覇しましたか！\n次は 西の 大森林、木の国エストリアへ\n向かってください。\n東の 民が 恐れる 金の国カガネの 斧も、\nきっと 鍬に 変わる 日が 来ますとも。"); }
+                else { await typeMessage("【旅の案内人】\n東の 大陸の 北に\n高天原の 塔が そびえています。\n塔の 頂には 分断以前の 記憶を 守る\n守護者が いるそうですよ。"); }
                 state = 'FIELD'; hideAllWindows(); drawMap(); return;
             }
             if (npc.id === "npc_guide_south") {
@@ -11453,8 +11453,8 @@ async function checkAction() {
                     await typeMessage("【案内人】\n南東の 海の 果てに\n漆黒の 魔王城があります……\n記憶が なくても 行って みてください。\nきっと 何かが 戻るはずです。");
                 } else if (_is2S) {
                     await typeMessage("【案内人】\n船が ありますね！\n逆回りで 記憶を たどっているのですね？\n次は 南西の 村島へ……\nあの 村の 人たちが あなたを 知っているはずです！");
-                } else if (partyData.flags.has_ship) { await typeMessage("【案内人】\n船が ありますね！\n4つの 孤島へ 渡れます：\n東の 塔島・南西の 村島・\n南の 祠島・遠く 魔王島……\nどれも 船が なければ 渡れません！"); }
-                else { await typeMessage("【案内人】\n南の 海岸沿いを 歩けば\n試練の 洞窟に たどり 着けます。\n洞窟を 制覇すると 近くの 浜辺に\n船が 現れるという うわさがありますよ！"); }
+                } else if (partyData.flags.has_ship) { await typeMessage("【道しるべの老婆】\n海路の 舟が ありますね！\n南のデセルタは 火のように 激しいが、\nその実、水を 恐れて 久しい国じゃ。\n灯火を 消されるのが 怖いだけなのじゃよ。\nあんたが 運ぶ 小さな 雨粒 ひとつが、\nあの国の 渇きを 癒すやもしれん。"); }
+                else { await typeMessage("【道しるべの老婆】\n南の 海岸沿いを 歩けば\n試練の 洞窟に たどり 着けます。\n洞窟を 制覇すると 近くの 浜辺に\n海路の 舟が 現れるという\nうわさが ありますよ！"); }
                 state = 'FIELD'; hideAllWindows(); drawMap(); return;
             }
             if (npc.id === "npc_guide_demon") {
@@ -11466,7 +11466,7 @@ async function checkAction() {
                     await typeMessage("【案内人】\n記憶を 失っているのですか……！\n魔王城は 南東の 海の 果てにあります。\nまずは そこへ 向かってみてください。\nきっと 記憶の 鍵が あります……！");
                 } else if (_is2D) {
                     await typeMessage("【案内人】\n魔王城からの 記憶が 戻りましたか！\n次は 南の 祠島です。\n船で 南へ 渡ってみてください。");
-                } else { await typeMessage("【案内人】\n近くに 感じる あの 暗黒の 気配……\n東の 海の 果てに 魔王の 城が あるのです。\n船で 渡り 最後の 戦いに 挑んでください！"); }
+                } else { await typeMessage("【最後の道案内】\n近くに 感じる あの 冷たい 気配……\nあの城は、どの国のものでも ないのです。\n五国すべての 拒絶が 積み重なって\n生まれた 澱みなのじゃ。\n剣で 崩せる ものでは ない……\nここまで 五国に 届けてきた 小さな 信頼、\nそれだけが、あの 澱みを 溶かします。\n恐れず、行きなされ。あんたは もう 独りじゃ ない。"); }
                 state = 'FIELD'; hideAllWindows(); drawMap(); return;
             }
             // ★新規町NPCの会話
@@ -14934,6 +14934,8 @@ async function showTitleScreen() {
             await typeMessage("国境の 外へ 出た 者は、二度と 戻らない。\n何百年も 前、世界は 一つに 繋がっていたと いう。\nだが 大いなる「分断」が 世界を 引き裂いて 以来\n隣国は 敵、外は 死の 世界だと 教えられてきた。");
             await typeMessage(`${_hero}は 国境の 見張り台の そばで 育った 若者だった。\n旅立ちの 前夜……\n幼い頃から 世話に なった 老いた 門番が 小声で 囁いた。\n「……本当は 見た ことが あるんじゃ。\n壁の 向こうにも、同じように 笑う 人々が いるのを」`);
             await typeMessage(`「いつか この目で 確かめる。\n────── 壁の 向こうに 何が あるのかを。」`);
+            await typeMessage(`（──争いは、いつも「向こう」から 来ると 教えられて 育った。\nけれど、老いた 門番の 囁きだけが\nずっと 胸の 奥に 引っかかっていた。\nなら、恐れるべきは 向こう側じゃない。\n恐れるべきは、確かめもせずに 心を 閉ざす、\nこちら側の 弱さだ──）`);
+            await typeMessage(`（怖くないと 言えば 嘘になる。\nそれでも──たとえ 幾度 拒まれても、笑われても、傷ついても。\nわたしは、人は 再び 手を 取り合えると、\n信じ続けると 決めた。\nそれが、この 旅で わたしが 持って行ける、\nたったひとつの 武器だから。）`);
             await typeMessage(`エニシアの 城下町に 戻った ${_hero}。\nボルド王が「境界の 使者」を 選ぶという 知らせが 届いた……`);
             await typeMessage(`────── だが この旅の 果てに\n${_hero}を 待つのは\n世界を もう一度 繋ぎ直す、長い 長い 道のりだった ──────`);
             _screen.style.transition = ''; _screen.style.opacity = '1';
