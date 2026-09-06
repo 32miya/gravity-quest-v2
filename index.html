@@ -8500,6 +8500,7 @@ function drawMap() {
                     'obj_deco_stone_lantern':{ key:'decoStoneLantern',iw:_T*0.9,ih:_T*1.6, xOff:0,       yOff:-_T*0.6 },
                     'obj_deco_arcane_orb':  { key:'decoArcaneOrb',   iw:_T*0.9,ih:_T*1.5, xOff:0,        yOff:-_T*0.5 },
                     'obj_deco_banner':      { key:'decoBanner',     iw:_T*0.9,ih:_T*1.7, xOff:0,        yOff:-_T*0.9 },
+                    'obj_deco_signpost':    { key:'decoSignpost',   iw:_T*0.9,ih:_T*1.1, xOff:0,        yOff:-_T*0.1 },
                 };
                 const _decoInfo = _decoMap[npc.id];
                 if (_decoInfo) {
@@ -8752,6 +8753,24 @@ function drawMap() {
                         ctx.beginPath();ctx.moveTo(_emx,_emy-T*0.16);ctx.lineTo(_emx+T*0.13,_emy);ctx.lineTo(_emx,_emy+T*0.16);ctx.lineTo(_emx-T*0.13,_emy);ctx.closePath();ctx.fill();
                         ctx.fillStyle='#8c1c1c';
                         ctx.beginPath();ctx.arc(_emx,_emy,T*0.05,0,Math.PI*2);ctx.fill();
+                        ctx.restore();
+                    } else if(npc.id==='obj_deco_signpost') {
+                        // 木の道標 — 街道の分岐に立つ古い案内板
+                        const T=_T,_spx=px+T*0.5,_spBaseY=py+T*0.94;
+                        ctx.save();
+                        ctx.fillStyle='rgba(0,0,0,0.22)';ctx.beginPath();ctx.ellipse(_spx,_spBaseY+T*0.02,T*0.18,T*0.05,0,0,Math.PI*2);ctx.fill();
+                        // 支柱
+                        ctx.fillStyle='#5a4020';ctx.fillRect(_spx-T*0.05,_spBaseY-T*0.85,T*0.1,T*0.85);
+                        ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(_spx+T*0.02,_spBaseY-T*0.85,T*0.03,T*0.85);
+                        // 案内板(左右2枚、角度をつけて刺さっている風)
+                        const _plank=(ang,yoff,col)=>{
+                            ctx.save();ctx.translate(_spx,_spBaseY-T*0.68+yoff);ctx.rotate(ang);
+                            ctx.fillStyle=col;ctx.fillRect(-T*0.02,-T*0.13,T*0.42,T*0.26);
+                            ctx.strokeStyle='#3a2810';ctx.lineWidth=1;ctx.strokeRect(-T*0.02,-T*0.13,T*0.42,T*0.26);
+                            ctx.restore();
+                        };
+                        _plank(-0.12,0,'#a07840');
+                        _plank(0.18,T*0.22,'#8c6838');
                         ctx.restore();
                     } else {
                         // その他装飾のフォールバック絵文字
@@ -14517,6 +14536,30 @@ async function showTitleScreen() {
                 else if (ky === 0 && ev.y === th - 2) ev.y = th - 1;
             }
         }
+        // 街道の道標: 町・村の入口そばのフィールドタイルに設置(中世風の世界観演出)
+        const _signpostSpots = [
+            ['map_field_5_0', 26, 29],
+            ['map_field_2_1', 22, 31],
+            ['map_field_4_1', 26, 21],
+            ['map_field_6_1', 22, 23],
+            ['map_field_2_2', 23, 24],
+            ['map_field_4_2', 9, 15],
+            ['map_field_8_2', 3, 4],
+            ['map_field_0_3', 22, 29],
+            ['map_field_1_3', 25, 23],
+            ['map_field_0_4', 14, 31],
+            ['map_field_7_5', 37, 8],
+            ['map_field_1_6', 4, 39],
+            ['map_field_4_6', 18, 27],
+            ['map_field_0_7', 22, 23],
+        ];
+        _signpostSpots.forEach(([_spMapId, _spx, _spy]) => {
+            const _spm = externalMapData[_spMapId];
+            if (!_spm || !_spm.npcs) return;
+            const _spKey = `${_spx},${_spy}`;
+            if (_spm.npcs[_spKey] || (_spm.exits && _spm.exits[_spKey])) return;
+            _spm.npcs[_spKey] = { id: 'obj_deco_signpost', name: '道標' };
+        });
     }
     _loadPct = 60;
     await loadExternalGrowthDatabase("https://www.gravity.place/share/ugcGame?id=38430");
