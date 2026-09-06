@@ -2466,8 +2466,63 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
         clearGlow(); ctx.globalAlpha = 1;
     };
 
+    // 共通: 詠唱魔法陣（二重リング＋回転ルーン線＋七芒星＋脈動コア）
+    // 雷属性で確立していた「魔法陣」演出を全属性で共有できるよう汎用化。
+    // 詠唱開始の一瞬だけ表示し、本編のエフェクトへ繋げる。
+    const MAGIC_PALETTES = {
+        fire:  { ring1:'#ffaa44', ring2:'#cc5500', rune:'#ffcc66', star:'#ffddaa', glow:'#ff6600', coreIn:'#fff2cc', coreMid:'#ff8822' },
+        ice:   { ring1:'#aaddff', ring2:'#4488cc', rune:'#cceeff', star:'#eef8ff', glow:'#66bbff', coreIn:'#ffffff', coreMid:'#88ccff' },
+        wind:  { ring1:'#aaffcc', ring2:'#44aa66', rune:'#ccffdd', star:'#eeffee', glow:'#55dd88', coreIn:'#f0fff0', coreMid:'#77ee99' },
+        explosion: { ring1:'#ffcc44', ring2:'#dd4400', rune:'#ffee88', star:'#ffeecc', glow:'#ff8800', coreIn:'#fffacc', coreMid:'#ffaa33' },
+        dark:  { ring1:'#cc88ff', ring2:'#661199', rune:'#eeccff', star:'#ddaaff', glow:'#aa33ff', coreIn:'#f5e6ff', coreMid:'#aa55dd' },
+        heal:  { ring1:'#ffee99', ring2:'#ddaa33', rune:'#fff5cc', star:'#ffffff', glow:'#ffdd55', coreIn:'#ffffff', coreMid:'#ffee99' },
+        buff:  { ring1:'#bbffee', ring2:'#33ccaa', rune:'#e0fff8', star:'#ffffff', glow:'#55ffcc', coreIn:'#ffffff', coreMid:'#88ffdd' },
+    };
+    const drawMagicCircle = (t, cx, cy, palKey, sizeMul=1, fadeEnd=0.24) => {
+        if (t >= fadeEnd) return;
+        const pal = MAGIC_PALETTES[palKey] || MAGIC_PALETTES.fire;
+        const growT = Math.min(t/0.14, 1);
+        const fade = t < 0.14 ? growT : Math.max(0, 1-(t-0.14)/Math.max(0.001,fadeEnd-0.14));
+        const ringR = (55+tier*26) * growT * sizeMul;
+        if (fade <= 0 || ringR <= 0) return;
+        for (let ri=0; ri<2; ri++) {
+            ctx.globalAlpha = fade*(ri===0?0.95:0.6);
+            ctx.shadowColor = pal.glow; ctx.shadowBlur = 16+tier*3;
+            ctx.strokeStyle = ri===0?pal.ring1:pal.ring2; ctx.lineWidth = 2+tier*0.4-ri*0.7;
+            ctx.beginPath(); ctx.arc(cx,cy,ringR*(1-ri*0.16),0,Math.PI*2); ctx.stroke();
+        }
+        const rotN = tier>=4?14:tier>=3?10:8;
+        for (let ri=0; ri<rotN; ri++) {
+            const ra=(ri/rotN)*Math.PI*2+t*Math.PI*4.2;
+            const rb=((ri+Math.floor(rotN/2))%rotN/rotN)*Math.PI*2+t*Math.PI*4.2;
+            ctx.globalAlpha=fade*(0.4+0.6*Math.abs(Math.sin(t*Math.PI*10+ri)));
+            ctx.shadowColor=pal.glow; ctx.shadowBlur=8;
+            ctx.strokeStyle=pal.rune; ctx.lineWidth=1.1;
+            ctx.beginPath();
+            ctx.moveTo(cx+Math.cos(ra)*ringR*0.88, cy+Math.sin(ra)*ringR*0.88);
+            ctx.lineTo(cx+Math.cos(rb)*ringR*0.88, cy+Math.sin(rb)*ringR*0.88);
+            ctx.stroke();
+        }
+        ctx.globalAlpha=fade*0.88; ctx.strokeStyle=pal.star; ctx.lineWidth=2;
+        ctx.shadowColor=pal.glow; ctx.shadowBlur=18;
+        ctx.beginPath();
+        for (let si=0; si<=7; si++) {
+            const sa=(si/7)*Math.PI*2+t*Math.PI*1.8+Math.PI/7;
+            const sr=si%2===0?ringR*0.78:ringR*0.35;
+            si===0?ctx.moveTo(cx+Math.cos(sa)*sr,cy+Math.sin(sa)*sr):ctx.lineTo(cx+Math.cos(sa)*sr,cy+Math.sin(sa)*sr);
+        }
+        ctx.closePath(); ctx.stroke();
+        ctx.globalAlpha=fade*(0.7+0.3*Math.sin(t*Math.PI*14));
+        ctx.shadowColor=pal.glow; ctx.shadowBlur=35;
+        const cG=ctx.createRadialGradient(cx,cy,0,cx,cy,ringR*0.3);
+        cG.addColorStop(0,pal.coreIn); cG.addColorStop(0.4,pal.coreMid); cG.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=cG; ctx.beginPath(); ctx.arc(cx,cy,ringR*0.3,0,Math.PI*2); ctx.fill();
+        clearGlow(); ctx.globalAlpha=1;
+    };
+
     // ── 炎属性: 業火の龍が螺旋突撃 → 画面が深紅に染まる → マグマ噴出
     const drawFire = (t) => {
+        drawMagicCircle(t, tcx, tcy, 'fire');
         const F_LAVA=0.35, F_BOOM=0.58;
 
         // ★ 炎の特徴1: 画面全体を強烈なオレンジ/深紅で染める (雷との最大の違い)
@@ -2618,6 +2673,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
     };
     // ── ヒャド系（氷）: FFXブリザガ風 巨大氷晶→砕け散る→ダイヤモンドダスト
     const drawIce = (t) => {
+        drawMagicCircle(t, tcx, tcy, 'ice');
         const BURST_T = 0.48, DUST_ST = 0.38;
 
         // 1. 画面の青白フリーズ
@@ -2869,6 +2925,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
         ctx.globalAlpha=1;
     };
     const drawWind = (t) => {
+        drawMagicCircle(t, tcx, tcy, 'wind');
         const SPHERE_ST = 0.28, CRIT_ST = 0.58;
 
         // 1. 背景薄緑染め
@@ -2964,6 +3021,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
     };
     // ── 回復系: DQ6風 光の粒が上昇 + 緑・金の光柱 ─────────────────
     const drawHeal = (t) => {
+        drawMagicCircle(t, tcx, tcy, 'heal');
         const isRevive = sid.includes('zao')||sid.includes('zaorn');
         const isGold = isRevive || tier >= 4;
         const c1 = isGold ? '#ffdd44' : '#44ff88';
@@ -3037,6 +3095,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
     // ── イオ系（爆発）: DQ6風 白フラッシュ → 衝撃波リング連続 ──────
     // ── イオ系（爆発）: エネルギー球収束 → 核爆発 → 衝撃波が画面を埋める
     const drawExplosion = (t) => {
+        drawMagicCircle(t, tcx, tcy, 'explosion');
         const BOOM_ST2=0.36;
 
         // 1. 背景オレンジ/黄環境光
@@ -3137,6 +3196,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
     };
     // ── ドルマ系（闇）: DQ6風 暗黒のオーブが着弾 ───────────────────
     const drawDark = (t) => {
+        drawMagicCircle(t, tcx, tcy, 'dark');
         // DQ6ドルマ系の特徴: 暗黒球が飛来→着弾で暗転、紫の爆発
         const orbN = tier>=3 ? 3 : tier>=2 ? 2 : 1;
         for (let oi=0; oi<orbN; oi++) {
@@ -3209,6 +3269,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
     // ── バフ/デバフ: DQ風 光の輪 + 上昇/下降する粒 ────────────────
     const drawBuff = (t) => {
         const isDebuff = etype==='debuff';
+        drawMagicCircle(t, tcx, tcy, isDebuff ? 'dark' : 'buff');
         const c = isDebuff ? '#aa00ff' : '#aaff44';
         const dir = isDebuff ? 1 : -1;
 
