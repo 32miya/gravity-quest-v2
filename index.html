@@ -1218,7 +1218,7 @@ function unpackSaveData(pwd) {
 function injectSubStoryData() {
     masterData.items["i_star_frag"] = { id: "i_star_frag", name: "ほしのカケラ", type: "tool", price: 0, desc: "かつてこの地を治めた慈悲深き王の涙が結晶化したものと言われている。悲しみと愛が宿る幻の鉱石。" };
     masterData.items["w_star_sword"] = { id: "w_star_sword", name: "星砕きの剣", type: "weapon", price: 10000, power: 85, desc: "聖王の涙の結晶から打ち出された剣。神聖な光に見せかけた闇の結界（嘘の衣）を剥ぎ取る唯一の刃と伝わる。" };
-    masterData.items["acc_star_bracelet"] = { id: "acc_star_bracelet", name: "星降る腕輪", type: "accessory", price: 5000, power: 0, effect: "speed_up", desc: "エニシアに代々伝わる家宝。夜空の光が宿り素早さが大幅に上がる。かつて聖王ボルドが旅人に贈ったものと同じ意匠を持つ。" };
+    masterData.items["acc_star_bracelet"] = { id: "acc_star_bracelet", name: "星降る腕輪", type: "accessory", price: 5000, power: 0, effect: "speed_up", desc: "エニシアに代々伝わる家宝。夜空の光が宿り素早さが大幅に上がる。かつて若きボルド王が旅人に贈ったものと同じ意匠を持つ。" };
     masterData.monsters["boss_desert_killer"] = { name: "デザートキラー", max_hp: 350, atk: 40, def: 15, spd: 30, exp: 800, gold: 500 };
     masterData.monsters["boss_trial_phantom"] = { name: "試練の幻影", max_hp: 450, atk: 55, def: 20, spd: 40, exp: 1500, gold: 1000 };
     masterData.spells["spl_ultima"] = { id: "spl_ultima", name: "アルテマ", type: "attack", target: "enemies", mp: 40, value: 480, desc: "敵全体に究極の光属性ダメージ。いかなる敵にも等しく降り注ぐ", element: "light" };
@@ -1293,8 +1293,8 @@ const SUBSTORIES = [
       steps:{ 1:'賢者の祠で大賢者アークの存在を知った', 2:'第1の断章を発見（1/4）', 3:'第2の断章を発見（2/4）', 4:'第3の断章を発見（3/4）', 5:'第4の断章を発見（4/4）' },
       doneText:'遺訓が集まり、隠れ里エデンへの道が開いた', reward:null },
     { id:'sq_09', title:'隠れ里エデン・和解の誓い',
-      steps:{ 1:'隠れ里エデンに到達し、長老ガルドスと話した', 2:'反乱軍の隊長の依頼を受けた', 3:'偽王の証拠「封印の書状」を入手した', 4:'真実を証明する「聖印」を見つけた' },
-      doneText:'偽王ボルドの正体が判明した。いよいよ決戦の時だ', reward:'a05', rewardMember:0 },
+      steps:{ 1:'隠れ里エデンに到達し、長老ガルドスと話した', 2:'反乱軍の隊長の依頼を受けた', 3:'王の孤独の証拠「封印の書状」を入手した', 4:'真実を証明する「和解の証」を見つけた' },
+      doneText:'ボルド王が十年間抱えてきた孤独と澱みの正体が判明した。いよいよ浄化の時だ', reward:'a05', rewardMember:0 },
     { id:'sq_10', title:'境界を越えた旅人',
       steps:{ 1:'謎の旅人の噂が各地に広まっている', 2:'旅人の目撃情報を集めた（2/3）', 3:'旅人の目撃情報を全て集めた（3/3）' },
       doneText:'異世界の旅人を撃破した', reward:'w_2nd_03' },
@@ -10261,22 +10261,22 @@ async function moveParty(dx, dy) {
 // 逆回りの動線: 魔王城→南の祠→南西の村→天空の塔→試練の洞窟→城下町→エニシア城
 const _2ND_MEMORY_MAP = {
     'map_demon_castle_1f': { flag:'2nd_mem_maou',
-        flash:'（……！ この 漆黒の 城……！\nここで 戦った……！\nグラ王が……グラ王が\nわたしたちを 命がけで 逃がしてくれた……！）',
+        flash:'（……！ この 漆黒の 城……！\nここで 戦った……！\nボルド王の 面影が……面影が\nわたしたちを 命がけで 逃がしてくれた……！）',
         hint:'（南の 海の 祠島……\nあの 光の 場所に 行けば\nもっと 思い出せる 気がする……）' },
     'map_shrine_warp': { flag:'2nd_mem_shrine',
-        flash:'（……！ この 光……！\nここで 聞いた……\n「城の 王は……偽物だ」という\n天空の 真実を……！）',
+        flash:'（……！ この 光……！\nここで 聞いた……\n「王は 独りで 何かを 抱えている」という\n天空の 真実を……！）',
         hint:'（南西の 村……あの 穏やかな 村人たちの\n顔が 浮かんでくる……）' },
     'map_town_02': { flag:'2nd_mem_village',
         flash:'（……！ 南西の 村！\nここの 人々を 助けた……\n海を 越えて……船で……！\nあの 試練の 洞窟で……船を 手に入れて……！）',
         hint:'（天空の 塔……白い 龍……\nあの 力が 体の どこかに 残っている……）' },
     'map_tower_1f': { flag:'2nd_mem_tower',
-        flash:'（……！！ 天空の 塔……！\nここで 白い 龍と 対峙した……！\n龍が 力を 授けてくれた……\n「城の 王は 偽物……本物の 敵は そこにいる……」！！）',
+        flash:'（……！！ 天空の 塔……！\nここで 白い 龍と 対峙した……！\n龍が 力を 授けてくれた……\n「王は 誰よりも 恐れている……\nもう一度、傷つくことを」……！！）',
         hint:'（試練の 洞窟……老騎士の 言葉……\n「城に 近づきすぎるな」……）' },
     'map_dungeon_1f': { flag:'2nd_mem_dungeon',
-        flash:'（……！ 試練の 洞窟……！\n元・王宮騎士の 英霊……\n船を 授けてくれた……\nそして 警告していた……\n「城に いる 者の 影を よく 見ろ」と……！）',
+        flash:'（……！ 試練の 洞窟……！\n元・王宮騎士の 英霊……\n船を 授けてくれた……\nそして 警告していた……\n「城に いる 王の 瞳の 奥を よく 見ろ」と……！）',
         hint:'（城下町 エニシア……\n全ての 始まりの 場所へ……\n真の 戦いが 待っている……！）' },
     'map_town_01': { flag:'2nd_mem_town',
-        flash:'（……！！ 思い出した……！！\nここから 全てが 始まった……！！\nグラ王は 本物の 初代国王……\n城に 座る 偽の 国王ボルドこそが\n百年前の 初代魔王……！！\nあいつを 倒さなければ……！）',
+        flash:'（……！！ 思い出した……！！\nここから 全てが 始まった……！！\nボルド王は 十年前、大切な 何かを 失い\n独りで 世界を 拒み続けてきた……！\n剣ではなく……もう一度\n手を 差し伸べなければ……！）',
         hint:null },
 };
 
@@ -10335,11 +10335,11 @@ async function checkAction() {
             if (partyData.flags.flag_2nd_maou_cleared && partyData.flags.flag_2nd_maou_cleared && !partyData.flags.last_boss_defeated && npc.id.includes('king') && npc.id !== 'boss_pirate_king') {
                 let _lv2 = (partyData.members.find(m=>m.hp>0)||partyData.members[0]).lv;
                 let _hn2 = partyData.members[0] ? partyData.members[0].name : '勇者';
-                await typeMessage("【偽の国王ボルド】\nよく……帰ってきたな……\n……なぜ 生きている？");
-                await typeMessage("【偽の国王ボルド】\nお前は 死ぬはずだった。\nレベル1の 未熟な 若造が\n試練の 洞窟で、海の嵐で、天空の 刃で——\nどれかで 命を 落とすのが\n「正しい 物語」だったはずだ……！！");
-                await typeMessage("【偽の国王ボルド】\nわしは 百年間 それを 繰り返してきた。\n力ある 者を「選ばれし 勇者」と 持ち上げ\n旅立たせ……消えてもらう。\n民が「勇者さえも 敵わなかった」と 知れば\n諦め、わしに 従う。\nそれが この 世界の 正しい 秩序じゃ！！");
-                await typeMessage(`【偽の国王ボルド】\n${_hn2}よ……！\nなぜ 自分で 考えた？\nなぜ 仲間を 本音で 信じた？\nなぜ 諦めずに ここまで 歩いた？\nそんな 者が 現れたら……この 秩序が 崩れるではないか！！`);
-                await typeMessage("【偽の国王ボルド】\n今すぐ ここで 終わらせよう！！\n……わしが 真の 姿を 現す！！");
+                await typeMessage("【ボルド王】\nよく……帰ってきたな……\n……なぜ 生きている？");
+                await typeMessage("【ボルド王】\nお前は 死ぬはずだった。\nレベル1の 未熟な 若造が\n試練の 洞窟で、海の嵐で、天空の 刃で——\nどれかで 命を 落とすのが\n「安全な 物語」だったはずだ……！！");
+                await typeMessage("【ボルド王】\nわしは 十年間 それを 繰り返してきた。\n力ある 者を「境界の 使者」と 持ち上げ\n旅立たせ……外の 世界で 消えてもらう。\n民が「境界の 外は 死の 世界だ」と 知れば\n二度と 壁の 外を 望まなくなる。\nそれが……お前たちを 二度と 失わずに済む\nたった一つの 方法だと 思っていた……！！");
+                await typeMessage(`【ボルド王】\n${_hn2}よ……！\nなぜ 自分で 考えた？\nなぜ 仲間を 本音で 信じた？\nなぜ 諦めずに ここまで 歩いた？\nそんな 者を 見ていると……\nわしが 十年間 殺し続けてきた 「希望」を\n思い出して しまうではないか……！！`);
+                await typeMessage("【ボルド王】\nもう 十分だ……！ ここで 終わらせよう！！\n……これが わしの 抱え続けてきた\n澱みの 全てだ！！");
                 // king_gura_final の外部エンティティデータを優先使用
                 const _kgfEnt = (externalEntitiesData && externalEntitiesData['king_gura_final']) || null;
                 masterData.monsters['boss_gura_final'] = {
@@ -10360,7 +10360,8 @@ async function checkAction() {
                 }
                 hideGoldWindow(); let _bwK = await executeBattle(['boss_gura_final']); showGoldWindow(); updateGoldWindow();
                 if (!_bwK) return;
-                await typeMessage("【偽の国王ボルド】\n……そんな……！\n百年間……百年間 積み重ねてきた 秩序が……！\nわしが……わしが 間違っていたなど……！！");
+                await typeMessage("【澱みの 化身】\n……なぜだ……！\nなぜ お前たちは まだ 剣を 収めない……！\nわしを 憎めば いいだろう……！\nわしを 恨んで……立ち去れば いいだろう……！！");
+                await typeMessage(`【${_hn2}】\n……恨みになど 来ていない。\n迎えに 来たんだ。\n十年間 独りで 抱え込んだ あなたを。`);
                 // 白フラッシュ演出
                 const _gc_e = document.getElementById('game-container');
                 _gc_e.style.transition = 'filter 0.08s'; _gc_e.style.filter = 'brightness(6) saturate(0)';
@@ -10370,11 +10371,12 @@ async function checkAction() {
                 await new Promise(r => setTimeout(r, 600));
                 AudioManager.playBGM('ending');
                 await new Promise(r => setTimeout(r, 800));
-                await typeMessage("……光が 広がっていく……。\n百年 続いた 嘘と 計算が\n一瞬にして 溶けていく……！");
-                await typeMessage("偽の国王ボルドが 砕け散った……！\n民の 考える力を 奪い\n諦めさせ 従わせてきた 仕組みが\n完全に 崩れた……！！");
-                await typeMessage("【聖王ボルド（魂）】\n……末裔よ。\nよくぞ……やり遂げてくれた。");
-                await typeMessage("【聖王ボルド（魂）】\n百年間……あの 者は\n民の 代わりに 考え、決め、支配した。\nそれが「正しい 王」だと 信じ 疑わなかった。\nしかし お前たちが 証明した……\n人は 自分で 選べる、と。");
-                await typeMessage("【聖王ボルド（魂）】\n完璧な 世界は 来ない。\n混乱も 迷いも あるだろう。\nしかし それが 本物の 始まりじゃ……\n誇りを 持って……生きよ……！");
+                await typeMessage("……光が 広がっていく……。\n十年間 積み重ねてきた 恐れと 孤独が\n温かい 光に 溶かされていく……！");
+                await typeMessage("澱みの 化身は 静かに 崩れ、消えていった……！\n民の 考える力を 奪い\n諦めさせ 従わせてきた 仕組みが\n完全に 崩れた……！！\n王座には……独り、涙を 流す ボルド王の 姿が あった。");
+                await typeMessage("【ボルド王】\n……境界の 使者よ。\nよくぞ……ここまで 来てくれた。\nわしを……見捨てずに いてくれて。");
+                await typeMessage("【ボルド王】\n十年前……わしは 隣国を 信じ、手を 差し伸べた。\nそして 大切な 者を 喪った。\nその 痛みが 二度と 誰にも 及ばぬようにと……\n国境を 閉ざし、希望を 摘み取ることが\n「正しい 王」だと 信じ 疑わなかった。");
+                await typeMessage("【ボルド王】\nしかし お前たちが 証明してくれた……\n傷つくことを 恐れず、それでも 人を 信じる\n勇気こそが、本当の 強さなのだと。");
+                await typeMessage("【ボルド王】\n完璧な 世界は 来ない。\n混乱も 迷いも あるだろう。\nしかし それが 本物の 始まりじゃ……\n誇りを 持って……共に 歩もう……！");
                 await typeMessage("（どこからか 聞き覚えのある 声が 届く……）");
                 await typeMessage("【海賊王バルゴ】\nよう……やりやがったな。\n（荒っぽい 声だが 確かに 震えていた）\n俺みたいな 捨て駒でも……\n生き延びた 甲斐が あったってもんだ。");
                 await typeMessage("【大魔導士 ラムダス】\nふぉっふぉっ……お主らのような 者が\nこの 世に 現れるとは……。\n百年 生きてきた 甲斐が あったわい。");
@@ -10397,16 +10399,16 @@ async function checkAction() {
                 let _is2nd_end = partyData.flags.flag_2nd_maou_cleared;
                 if (npc.id.includes('king') && npc.id !== 'boss_pirate_king') {
                     if (_is2nd_end) {
-                        // 偽王討伐編: 真エンディング後の城王NPC = 聖王ボルドの魂が宿る像
+                        // 偽王討伐編: 真エンディング後の城王NPC = 浄化され、玉座に戻ったボルド王本人
                         AudioManager.playBGM('ending');
-                        await typeMessage("【聖王ボルドの 石像】\n（ふと 石像の 瞳が 光った……）");
-                        await typeMessage("【聖王ボルド（魂）】\n末裔よ……よく 戻った。\n世界は 再び 光を 取り戻した。\nこれからの 時代は……お前たちのものじゃ。");
+                        await typeMessage("【ボルド王】\n（玉座の 傍らで、静かに 目を 閉じている……\nふと その 瞳が 開いた……）");
+                        await typeMessage("【ボルド王】\n境界の 使者よ……よく 戻った。\n世界は 再び 光を 取り戻した。\nこれからの 時代は……お前たちのものじゃ。");
                         let allNames2 = partyData.members.map(m => m.name).join('、');
                         await typeMessage(`${allNames2}よ！\nお前たちの 名は エニシアの 真の 歴史に\nえいえんに 刻まれるであろう！！`);
                     } else {
-                        // 1周目終了後は偽王が城を支配（普通は来ない：ボス戦後リロードのため）
+                        // 1周目終了後は澱みに沈んだ王が城を支配（普通は来ない：ボス戦後リロードのため）
                         AudioManager.playBGM('game_over');
-                        await typeMessage("【偽の国王ボルド】\nよく戻ったな……勇者よ。\nこの城は 今や わしのものじゃ。\nお前たちの 力も……もらい受けようか。");
+                        await typeMessage("【澱みに沈む 王】\nよく戻ったな……境界の 使者よ。\nこの城は 今や わしのものじゃ。\nお前たちの 力も……もらい受けようか。");
                     }
                 } else {
                     if (!(npc.id.includes('chest') || npc.id.includes('obj_chest')) && npc.id !== "npc_class_change") {
@@ -10594,7 +10596,7 @@ async function checkAction() {
             // 本棚
             if (npc.id === 'obj_bookshelf' || npc.id === 'obj_bookshelf2') {
                 const _books = [
-                    "『エニシア王国の歴史』\n……百年前、グラ王という\n偉大な 王がいた。\n彼は 魔王の 力を\n封じようとしたが……",
+                    "『エニシア王国の歴史』\n……かつて 若き ボルド王は\n国境を 開き、隣国と 手を 取り合おうと\n夢見ていたという。\nだが その 夢は……",
                     "『魔物の 生態』\n東の 魔王城からは\n強大な 魔力が 溢れている。\n天空の 力なき者には\nその 城の 扉は 開かない……",
                 ];
                 await typeMessage(_books[npc.id === 'obj_bookshelf' ? 0 : 1]);
@@ -10755,9 +10757,8 @@ async function checkAction() {
             if (npc.id === "obj_parents_relic") {
                 if (partyData.flags.flag_2nd_maou_cleared) {
                     await typeMessage("壁に 古びた 肖像画が 飾られている……\n慈悲深い 笑顔の 王と 王妃……");
-                    await typeMessage("（……真実を 知った 今、この 笑顔が\n全く 別物に 見えてくる……）");
-                    await typeMessage("（偽の王は 百年もの間\nこの 肖像画を 「自らの 両親」と 偽り\n人々を 騙し 続けたのだ……！）");
-                    await typeMessage("（本物の 聖王ボルドも\nきっと この 肖像画の 前で\n多くの 時を 過ごしたはずだ……\n奪われた 肉体の まま……）");
+                    await typeMessage("（……真実を 知った 今、この 笑顔が\n違って 見えてくる……）");
+                    await typeMessage("（ボルド王は この 肖像画の 前で\nどれほどの 時を 過ごしたのだろう。\n両親の 笑顔を 見つめながら、\n独り 抱え続けた 悲しみを\n誰にも 話せずに……）");
                 } else if (partyData.flags.flag_sky_truth_known) {
                     await typeMessage("壁に 古びた 肖像画が 飾られている……\n慈悲深い 笑顔の 王と 王妃……");
                     await typeMessage("（……天空の 王から 聞いた 真実を 思えば\nこの 肖像画が 悲しく 映る……\nまるで あの方たちが\n泣いて いるように 見えた）");
@@ -10792,7 +10793,7 @@ async function checkAction() {
                 const _tMsgs = [
                     "第1の断章：\n「三界を 渡りし 者よ……\n大賢者アークは 光を 求め 旅立った。\n彼の 遺した 知恵が 世界を 救う……」",
                     "第2の断章：\n「星の 彼方に エデンの 地あり……\n迷える 魂の 導き手よ\nその 扉は 真実を 知る者にのみ 開かれる……」",
-                    "第3の断章：\n「闇に 落ちし 王の 魂は\n光の 継承者によって のみ 解き放たれる……\nグラ王よ……安らかに……」",
+                    "第3の断章：\n「澱みに 沈みし 王の 心は\n傷つくことを 恐れぬ 者によって のみ\n解き放たれる……\nボルド王よ……いつか 光の 中へ……」",
                     "第4の断章：\n「全ての 断章を 集めし 者へ——\n汝の 心に 既に エデンはある。\n── 大賢者アーク ──」"
                 ];
                 await typeMessage(_tMsgs[_tNum-1]);
@@ -10855,7 +10856,7 @@ async function checkAction() {
                         showGoldWindow(); updateGoldWindow();
                         if(isWin) {
                             await typeMessage("【大魔導士 ラムダス】\nみごとだ……！！\n約束通り 究極の 魔法を 授けよう。\nこれは わしの 魔力の 全てじゃ。"); AudioManager.playSE('level_up'); let mage = partyData.members.find(m => m.job === "魔法使い" || m.job === "賢者") || partyData.members[0]; if(!mage.spells.includes("spl_ultima")) mage.spells.push("spl_ultima"); await typeMessage(`${mage.name}は 究極魔法『アルテマ』を\nおぼえた！`);
-                            await typeMessage("【大魔導士 ラムダス】\n……それと もうひとつ 言っておく。\n魔王城に 眠る 怨念は\n単なる 悪では ない。\nエニシアの 仕組みに 虐げられた 者たちの\n怒りと 悲しみが 集まったものじゃ。\n倒すことは できる……だが 本当の 悪は 別の場所に いる。\n覚えておけ。"); partyData.flags.flag_mage_trial_cleared = true; delete currentMap.npcs[key];
+                            await typeMessage("【大魔導士 ラムダス】\n……それと もうひとつ 言っておく。\n魔王城に 眠る 澱みは\n単なる 悪では ない。\nエニシアの 仕組みに 傷つけられた 者たちの\n怒りと 悲しみ、そして 王自身の\n孤独が 集まったものじゃ。\n浄化することは できる……だが 本当の 戦いは\nそこから 始まる。\n覚えておけ。"); partyData.flags.flag_mage_trial_cleared = true; delete currentMap.npcs[key];
                         }
                     } else { await typeMessage("【大魔導士 ラムダス】\nまだ 力が 足りぬようじゃ……\n鍛えて また 来るがよい。"); }
                 }
@@ -10866,14 +10867,14 @@ async function checkAction() {
             if (npc.id === 'npc_sky_dragon_girl') {
                 const _aria2nd = partyData.flags.flag_2nd_maou_cleared;
                 if (partyData.flags.last_boss_defeated && _aria2nd) {
-                    await typeMessage("【アリア】\n……本当に、本当に 平和が 戻ってきたんですね……！\nグラ王様も……ようやく 安らかに 眠れる……。");
+                    await typeMessage("【アリア】\n……本当に、本当に 平和が 戻ってきたんですね……！\nボルド王様も……ようやく 独りじゃ なくなった……。");
                     await typeMessage("【アリア】\n天空の 龍も 喜んでいます……！\nこれで 真の 意味で 世界が 救われました……。\nありがとう……本当に ありがとうございます！");
-                    await typeMessage("────── こうして エニシア王国に\n真の 平和が 訪れた。\n偽りの 影は 消え去り\n大地に 再び 光が 満ちた。\nグラ王の 魂は 末裔たちを 静かに 見守りながら\n永遠の 安息へと 旅立っていった……\n─── fin ───");
+                    await typeMessage("────── こうして エニシア王国に\n真の 平和が 訪れた。\n澱みの 影は 消え去り\n大地に 再び 光が 満ちた。\nボルド王は 使者たちを 静かに 見守りながら\n新しい 時代を 歩み始めた……\n─── fin ───");
                 } else if (_aria2nd) {
                     const _guardsLeft = _countRemainingGuards();
                     const _memCount2=Object.keys(_2ND_MEMORY_MAP).filter(k=>partyData.flags[_2ND_MEMORY_MAP[k].flag]).length;
                     const _totalMem=Object.keys(_2ND_MEMORY_MAP).length;
-                    await typeMessage("【アリア】\n気がつきましたか……！\nよかった……。\nわたしは アリア……天空の 龍の お使いです。\nグラ王様が あなたたちを 逃がして……\nショックで 記憶を 失ってしまったのですね。");
+                    await typeMessage("【アリア】\n気がつきましたか……！\nよかった……。\nわたしは アリア……天空の 龍の お使いです。\n王の 澱みに 触れた 衝撃で……\nショックで 記憶を 失ってしまったのですね。");
                     if (!partyData.flags.has_ship) {
                         // 船なし: まず試練の洞窟へ
                         await typeMessage("【アリア】\nまず この村の 北にある\n「試練の 洞窟」へ 向かってください。\nあの 洞窟の 奥に 守護霊の 老騎士がいます。\n彼が 船を 授けてくれるはずです……！");
@@ -10884,12 +10885,12 @@ async function checkAction() {
                     } else if(_memCount2 < _totalMem) {
                         await typeMessage(`【アリア】\n記憶が ${_memCount2}/${_totalMem} 戻ってきましたね！\n引き続き 歩んできた 道を 逆に 辿ってください。\n龍も あなたたちを 応援しています！`);
                     } else {
-                        await typeMessage("【アリア】\n全ての 記憶が 戻りましたね……！\n城下町と エニシア城の 兵士たちを 解放して\nグラ王様を 目覚めさせてください……！");
+                        await typeMessage("【アリア】\n全ての 記憶が 戻りましたね……！\n城下町と エニシア城の 兵士たちを 解放して\nボルド王の 澱みを 浄化して ください……！");
                     }
                     if(_guardsLeft > 0 && _memCount2 === _totalMem) await typeMessage(`【アリア】\nまだ ${_guardsLeft}人 の 兵士が 残っています……\n闇に 操られた 被害者なのです……\n解放してあげてください！`);
-                    else if(_guardsLeft === 0 && _memCount2 === _totalMem) await typeMessage("【アリア】\n全ての 兵士が 解放されました……！\nグラ王様が 目覚めているはずです……\n城へ 急いで！！");
+                    else if(_guardsLeft === 0 && _memCount2 === _totalMem) await typeMessage("【アリア】\n全ての 兵士が 解放されました……！\n王は 澱みの 奥で 待っているはずです……\n城へ 急いで！！");
                     // 船入手後にエデンへのヒントを追加
-                    if(partyData.flags.has_ship && _memCount2 >= 1) await typeMessage("【アリア】\nそうそう……フィールドの 中央あたりに\n「かくし扉」があります。\n偽王の 支配を 逃れた 人々が 作った\n「隠れ里 エデン」への 入り口です。\n仲間の 声を 聞きに 行ってみてください。");
+                    if(partyData.flags.has_ship && _memCount2 >= 1) await typeMessage("【アリア】\nそうそう……フィールドの 中央あたりに\n「かくし扉」があります。\n王の 圧政を 逃れた 人々が 作った\n「隠れ里 エデン」への 入り口です。\n仲間の 声を 聞きに 行ってみてください。");
                 } else {
                     await typeMessage("【アリア】\n（不思議な 雰囲気を 持つ 少女が\n優しく 微笑んでいる……）\nこの 村には 海と 龍の 加護が あります。\n旅の 疲れを 癒やしてください。");
                 }
@@ -10957,7 +10958,7 @@ async function checkAction() {
                 const _guardL = _countRemainingGuards();
 
                 if(npc.id==='npc_eden_inn'){
-                    await typeMessage("【エデン 宿屋】\nここは 偽王の 目を 避けた\n避難民たちの 宿です。\nごゆっくり お休みください。");
+                    await typeMessage("【エデン 宿屋】\nここは 王の 澱みから 逃れた\n避難民たちの 宿です。\nごゆっくり お休みください。");
                     AudioManager.playSE('inn');
                     partyData.members.forEach(m=>{m.hp=m.max_hp;m.mp=m.max_mp;m.isPoisoned=false;});
                     await typeMessage("ゆっくり 休んだ……\nHP・MPが 回復した！");
@@ -10967,55 +10968,55 @@ async function checkAction() {
                 if(npc.id==='npc_eden_elder'){
                     if(_fin){
                         if(getSQ('sq_09')===4 && !isSQDone('sq_09')) {
-                            await typeMessage("【長老ガルドス】\n……よく やり遂げた。\n約束の もの、「聖印」を 受け取れ。\nこれは エデンの 人々が\n百年間 守り続けてきた 証じゃ……！");
+                            await typeMessage("【長老ガルドス】\n……よく やり遂げた。\n約束の もの、「和解の 証」を 受け取れ。\nこれは エデンの 人々が\n10年間 守り続けてきた 証じゃ……！");
                             await grantSQReward('sq_09');
-                            await typeMessage("（ふしぎな台帳に 「真実を証明する 聖印を 見つけた」が 記録された）");
+                            await typeMessage("（ふしぎな台帳に 「真実を証明する 和解の証を 見つけた」が 記録された）");
                         }
-                        await typeMessage("【長老ガルドス】\n真の王が 戻った……！\n10年の 苦しみが 報われた！\n勇者よ……ありがとう！！");
+                        await typeMessage("【長老ガルドス】\n王が 戻った……！\n10年の 孤独が 報われた！\n境界の 使者よ……ありがとう！！");
                     } else if(_guardL===0&&_memC===Object.keys(_2ND_MEMORY_MAP||{}).length){
-                        await typeMessage("【長老ガルドス】\n全ての 記憶と 仲間が 揃った……！\nもう 行きなさい。\n城の 偽王を 倒して くれ！！");
+                        await typeMessage("【長老ガルドス】\n全ての 記憶と 仲間が 揃った……！\nもう 行きなさい。\n王の 澱みを 浄化して くれ！！");
                     } else if(_memC>0){
-                        await typeMessage(`【長老ガルドス】\n記憶が ${_memC}個 戻りましたね。\n10年前……あの日\nグラ王様は 本当の姿で\n世界を 救おうとしていた……。`);
-                        await typeMessage("【長老ガルドス】\n私は 10年間 この里を 守ってきた。\nグラ王様の 末裔が 必ず 来ると\n信じていたから……。\nあなたたちが その人たちです！");
+                        await typeMessage(`【長老ガルドス】\n記憶が ${_memC}個 戻りましたね。\n10年前……あの日\nボルド王は 大切な 何かを 失い\n独り 世界を 拒むように なった……。`);
+                        await typeMessage("【長老ガルドス】\n私は 10年間 この里を 守ってきた。\n王の 心に もう一度 届く 者が\n必ず 来ると 信じていたから……。\nあなたたちが その人たちです！");
                         if(_memC>=2){
                             await typeMessage("【長老ガルドス】\nラムダスという 賢者を 知っていますか……？\n彼は かつて バルゴと 共に\n「英雄の 使い捨て」の 仕組みを\n暴こうとした 人物です。\n大賢者アークの 遺訓を 各地に 残したのも\n彼でした。\n今は どこに いるのか……");
                         }
                     } else {
-                        await typeMessage("【長老ガルドス】\nここが 「隠れ里 エデン」です。\n偽王の 支配が 始まって……\n城下町を 逃げ出した 人々が\n力を 合わせて 作った 街です。");
-                        await typeMessage("【長老ガルドス】\n王に「使い捨て」られ\n消えていった 者たちの 怒りが\n魔王城に 集まっています。\nその 怨念を 浄化し\n偽王を 暴いてください……！");
+                        await typeMessage("【長老ガルドス】\nここが 「隠れ里 エデン」です。\n王の 心が 閉ざされてから……\n城下町を 逃げ出した 人々が\n力を 合わせて 作った 街です。");
+                        await typeMessage("【長老ガルドス】\n王の 仕組みに 傷つけられ\n消えていった 者たちの 悲しみが\n魔王城に 澱みとなって 集まっています。\nその 澱みを 浄化し\n王の 本当の 姿を 取り戻して ください……！");
                         await typeMessage("【長老ガルドス】\nこの里には 昔から 伝わる 話がある。\n20年前……バルゴという 男が\n王に 送られた 英雄だったが\n使い捨てられそうに なり 生き延びた。\nそして ラムダスという 賢者と 出会い\n真実を 広めようとした……。");
-                        await typeMessage("【長老ガルドス】\nその バルゴが この エデンの 地図を\nこっそり 残してくれたんじゃ。\n「次の 英雄が 迷ったとき\nここへ 辿り着けるように」と……。\nあなたたちが その 英雄たちです！");
+                        await typeMessage("【長老ガルドス】\nその バルゴが この エデンの 地図を\nこっそり 残してくれたんじゃ。\n「次の 使者が 迷ったとき\nここへ 辿り着けるように」と……。\nあなたたちが その 使者たちです！");
                         if(getSQ('sq_09')===1) { advanceSQ('sq_09', 2); await typeMessage("（ふしぎな台帳に 「隠れ里エデンに到達し、長老ガルドスと話した」が 記録された）"); }
                     }
                     state='FIELD'; hideAllWindows(); drawMap(); return;
                 }
                 if(npc.id==='npc_eden_rebel'){
                     if(getSQ('sq_09')===3 && _2nd && !isSQDone('sq_09')) {
-                        await typeMessage("【反乱軍の隊長】\n魔王城を 倒したか……！\nよし、これを 受け取れ——\n「封印の書状」だ。\n百年間、王が 使い続けた\n英雄抹殺の 命令書の 写しだ。\nこれで 偽王の 正体を 証明できる！");
+                        await typeMessage("【反乱軍の隊長】\n魔王城を 倒したか……！\nよし、これを 受け取れ——\n「封印の書状」だ。\n十年間、王が 使い続けた\n英雄抹殺の 命令書の 写しだ。\nこれで 王が 何を 恐れて\nこの 仕組みを 続けてきたのか、\n証明できる！");
                         advanceSQ('sq_09', 4);
-                        await typeMessage("（ふしぎな台帳に 「偽王の証拠 封印の書状を入手した」が 記録された）");
+                        await typeMessage("（ふしぎな台帳に 「王の孤独の証拠 封印の書状を入手した」が 記録された）");
                         state='FIELD'; hideAllWindows(); drawMap(); return;
                     }
                     if(_fin){
                         await typeMessage("【反乱軍の隊長】\nやった……やったぞ！\n10年間 待ち続けた この日が！\nエデンの みんなに 知らせに 行かなければ！！");
                     } else if(_guardL===0){
-                        await typeMessage("【反乱軍の隊長】\n城の 兵士たちを 全員 解放した……！\nあとは 偽王 一人 だ！\n城に 乗り込め！！ 今こそ 決着の 時！！");
+                        await typeMessage("【反乱軍の隊長】\n城の 兵士たちを 全員 解放した……！\nあとは 王の 澱みを 浄化するのみ だ！\n城に 乗り込め！！ 今こそ 決着の 時！！");
                     } else if(_memC>2){
-                        await typeMessage(`【反乱軍の隊長】\n城下町と エニシア城の\n兵士たちが まだ 闇に 囚われている！\n残り ${_guardL}人 だ！\n全員 解放すれば 偽王の 力が 弱まる！`);
+                        await typeMessage(`【反乱軍の隊長】\n城下町と エニシア城の\n兵士たちが まだ 闇に 囚われている！\n残り ${_guardL}人 だ！\n全員 解放すれば 澱みの 力が 弱まる！`);
                     } else {
-                        await typeMessage("【反乱軍の隊長】\n俺たちは 10年間\n偽王の 圧政に 抵抗し続けてきた！\n城下町には まだ 闇に 囚われた\n仲間たちが いる……。");
-                        await typeMessage("【反乱軍の隊長】\nだが 俺たちじゃ 手が 出せない。\nお前たちなら できる！\n魔王城を 倒したら また 来い——\n偽王の 正体を 暴く 証拠を 渡してやる！");
+                        await typeMessage("【反乱軍の隊長】\n俺たちは 10年間\n王の 圧政に 抵抗し続けてきた！\n城下町には まだ 闇に 囚われた\n仲間たちが いる……。");
+                        await typeMessage("【反乱軍の隊長】\nだが 俺たちじゃ 手が 出せない。\nお前たちなら できる！\n魔王城の 澱みを 浄化したら また 来い——\n王の 孤独の 正体を 暴く 証拠を 渡してやる！");
                         if(getSQ('sq_09')===2) { advanceSQ('sq_09', 3); await typeMessage("（ふしぎな台帳に 「反乱軍の隊長の依頼を受けた」が 記録された）"); }
                     }
                     state='FIELD'; hideAllWindows(); drawMap(); return;
                 }
                 if(npc.id==='npc_eden_poet'){
                     if(_fin){
-                        await typeMessage("【吟遊詩人カルロ】\nそれは 伝説の始まり……\n闇の 10年を 乗り越えた\n英雄たちの 詩を 歌わせてくれ！\n────これが 歌われる日が 来るとは！");
-                        await typeMessage("【吟遊詩人カルロ】\n♪ バルゴの 拳が 嵐を 砕き\nラムダスの 声が 暗闇に 響いた\n20年の 旅を 経て 帰ってきた あの男\n今の 英雄たちに 証明した——\n出来レースでも 本物の 絆は 本物だと ♪");
+                        await typeMessage("【吟遊詩人カルロ】\nそれは 伝説の始まり……\n闇の 10年を 乗り越えた\n使者たちの 詩を 歌わせてくれ！\n────これが 歌われる日が 来るとは！");
+                        await typeMessage("【吟遊詩人カルロ】\n♪ バルゴの 拳が 嵐を 砕き\nラムダスの 声が 暗闇に 響いた\n20年の 旅を 経て 帰ってきた あの男\n今の 使者たちに 証明した——\n出来レースでも 本物の 絆は 本物だと ♪");
                     } else {
-                        await typeMessage("【吟遊詩人カルロ】\n♪ 百年前の 王の 嘆きよ……\n奪われた 体と 魂 悲しみよ……\n10年後の 英雄よ……届けておくれ\n真実の光を 闇の城へと ♪");
-                        await typeMessage("【吟遊詩人カルロ】\n……この歌は 10年前から\n語り継がれている 詩です。\n「英雄が 時を 越えて 来る」という\n予言が 込められているそうです。");
+                        await typeMessage("【吟遊詩人カルロ】\n♪ 十年前の 王の 嘆きよ……\n閉ざされた 心 悲しみよ……\n十年後の 使者よ……届けておくれ\n真実の光を 闇の城へと ♪");
+                        await typeMessage("【吟遊詩人カルロ】\n……この歌は 10年前から\n語り継がれている 詩です。\n「使者が 時を 越えて 来る」という\n予言が 込められているそうです。");
                         await typeMessage("【吟遊詩人カルロ】\n20年前……バルゴという 海賊が いましてね。\n王に 送り込まれた 英雄だったのに\n生き延びて 戻ってきた……。\n「出来レースでも 旅は 本物だ」と\n言い残して 海へ 去ったそうです。\nそれを 聞いた ラムダスという 賢者が\nここ エデンへの 地図を 残してくれたんです。");
                     }
                     state='FIELD'; hideAllWindows(); drawMap(); return;
@@ -11032,13 +11033,13 @@ async function checkAction() {
                     if(_fin){
                         await typeMessage("【城下町の難民】\n……あの 城下町に\nまた 戻れる日が 来るとは……！\n10年間 逃げてばかりで 悔しかった。\nありがとう……本当に ありがとう……！！");
                     } else {
-                        await typeMessage("【城下町の難民】\n10年前……偽王が 現れた 夜\nわたしは 城下町から 逃げてきました。\nあの夜の 兵士たちの 眼は……\n黒く 濁っていて とても 怖かった……。");
+                        await typeMessage("【城下町の難民】\n10年前……王の 心が 閉ざされた 夜\nわたしは 城下町から 逃げてきました。\nあの夜の 兵士たちの 眼は……\n黒く 濁っていて とても 怖かった……。");
                         await typeMessage("【城下町の難民】\nでも 後で 気がついたんです。\nあの兵士たち……みんな 泣いていた。\n声に 出さずに……でも 確かに。\nきっと 呪われていて 苦しんでいたんでしょう……。");
                     }
                     state='FIELD'; hideAllWindows(); drawMap(); return;
                 }
                 if(npc.id==='npc_eden_shop'){
-                    await typeMessage("【エデン 道具屋】\nエデンで 作った 貴重な 品々です。\n偽王の 目を くぐって 集めたものだから\n少し お高いですが……。");
+                    await typeMessage("【エデン 道具屋】\nエデンで 作った 貴重な 品々です。\n王の 兵士の 目を くぐって 集めたものだから\n少し お高いですが……。");
                     // エデンショップ: 後半高品質アイテム
                     const _eshop=[
                         masterData.items['i05'], // 世界樹の葉
@@ -11067,7 +11068,7 @@ async function checkAction() {
                     if(partyData.flags['2nd_mem_town']){
                         await typeMessage("【退役騎士ガリード】\n……記憶が 戻ってきたか。\nそうだ……あの 城には\n本物の 聖王の 魂が 眠っている。\nお前たちなら……必ず できる！");
                     } else {
-                        await typeMessage("【退役騎士ガリード】\nわしは 10年前 城の 近衛騎士だった。\n偽王の「闇」が 迫ってきた 瞬間……\n辛うじて 城を 脱出した。\n仲間たちは……全員 囚われてしまった。");
+                        await typeMessage("【退役騎士ガリード】\nわしは 10年前 城の 近衛騎士だった。\n王の 心を 覆う「澱み」が\n城中に 広がってきた 瞬間……\n辛うじて 城を 脱出した。\n仲間たちは……全員 囚われてしまった。");
                         await typeMessage("【退役騎士ガリード】\nお前たちを 見ていると\n10年前の 英雄の 話を 思い出す……。\n「ふっかつのじゅもん」の 力で\n来た 者たちか？ ならば……頼む！！");
                     }
                     state='FIELD'; hideAllWindows(); drawMap(); return;
@@ -11077,7 +11078,7 @@ async function checkAction() {
                         await typeMessage("【語り部の老婦】\nそう……それが 本当の 歴史じゃ。\nこの村は ずっと 知っておった。\n「いつか 英雄が 時を 越えてくる」と。\nお前たちが その人たちじゃ！");
                     } else {
                         await typeMessage("【語り部の老婦】\nこの村には 百年前から\n語り継がれている 話がある。\n「本物の 王は 肉体を 奪われ\n百年 泣き続けた」という 話じゃ。");
-                        await typeMessage("【語り部の老婦】\n10年前……偽王が 本性を 現した 時\nこの村の 者たちは 皆 言うた……\n「やはり そうか」と。\nお前たちが 真実を 届けてくれ！");
+                        await typeMessage("【語り部の老婦】\n10年前……王が 国境を 固く 閉ざした 時\nこの村の 者たちは 皆 言うた……\n「何かが あったに 違いない」と。\nお前たちが 真実を 届けてくれ！");
                     }
                     state='FIELD'; hideAllWindows(); drawMap(); return;
                 }
@@ -11120,14 +11121,14 @@ async function checkAction() {
                             await typeMessage("【異世界の旅人】\n……見事じゃ。\nこれほどの 強さ、わしも 久しぶりに 感じた。\nこれを 受け取れ——\n「アルテマソード」。\n次元をも 切り裂く 究極の 剣じゃ。"); AudioManager.playSE('item_get');
                             let target = partyData.members[0]; if(target.inventory.length < 8) target.inventory.push("w_star_sword"); else target.inventory[0] = "w_star_sword";
                             await typeMessage("『星砕きの剣』を てにいれた！");
-                            await typeMessage("【異世界の旅人】\n……一つだけ 言おう。\n偽王を 倒しても 終わりでは ない。\n本当の 旅は そこから 始まる。\n「出来レース」の 後を\n自分の 足で 歩き続けるのが\n本当の 英雄じゃ。");
+                            await typeMessage("【異世界の旅人】\n……一つだけ 言おう。\n王を 救っても 終わりでは ない。\n本当の 旅は そこから 始まる。\n「出来レース」の 後を\n自分の 足で 歩き続けるのが\n本当の 英雄じゃ。");
                             partyData.flags.flag_beaten_secret_boss = true;
                             if(!isSQDone('sq_10')) await grantSQReward('sq_10');
                             delete currentMap.npcs[key];
                         }
                     } else { await typeMessage("【異世界の旅人】\n準備ができたら また 来るがいい。\nわしは 逃げも 隠れも せぬ。"); }
                 } else {
-                    await typeMessage("【異世界の旅人】\n……偽王を 倒したか。\n君たちは 出来レースを 生き抜いて\n本物の 絆を 証明した。\nバルゴも ラムダスも きっと 喜んでいるじゃろう。\n自分の 足で 歩き続けるのじゃ！");
+                    await typeMessage("【異世界の旅人】\n……王を 救ったか。\n君たちは 出来レースを 生き抜いて\n本物の 絆を 証明した。\nバルゴも ラムダスも きっと 喜んでいるじゃろう。\n自分の 足で 歩き続けるのじゃ！");
                 }
                 state = 'FIELD'; hideAllWindows(); drawMap(); return;
             }
@@ -11172,9 +11173,9 @@ async function checkAction() {
                 if (!partyData.flags.flag_king_ending_told) {
                     // ★ 真エンディング後・石像エピローグ
                     AudioManager.playBGM('ending');
-                    await typeMessage("【聖王ボルドの 石像】\n（ふと 石像の 瞳が 光った……）");
-                    await typeMessage("【聖王ボルド（魂）】\n末裔よ……よく 戻った。\n世界は 変わり始めた。\nまだ 混乱している 民も いるだろうが……\nそれが 本物の 歴史の 始まりじゃ。");
-                    await typeMessage("【聖王ボルド（魂）】\nお前たちの 旅は 終わらない。\nこれからも 自分の 足で\n歩き続けるのじゃ……\n誇りを 持って。\n────── いつでも この城に 帰ってくるがよい。");
+                    await typeMessage("【ボルド王】\n（玉座の 傍らで、静かに 目を 閉じている……\nふと その 瞳が 開いた……）");
+                    await typeMessage("【ボルド王】\n境界の 使者よ……よく 戻った。\n世界は 変わり始めた。\nまだ 混乱している 民も いるだろうが……\nそれが 本物の 歴史の 始まりじゃ。");
+                    await typeMessage("【ボルド王】\nお前たちの 旅は 終わらない。\nこれからも 自分の 足で\n歩き続けるのじゃ……\n誇りを 持って。\n────── いつでも この城に 帰ってくるがよい。");
                     await typeMessage("『グラビティ クエスト』\n\nおわり\n\nプレイ ありがとうございました！");
                     partyData.flags.flag_king_ending_told = true;
                     localStorage.setItem('gravity_quest_save', JSON.stringify(partyData));
@@ -11187,7 +11188,7 @@ async function checkAction() {
             // ★宮廷賢者バルダック
             if (npc.id === "npc_story_advisor") {
                 if (partyData.flags.last_boss_defeated) {
-                    if (partyData.flags.flag_2nd_maou_cleared) { await typeMessage("【宮廷賢者バルダック】\n聖王ボルドの 魂が 解放されたと\n聞こえてきた……。\nずっと この日を 待っておった……！\nお前たちを ずっと 誇りに 思っておるぞ！"); }
+                    if (partyData.flags.flag_2nd_maou_cleared) { await typeMessage("【宮廷賢者バルダック】\nボルド王が 澱みから 解き放たれたと\n聞こえてきた……。\nずっと この日を 待っておった……！\nお前たちを ずっと 誇りに 思っておるぞ！"); }
                     else { await typeMessage("【宮廷賢者バルダック】\nよく 戻った……！\n世界中から 魔物の 気配が 消えておる。\n洞窟から 始まり 世界を 右回りに 一周した\nお前たちの 旅は 伝説となるじゃろう！\nエニシア城で 凱旋の 報告を するのじゃ！"); }
                 } else if (!partyData.flags.flag_king_met) {
                     await typeMessage("【宮廷賢者バルダック】\nまず 玉座の間の 王様に\nご挨拶を するのじゃ。\nただ……ひとつだけ 覚えておいてくれ。\nこの城を 旅立った「勇者」と 呼ばれた 者が\nこれまで 何人いたか……\nわしは 知っている。\nそして 誰も 帰ってこなかった ことも な。 ふむ……。");
@@ -12662,11 +12663,11 @@ ${_sns[_ri(_sns.length)]}
                 if (partyData.flags.last_boss_defeated) {
                     await typeMessage("【漁師の妻】\nまあ……本当に 平和が 来たんですね！\nこれで 主人も 安心して 漁に 出られます。\n本当に ありがとうございました……！");
                 } else if (_is2W) {
-                    await typeMessage("【漁師の妻】\nグラ王様が あなたたちを 逃がすために……\nご自分を 犠牲に して……。\nアリアが 全部 話してくれました……。");
+                    await typeMessage("【漁師の妻】\n王の 澱みに 触れて 逃げてきたって……\nアリアが 全部 話してくれました……。");
                     if (!partyData.flags.has_ship) {
                         await typeMessage("【漁師の妻】\n北の 洞窟に 守護霊の 老騎士が います。\n以前 あなたたちに 船を 渡してくれた方です。\nもう一度 会いに 行ってみては……？");
                     } else {
-                        await typeMessage("【漁師の妻】\n記憶が なくても 大丈夫よ。\nあなたたちの 体には\nグラ王様の 想いが 宿っているはずです。\n必ず 思い出せます。");
+                        await typeMessage("【漁師の妻】\n記憶が なくても 大丈夫よ。\nあなたたちの 心には\nきっと 王を 救いたいという 想いが\n宿っているはずです。\n必ず 思い出せます。");
                     }
                 } else {
                     await typeMessage("【漁師の妻】\nいらっしゃい 旅人さん。\nこの村の 魚は とても 美味しいですよ。\n道具屋では 漁師の嫁の 手作り 薬草も 売っています。");
@@ -12837,11 +12838,11 @@ ${_sns[_ri(_sns.length)]}
                         await typeMessage("【天空の王】\nとどまれ……。\n（白竜の 瞳が ${_heroName}を 見つめ\n静かに 涙を 流した……）");
                         await typeMessage("【天空の王】\nその血の 匂い……百年 待ち続けた\n光の 紋章の 継承者か……！\nお前が 真の 器かどうか\n証明してみせよ！");
                     } else if (_isFinal && _is2nd) {
-                        await typeMessage("【偽の国王ボルド】\nくははは！ よくぞ 辿り着いた\n真実を 知った 勇者よ！！");
-                        await typeMessage("【偽の国王ボルド】\n百年前に あの 肉体を 手に入れた時から\nこの日を 楽しみにしておった……！\nお前たちを ここで 終わりにしてやろう！！");
+                        await typeMessage("【澱みに沈む 王の 面影】\n……また 来たのか。\n真実を 知って なお、ここへ……？");
+                        await typeMessage("【澱みに沈む 王の 面影】\n十年前……あの日から\nわしは ずっと ここに いた。\n閉ざした 心の 奥底に……\nお前たちに 見せられる ものでは ない……！！");
                     } else if (_isFinal) {
-                        await typeMessage("【グラ王】\nや……やっと 来たか……\n我が 末裔よ……！");
-                        await typeMessage("【グラ王】\n（苦痛と 安堵の 入り混じった 表情で……）\nわしを……倒せ。\n今は まだ 何も 言えない……\nだが……この剣を 受けよ……！！");
+                        await typeMessage("【彷徨う 王の 面影】\n……お前たちか……\n国境の 見張り台で 育ったという……！");
+                        await typeMessage("【彷徨う 王の 面影】\n（苦痛と 安堵の 入り混じった 表情で……）\nわしを……倒してくれ。\n今は まだ 何も 語れない……\nだが……この剣に 込めた 想いだけは\n受け取ってくれ……！！");
                     } else {
                         await typeMessage(`【${_bn}】\nここまで たどりついたとは！\nだが ここから さきには すすませぬ！！`);
                     }
@@ -12903,14 +12904,14 @@ ${_sns[_ri(_sns.length)]}
                             }
                         } else if (_isFinal && _is2nd) {
                             // 既に怨念浄化済み → 城へ急ぐよう促す
-                            await typeMessage("（……この場所に 漂っていた 怨念は\nすでに 浄化された。\nエニシア城へ 急がなければ……！\n偽の 王が 待っている……！）");
+                            await typeMessage("（……この場所に 漂っていた 澱みは\nすでに 浄化された。\nエニシア城へ 急がなければ……！\nボルド王が……独り 待っている……！）");
                             state='FIELD'; hideAllWindows(); drawMap(); return;
                         } else if (_isFinal) {
                             // 第1形態撃破 → 中間演出 → 最終形態連続戦闘
-                            await typeMessage("グラ王は 倒れた……\nしかし……！");
-                            await typeMessage("『……よくぞ ここまで 来た……\n我が 末裔よ……\n……だが……まだ 終わりでは ない……！！』");
-                            await typeMessage("グラ王の 体から 黒い 光が 溢れ出した……！\n魔王の 呪縛が 完全に 解き放たれていく……！！");
-                            await typeMessage("【グラ王・最終形態】が 現れた！！\nこれが グラ王の 本当の 姿——\n百年間 封じ続けた 力の 全て……！！");
+                            await typeMessage("王の 面影は 崩れ落ちた……\nしかし……！");
+                            await typeMessage("『……よくぞ ここまで 来た……\n境界の 使者よ……\n……だが……まだ 終わりでは ない……！！\nこれが わしの 抱え続けた\n澱みの 姿……直視するがいい……！』");
+                            await typeMessage("面影の 奥から 黒い 靄が 溢れ出した……！\n十年分の 孤独と 恐れが\n形を 成していく……！！");
+                            await typeMessage("【澱みの 化身】が 現れた！！\nこれが ボルド王の 心の 奥に\n巣食い続けてきた 恐れの 姿——\n分断そのものが 凝り固まった 姿……！！");
                             // 最終形態ステータス（第1形態の約1.6倍）
                             masterData.monsters['boss_maou_final'] = {
                                 name: 'グラ王・最終形態',
@@ -12931,14 +12932,14 @@ ${_sns[_ri(_sns.length)]}
                             hideGoldWindow(); let _bwFinal = await executeBattle(['boss_maou_final']); showGoldWindow(); updateGoldWindow();
                             if (!_bwFinal) return;
                             // 最終形態撃破 → 偽王決戦フラグへ
-                            await typeMessage("グラ王・最終形態を 撃破した……！！\n魔王城全体が 轟き……\n黒い 光が 城の 外へ 流れ出していく……！");
-                            await typeMessage("（……この 怨念は\n王の 仕組みに 虐げられた 者たちの\n怒りと 悲しみが 固まったものだった。\n それが 今……源へ 還っていく……\nエニシア城へ……！）");
-                            await typeMessage("（……急がなければ。\nこの 怨念が 戻っていく 先に\n本当の 悪が 待っている……！）");
+                            await typeMessage("澱みの 化身は 崩れ 溶けていった……！！\nこの城 全体が 静かに 震え……\n黒い 靄が 外へ 流れ出していく……！");
+                            await typeMessage("（……この 澱みは\n王の 仕組みに 傷つけられた 者たちの\n怒りと 悲しみ、そして 王自身の\n十年分の 孤独が 固まったものだった。\nそれが 今……源へ 還っていく……\nエニシア城へ……！）");
+                            await typeMessage("（……急がなければ。\nこの 澱みが 還っていく 先で\nボルド王が 独り、待っている……！）");
                             partyData.flags.flag_2nd_maou_cleared = true;
                             partyData.flags.flag_king_ending_told = false;
                             if (getSQ('sq_04') >= 1 && !isSQDone('sq_04') && !partyData.members.some(m=>m.inventory.includes('dragon_scale_gold'))) {
                                 const _gTgt = partyData.members.find(m=>m.inventory.length<8)||partyData.members[0];
-                                if(_gTgt){_gTgt.inventory.push('dragon_scale_gold'); AudioManager.playSE('item_get'); await typeMessage("グラ王の 残力が\n金色の 鱗に 変わった……\n金竜の鱗 を てにいれた！"); advanceSQ('sq_04',4);}
+                                if(_gTgt){_gTgt.inventory.push('dragon_scale_gold'); AudioManager.playSE('item_get'); await typeMessage("澱みの 化身の 残力が\n金色の 鱗に 変わった……\n金竜の鱗 を てにいれた！"); advanceSQ('sq_04',4);}
                             }
                             await typeMessage("（エニシア城に 帰還します。\n王様に 話しかけると 最終決戦です！）");
                             let _retTown = 'map_castle_01';
@@ -13019,18 +13020,18 @@ ${_sns[_ri(_sns.length)]}
                 }
                 else if (npc.id === 'npc_guard_demon') {
                     if (partyData.flags.flag_2nd_maou_cleared) {
-                        await typeMessage("【魔族の兵士】\n……お前たちが 来るのを\nずっと 待っておった……。\n百年……百年もの間\nわれらは 偽りの 主に 仕えてきた……！");
-                        await typeMessage("【魔族の兵士】\nグラ王様……本物の 初代国王は\nわれらの 真の 主君だった……！\nなのに われらは……その 肉体を 奪った者に\nずっと 操られていたのだ！");
-                        await typeMessage("【魔族の兵士】\nお前たちが 過去を 変えに 来た……\nそれは わかる。\nだが……われらの 魂に 誓い、\nこの 戦いだけは 受けてもらわねばならぬ！");
+                        await typeMessage("【魔族の兵士】\n……お前たちが 来るのを\nずっと 待っておった……。\n十年……十年もの間\nわれらは 澱みに 呑まれた 王に 仕えてきた……！");
+                        await typeMessage("【魔族の兵士】\nボルド王……本当の あの方は\nわれらの 真の 主君だった……！\nなのに われらは……澱みに 心を 侵され\nずっと それに 従わされていたのだ！");
+                        await typeMessage("【魔族の兵士】\nお前たちが 王を 救いに 来た……\nそれは わかる。\nだが……われらの 誇りに 誓い、\nこの 戦いだけは 受けてもらわねばならぬ！");
                     } else if (partyData.flags.flag_sky_truth_known) {
-                        await typeMessage("【魔族の兵士】\n…人間を守らねば……\nあいつ（偽の王）が 世界を 喰らい尽くす前に……");
-                        await typeMessage("【魔族の兵士】\nグラ王様を 信じるな……などと\n言わないでくれ……！\nわれらは……人間のために 戦っているのだ……！");
+                        await typeMessage("【魔族の兵士】\n…人間を守らねば……\n澱みが 世界を 喰らい尽くす前に……");
+                        await typeMessage("【魔族の兵士】\nボルド王を 信じるな……などと\n言わないでくれ……！\nわれらは……人間のために 戦っているのだ……！");
                     } else {
                         await typeMessage("【魔族の兵士】\nよく ここまで 来たな 人間ども……！\nだが ここから 先には\nただでは 通さぬ！\n魔王様の 御名において\nここを 守りきる！！");
                     }
                     let _gid = 'death_knight'; if (!masterData.monsters[_gid]) masterData.monsters[_gid] = { name: '魔族の兵士', max_hp: 180, atk: 38, def: 22, spd: 18, exp: 350, gold: 180 };
                     hideGoldWindow(); let _gw = await executeBattle([_gid]); showGoldWindow(); updateGoldWindow();
-                    if (_gw) { delete currentMap.npcs[key]; if (partyData.flags.flag_2nd_maou_cleared) { await typeMessage("魔族の兵士を たおした……\n「……よく やった……\n聖王ボルドを……救ってやってくれ……！」"); } else { await typeMessage("魔族の兵士を たおした！"); } }
+                    if (_gw) { delete currentMap.npcs[key]; if (partyData.flags.flag_2nd_maou_cleared) { await typeMessage("魔族の兵士を たおした……\n「……よく やった……\nボルド王を……救ってやってくれ……！」"); } else { await typeMessage("魔族の兵士を たおした！"); } }
                 }
                 else if(npc.id.includes('shop') || npc.id.includes('bazaar') || (npc.name && (npc.name.includes('武器屋') || npc.name.includes('道具屋') || npc.name.includes('防具屋')))) { if (npc.id.includes('weapon') || npc.id.includes('bazaar') || npc.id === 'npc_strong_weapon_shop' || (npc.name && (npc.name.includes('武器屋') || npc.name.includes('防具屋')))) await eventWeaponShop(npc.id); else await eventShop(npc.id); }
                 else if(npc.id.includes('priest') || npc.id.includes('church') || (npc.name && (npc.name.includes('神父') || npc.name.includes('神官')))) await eventPriest();
@@ -13725,7 +13726,7 @@ async function executeBattle(fixedEnemies = null) {
     await typeMessage(`${enemies.map(e=>e.displayName).join(' と\n')} が\nあらわれた！`);
 
     if (hasGuraKing) {
-        await typeMessage(`【王の威圧】\nグラ王の 放つ 圧倒的な 威圧感が\nパーティーを つつみこむ……！`);
+        await typeMessage(`【王の威圧】\n澱みと化した 王の 放つ 圧倒的な 威圧感が\nパーティーを つつみこむ……！`);
         await typeMessage(`パーティー ぜんいんの こうげきりょくが\nさがってしまった！`);
     }
     
