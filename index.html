@@ -830,7 +830,7 @@ const _GQ_JOBS = ['勇者','戦士','魔法使い','僧侶','賢者','パンダ'
 const _GQ_MAPS = ['map_town_01','map_castle_01','map_dungeon_1f','map_dungeon_b1f','map_dungeon_b2f','map_dungeon_b3f','map_tower_1f','map_tower_2f','map_tower_3f','map_shrine_warp','map_demon_castle_1f','map_demon_castle_2f','map_demon_castle_3f','map_demon_castle_4f','map_town_02','map_town_03','map_dharma_temple','map_fishing_village_nw','map_frontier_village','map_pirate_cave','map_sage_shrine','map_field_0_0','map_field_1_0','map_field_2_0','map_field_3_0','map_field_4_0','map_field_0_1','map_field_1_1','map_field_2_1','map_field_3_1','map_field_4_1','map_field_0_2','map_field_1_2','map_field_2_2','map_field_3_2','map_field_4_2','map_field_0_3','map_field_1_3','map_field_2_3','map_field_3_3','map_field_4_3','map_field_0_4','map_field_1_4','map_field_2_4','map_field_3_4','map_field_4_4','map_eden',
     'map_castle_zarmo','map_castle_estoria','map_castle_deserta','map_castle_north',
     'map_town_nord','map_town_rosalia','map_town_coral','map_town_bazaar','map_town_estoria_city','map_town_oasis','map_town_south_port','map_town_frost','map_village_elfheim','map_town_salmon',
-    'map_tower_magic_1f','map_tower_darkspire_1f','map_dharma_temple_north','map_demon_castle_left'];
+    'map_tower_magic_1f','map_tower_darkspire_1f','map_dharma_temple_north','map_demon_castle_left','map_fishing_village_harbor'];
 // アイテム/装備コンパクトIDテーブル（8ビット=256種、0=なし）
 // 消耗品(i*)・武器(w*)・防具(a*)・盾(s*)・兜(h*)・アクセ(x*/acc*)・特殊品を網羅
 const _GQ_EQUIP = [
@@ -6285,12 +6285,15 @@ async function fetchExternalMap(url) { const loading = document.getElementById('
                     }
                 }
             }
-            // ===== 試練の洞窟南の漁村「グラ港」(14×14) =====
-            // 洞窟(map_field_0_4 / (10,22))の南側陸地に配置。船なしで陸路アクセス可能
+            // ===== 試練の洞窟南の漁村「グラ港」(村広場14×14 + 波止場14×10 の2マップ構成) =====
+            // 洞窟(map_field_0_4 / (10,22))の南側陸地に配置。船なしで陸路アクセス可能。
+            // 小規模集落は1マップだと手狭に見えるため、村広場と波止場を分割し、
+            // 南側の出口(6,7列目)で相互接続する(街の規模が大きいマップほど
+            // マップ数を増やす方針の第一号パイロット)。
             if (!externalMapData['map_fishing_village_nw']) {
                 const _fvW=14,_fvH=14;
-                // 漁村レイアウト: 1=壁,0=草地,9=石畳,10=建物床,5=水,11=草花
-                // y0:上壁 y1-3:2棟(神父・道具屋) y4-10:広場・中央 y11-12:港(水+桟橋) y13:出口(北=フィールドへ)
+                // 村広場レイアウト: 1=壁,0=草地,9=石畳,10=建物床,5=水,11=草花
+                // y0:上壁(北=フィールドへ) y1-3:2棟(神父・道具屋) y4-11:広場 y12:通路 y13:南壁(波止場への出口)
                 const _fvLayout=[
                     [1,1,1,1,1,1,0,0,1,1,1,1,1,1],  // y=0: 上壁(北出口あり)
                     [1,1,9,10,9,1,0,0,1,9,10,9,1,1],
@@ -6302,27 +6305,58 @@ async function fetchExternalMap(url) { const loading = document.getElementById('
                     [1,0,0,0,0,0,0,0,0,0,0,0,0,1],
                     [1,0,0,0,0,0,0,0,0,0,0,0,0,1],
                     [1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,1],
                     [1,0,0,0,0,9,9,9,9,9,0,0,0,1],
-                    [1,5,5,5,5,9,9,9,9,5,5,5,5,1],
-                    [1,5,5,5,5,9,0,0,9,5,5,5,5,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1],  // y=13: 下壁（南は海）
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,0,0,1,1,1,1,1,1],  // y=13: 下壁（南=波止場への出口）
                 ];
                 const _fvT=_fvLayout.flat();
+                // 波止場レイアウト(14×10): y0:村への北出口 y1-4:荷揚げ広場 y5-7:桟橋(水に囲まれる) y8:海 y9:南壁(行き止まり)
+                const _hbW=14,_hbH=10;
+                const _hbLayout=[
+                    [1,1,1,1,1,1,0,0,1,1,1,1,1,1],  // y=0: 上壁(村への出口)
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,9,9,9,9,9,0,0,0,1],
+                    [1,0,0,9,0,0,0,0,0,0,9,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,9,9,9,9,9,0,0,0,1],
+                    [1,5,5,5,9,9,9,9,9,9,5,5,5,1],
+                    [1,5,5,5,9,9,9,9,9,9,5,5,5,1],
+                    [1,5,5,5,5,5,5,5,5,5,5,5,5,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1],  // y=9: 下壁（南は海、行き止まり）
+                ];
+                const _hbT=_hbLayout.flat();
+                const _hbId='map_fishing_village_harbor';
                 // 試練の洞窟のある map_field_0_4 の南部陸地を探す
                 const _fvP=findLand('map_field_0_4',10,35)||findLand('map_field_0_4',10,30)||findLand('map_field_0_4',8,28);
                 const _fvRet=_fvP?{map:'map_field_0_4',x:_fvP.x,y:_fvP.y}:{map:'map_field_0_4',x:10,y:36};
                 externalMapData['map_fishing_village_nw']={
                     width:_fvW,height:_fvH,tiles:_fvT,encounters:[],
-                    exits:{'6,0':_fvRet,'7,0':_fvRet},  // 北出口→フィールドへ(洞窟方向)
+                    exits:{
+                        '6,0':_fvRet,'7,0':_fvRet,  // 北出口→フィールドへ(洞窟方向)
+                        '6,13':{map:_hbId,x:6,y:1},'7,13':{map:_hbId,x:7,y:1},  // 南出口→波止場へ
+                    },
                     npcs:{
                         '3,2':{id:'npc_priest',name:'神父'},
                         '10,2':{id:'npc_item_shop_village',name:'道具屋（漁師の嫁）'},
                         '6,5':{id:'npc_sky_dragon_girl',name:'アリア'},
-                        '2,8':{id:'npc_fisher_old',name:'老漁師'},
-                        '11,8':{id:'npc_fisher_wife',name:'漁師の妻'},
-                        '6,9':{id:'npc_fisher_child',name:'漁師の子'},
                     },
                     name:'グラ港の漁村'
+                };
+                externalMapData[_hbId]={
+                    width:_hbW,height:_hbH,tiles:_hbT,encounters:[],
+                    exits:{
+                        '6,0':{map:'map_fishing_village_nw',x:6,y:12},
+                        '7,0':{map:'map_fishing_village_nw',x:7,y:12},  // 北出口→村広場へ
+                    },
+                    npcs:{
+                        '2,1':{id:'obj_deco_barrel',name:'樽'},
+                        '11,1':{id:'obj_deco_barrel',name:'樽'},
+                        '3,1':{id:'npc_fisher_old',name:'老漁師'},
+                        '10,1':{id:'npc_fisher_wife',name:'漁師の妻'},
+                        '6,4':{id:'npc_fisher_child',name:'漁師の子'},
+                    },
+                    name:'グラ港の波止場'
                 };
                 if(_fvP&&externalMapData['map_field_0_4']){
                     const _fw=externalMapData['map_field_0_4'].width||45;
@@ -8416,7 +8450,7 @@ function drawMap() {
     const _isDesertMap = _mapId.includes('desert') || _mapId.includes('oasis') || _mapId.includes('sand');
     // 都市規模による壁材の違い: 小規模集落は木の柵、首都(城下町グラマニア)は最も重厚な石壁、
     // それ以外の町は中間の煉瓦壁(既存)のまま。
-    const _SMALL_TOWN_IDS = ['map_fishing_village_nw','map_town_port','map_market_east','map_village_border','map_waypoint_village','map_frontier_village','map_abandoned_house'];
+    const _SMALL_TOWN_IDS = ['map_fishing_village_nw','map_fishing_village_harbor','map_town_port','map_market_east','map_village_border','map_waypoint_village','map_frontier_village','map_abandoned_house'];
     const _isSmallTown = isTown && _SMALL_TOWN_IDS.some(k => _mapId.includes(k.replace('map_','')));
     const _isCapitalTown = isTown && (_mapId.includes('town_01') || _mapId === 'town_01');
     // 偽王討伐編: 城下町・グラマニア城を魔王城スタイルで描画
