@@ -2190,7 +2190,9 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
         const _cc = _cosmicCvs.getContext('2d');
         const _cosmicStars = Array.from({length:90},(_,i)=>({x:rng(i*7+1)*W,y:rng(i*7+2)*H,r:0.5+rng(i*7+3)*2.2,spd2:0.18+rng(i*7+4)*0.85,tw:rng(i*7+5)*Math.PI*2,hue4:rng(i*7+6)*60}));
         // 色味: 風=青緑, 爆発=赤橙, 闇/アルテマ=深紫
-        const _nebCol = _isUltima?'rgba(40,0,80,0.72)':(etype==='wind'?'rgba(0,30,60,0.62)':(etype==='explosion'?'rgba(60,10,0,0.62)':'rgba(20,0,50,0.68)'));
+        const _nebRGB = _isUltima?[40,0,80,0.72]:(etype==='wind'?[0,30,60,0.62]:(etype==='explosion'?[60,10,0,0.62]:[20,0,50,0.68]));
+        const _nebCol = `rgba(${_nebRGB[0]},${_nebRGB[1]},${_nebRGB[2]},${_nebRGB[3]})`;
+        const _nebColMid = `rgba(${_nebRGB[0]},${_nebRGB[1]},${_nebRGB[2]},0.32)`;
         const _starCol = _isUltima?['#cc88ff','#ffffff','#aa66ff']:(etype==='wind'?['#88ffcc','#ffffff','#66ddaa']:(etype==='explosion'?['#ffcc88','#ffffff','#ffaa66']:['#aaaaff','#ffffff','#8888dd']));
         const _cosmicStart2 = performance.now();
         const _cosmicDur2 = dur + 120;
@@ -2202,7 +2204,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
             // 星雲グロー
             _cc.globalAlpha=bgAc*0.42;
             const nG=_cc.createRadialGradient(tcx,tcy,0,tcx,tcy,W*0.65);
-            nG.addColorStop(0,_nebCol); nG.addColorStop(0.55,_nebCol.replace('0.','0.32,').replace(',0.',',(0.32/')); nG.addColorStop(1,'rgba(0,0,0,0)');
+            nG.addColorStop(0,_nebCol); nG.addColorStop(0.55,_nebColMid); nG.addColorStop(1,'rgba(0,0,0,0)');
             _cc.fillStyle=nG; _cc.fillRect(0,0,W,H);
             // 流れ星パーティクル
             for(const s of _cosmicStars){
@@ -2245,12 +2247,18 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
         // 火は爆発タイミング(52%)、氷は砕け散り(48%)、雷は即時、他は即時
         const _shakeDelay = etype==='fire' ? dur*0.50 : etype==='ice' ? dur*0.45 : 0;
         const _maxSk = [0,0,8,16,24][tier], _mx = [0,0,7,15,22][tier], _my = [0,0,5,10,16][tier];
+        // カメラズームパンチ: 着弾点へ一瞬寄せてから戻す（tier2以上で発動、tierが高いほど強い）
+        const _zoomPeak = [0,0,0.03,0.055,0.09][tier];
+        gc.style.transformOrigin = `${(tcx/W*100).toFixed(1)}% ${(tcy/H*100).toFixed(1)}%`;
         setTimeout(() => {
             let _sk = 0;
             const iv = setInterval(() => {
                 _sk++;
-                gc.style.transform = _sk % 2 === 0 ? `translate(${(Math.random()-0.5)*_mx}px,${(Math.random()-0.5)*_my}px)` : 'none';
-                if (_sk >= _maxSk) { clearInterval(iv); gc.style.transform = 'none'; }
+                const _zAmt = _zoomPeak * Math.max(0, 1 - _sk / _maxSk);
+                const _tx = _sk % 2 === 0 ? (Math.random()-0.5)*_mx : 0;
+                const _ty = _sk % 2 === 0 ? (Math.random()-0.5)*_my : 0;
+                gc.style.transform = `scale(${(1+_zAmt).toFixed(4)}) translate(${_tx}px,${_ty}px)`;
+                if (_sk >= _maxSk) { clearInterval(iv); gc.style.transform = 'none'; gc.style.transformOrigin = ''; }
             }, 48);
         }, _shakeDelay);
     }
@@ -2282,20 +2290,38 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
     const dqFlash = (t, delay=0, col='rgba(255,255,255,0.92)') => {
         const ft = t - delay; if (ft < 0) return;
         const fa = ft < 0.12 ? ft/0.12 : Math.max(0, 1-(ft-0.12)/0.1);
-        if (fa > 0) { ctx.globalAlpha = fa * (0.7+tier*0.1); ctx.fillStyle = col; ctx.fillRect(0,0,W,H); }
+        if (fa > 0) {
+            // 色収差(クロマティックアベレーション): tier3以上で赤/シアンを僅かにずらして重ね、衝撃の"ブレ"を演出
+            if (tier >= 3) {
+                const _cab = 2 + tier;
+                ctx.globalCompositeOperation = 'screen';
+                ctx.globalAlpha = fa * 0.45;
+                ctx.fillStyle = 'rgba(255,40,40,0.85)'; ctx.fillRect(-_cab, 0, W, H);
+                ctx.fillStyle = 'rgba(40,220,255,0.85)'; ctx.fillRect(_cab, 0, W, H);
+                ctx.globalCompositeOperation = 'source-over';
+            }
+            ctx.globalAlpha = fa * (0.7+tier*0.1); ctx.fillStyle = col; ctx.fillRect(0,0,W,H);
+        }
         ctx.globalAlpha = 1;
     };
 
-    // 共通: 衝撃波リング（複数個が順番に広がる）
+    // 共通: 衝撃波リング（複数個が順番に広がる）＋ 高tierはブルーム(発光)を追加
     const dqRing = (t, col, lw=3, speed=1.0) => {
         const ringN = tier >= 3 ? 4 : tier >= 2 ? 3 : 2;
         for (let ri = 0; ri < ringN; ri++) {
             const rp = Math.max(0, t - ri * 0.12); if (rp <= 0) continue;
             const r = rp * (70 + tier * 40) * speed;
             const al = Math.max(0, 1 - rp * 1.1);
+            if (tier >= 3 && ri === 0) {
+                // ブルーム: 柔らかい光の広がりをリングの内側に敷く（2025年風の派手さ）
+                ctx.globalAlpha = al * 0.35;
+                const _bloom = ctx.createRadialGradient(tcx, tcy, 0, tcx, tcy, r * 1.4);
+                _bloom.addColorStop(0, col); _bloom.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = _bloom; ctx.beginPath(); ctx.arc(tcx, tcy, r * 1.4, 0, Math.PI*2); ctx.fill();
+            }
             ctx.globalAlpha = al;
             ctx.strokeStyle = col; ctx.lineWidth = Math.max(0.5, lw - ri * 0.5 - rp * 2);
-            ctx.shadowColor = col; ctx.shadowBlur = 10;
+            ctx.shadowColor = col; ctx.shadowBlur = 10 + tier * 3;
             ctx.beginPath(); ctx.arc(tcx, tcy, r, 0, Math.PI*2); ctx.stroke();
         }
         clearGlow(); ctx.globalAlpha = 1;
