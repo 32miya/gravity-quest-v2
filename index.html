@@ -7932,7 +7932,7 @@ function getEnemyImageHtml(enemyId) {
 
 function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
     const T = TILE_SIZE;
-    const { castle, town, cave, demon, tower, shrine, smallTown, capitalTown } = mc;
+    const { castle, town, cave, demon, tower, shrine, smallTown, capitalTown, townElement } = mc;
     const fl = Math.floor;
     const fr = (c, rx, ry, rw, rh) => { ctx.fillStyle = c; ctx.fillRect(px + rx, py + ry, rw, rh); };
     const ln = (c, lw, x1, y1, x2, y2) => { ctx.strokeStyle = c; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(px + x1, py + y1); ctx.lineTo(px + x2, py + y2); ctx.stroke(); };
@@ -8119,9 +8119,15 @@ function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
             ctx.fillStyle = _vg; ctx.fillRect(px, py, T, T);
             ctx.restore();
         } else if (town) {
-            // DQスタイル赤レンガ道路
-            fr('#561410', 0, 0, T, T); // 目地（暗い赤褐色）
-            let bcs = ['#8c3028','#963828','#843020','#9e3c30'];
+            // DQスタイル道路: 五行の属性ごとに色調を変える（未分類は既存の赤レンガ）
+            const _roadPal = {
+                wood:  { mortar:'#2c3a24', bricks:['#6a7c3c','#748c40','#607836','#7c9048'] },
+                fire:  { mortar:'#5a2c0c', bricks:['#c8823c','#d4903e','#bc7830','#dc9848'] },
+                metal: { mortar:'#34302a', bricks:['#8a8478','#928c7e','#807a6e','#9a9486'] },
+                water: { mortar:'#132434', bricks:['#4c6478','#547082','#446074','#5c7890'] },
+            }[townElement] || null;
+            fr(_roadPal ? _roadPal.mortar : '#561410', 0, 0, T, T); // 目地
+            let bcs = _roadPal ? _roadPal.bricks : ['#8c3028','#963828','#843020','#9e3c30'];
             for (let row = 0; row < 4; row++) {
                 let off = row % 2 === 0 ? 0 : 4;
                 let by2 = row * 8 + 1;
@@ -8249,9 +8255,15 @@ function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
                 fr('#e8c060', T/2 - 1, T - 10, 2, 2);
             }
         } else if (town) {
-            // DQスタイルグレー石壁（中規模: 現状維持）
-            fr('#404040', 0, 0, T, T); // 目地（暗いグレー）
-            let gsc = ['#787878','#6e6e6e','#747474','#666666','#717171'];
+            // DQスタイルグレー石壁（中規模）: 五行の属性ごとに色調を変える
+            const _elemPal = {
+                wood:  { mortar:'#2e3a2c', bricks:['#5c7458','#527052','#5e7a5a','#4c684c','#587656'] },
+                fire:  { mortar:'#4a2c18', bricks:['#c08858','#b87c4c','#c69064','#ae7444','#bb8354'] },
+                metal: { mortar:'#3a3628', bricks:['#8c8468','#827a5c','#948c70','#766e54','#867e62'] },
+                water: { mortar:'#1c2c3a', bricks:['#5c7488','#527088','#66809a','#4c6a80','#5a7690'] },
+            }[townElement] || null;
+            fr(_elemPal ? _elemPal.mortar : '#404040', 0, 0, T, T); // 目地
+            let gsc = _elemPal ? _elemPal.bricks : ['#787878','#6e6e6e','#747474','#666666','#717171'];
             for (let row = 0; row < 4; row++) {
                 let off = (row % 2) * 8;
                 let by2 = row * 8 + 1;
@@ -8453,10 +8465,24 @@ function drawMap() {
     const _SMALL_TOWN_IDS = ['map_fishing_village_nw','map_fishing_village_harbor','map_town_port','map_market_east','map_village_border','map_waypoint_village','map_frontier_village','map_abandoned_house'];
     const _isSmallTown = isTown && _SMALL_TOWN_IDS.some(k => _mapId.includes(k.replace('map_','')));
     const _isCapitalTown = isTown && (_mapId.includes('town_01') || _mapId === 'town_01');
+    // 五行世界観による中規模町の色調差別化: 木(東)/火(南)/金(西)/水(北)の4系統。
+    // 首都(土)は既存の重厚な石壁のまま、未分類の町は従来のグレー煉瓦を維持。
+    const _WOOD_TOWN_IDS = ['map_town_estoria_city'];
+    const _FIRE_TOWN_IDS = ['map_town_oasis','map_town_south_port'];
+    const _METAL_TOWN_IDS = ['map_town_bazaar','map_town_rosalia'];
+    const _WATER_TOWN_IDS = ['map_town_nord','map_town_frost','map_town_coral','map_town_salmon'];
+    const _elemMatch = ids => ids.some(k => _mapId.includes(k.replace('map_','')));
+    let _townElement = null;
+    if (isTown && !_isSmallTown && !_isCapitalTown) {
+        if (_elemMatch(_WOOD_TOWN_IDS)) _townElement = 'wood';
+        else if (_elemMatch(_FIRE_TOWN_IDS)) _townElement = 'fire';
+        else if (_elemMatch(_METAL_TOWN_IDS)) _townElement = 'metal';
+        else if (_elemMatch(_WATER_TOWN_IDS)) _townElement = 'water';
+    }
     // 偽王討伐編: 城下町・グラマニア城を魔王城スタイルで描画
     const _is2ndDarkMap = false; // 2周目暗黒化廃止（1周目完結）
     const _isDemon = _mapId.includes('demon') || _is2ndDarkMap; const _isTower = _mapId.includes('tower'); const _isShrine = _mapId.includes('shrine') || _mapId.includes('temple') || _mapId.includes('dharma');
-    const _mc = { castle: isCastle && !_isDemon, town: isTown && !_is2ndDarkMap, cave: isCave, demon: _isDemon, tower: _isTower, shrine: _isShrine, smallTown: _isSmallTown, capitalTown: _isCapitalTown };
+    const _mc = { castle: isCastle && !_isDemon, town: isTown && !_is2ndDarkMap, cave: isCave, demon: _isDemon, tower: _isTower, shrine: _isShrine, smallTown: _isSmallTown, capitalTown: _isCapitalTown, townElement: _townElement };
     const _drawNow = Date.now();
     let lights = [];
     const _fieldMatch = _mapId && _mapId.match(/^map_field_(\d)_(\d)$/);
