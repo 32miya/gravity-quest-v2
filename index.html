@@ -72,7 +72,7 @@
                 { id: "w02", name: "こんぼう（棒）", attack: 7, price: 30, description: "樫の木を削り出した武器。" },
                 { id: "w03", name: "銅のつるぎ（剣）", attack: 12, price: 100, description: "新米冒険者の定番装備。" },
                 { id: "w05", name: "はじゃのつるぎ（破邪）", attack: 45, price: 3500, description: "邪悪な力を払う伝説の剣の写し。" },
-                { id: "w06", name: "天空のつるぎ（転空）", attack: 110, price: 0, description: "雲の上から授かった究極の聖剣。" },
+                { id: "w06", name: "天空のつるぎ（転空）", attack: 110, price: 0, element: "light", description: "雲の上から授かった究極の聖剣。" },
                 { id: "w07", name: "はぐれメタルの剣", attack: 130, price: 30000, description: "超硬質の金属でできた最強の剣。" },
                 { id: "w08", name: "クロスボウ", attack: 18, price: 350, description: "第2章のアリーナ一行が装備していそうな弓。" },
                 { id: "w09", name: "正義のそろばん", attack: 35, price: 1600, description: "第3章の武器商人トルネコ専用のような計算機。" },
@@ -84,12 +84,12 @@
                 { id: "w15", name: "はがねのつるぎ（鋼）", attack: 33, price: 2000, description: "中盤の主力。重厚な鋼鉄の長剣。" },
                 { id: "w16", name: "どくがのナイフ", attack: 24, price: 750, description: "刃に麻痺毒が塗られた短剣。魔女が好みそう。" },
                 { id: "w17", name: "鉄のツメ（爪）", attack: 38, price: 1500, description: "アリーナのような格闘家が好む鋭い鉤爪。" },
-                { id: "w18", name: "ゾンビキラー", attack: 67, price: 18000, description: "アンデッドに絶大な威力を発揮する聖なる剣。" },
+                { id: "w18", name: "ゾンビキラー", attack: 67, price: 18000, element: "light", description: "アンデッドに絶大な威力を発揮する聖なる剣。" },
                 { id: "w20", name: "はやぶさの剣", attack: 67, price: 25000, description: "一度の攻撃で2回斬りつけることができる細身の剣。" },
                 { id: "w21", name: "もろはのつるぎ（諸刃）", attack: 99, price: 3300, description: "【呪】高い攻撃力だが、自分もダメージを受ける。" },
                 { id: "w22", name: "銀のタロット", attack: 15, price: 0, description: "占い師が使う不思議なカード。使うと何かが起きる。" },
-                { id: "w23", name: "炎のつるぎ（火）", attack: 75, price: 22000, description: "刀身が燃え盛る剣。使うとギラ（火炎魔法）の効果。" },
-                { id: "w24", name: "吹雪のつるぎ（氷）", attack: 85, price: 28000, description: "冷気を纏った魔法の剣。炎の魔物に絶大な威力。" },
+                { id: "w23", name: "炎のつるぎ（火）", attack: 75, price: 22000, element: "fire", description: "刀身が燃え盛る剣。使うとギラ（火炎魔法）の効果。" },
+                { id: "w24", name: "吹雪のつるぎ（氷）", attack: 85, price: 28000, element: "ice", description: "冷気を纏った魔法の剣。炎の魔物に絶大な威力。" },
                 { id: "w26", name: "大かなづち", attack: 48, price: 4200, description: "重いが破壊力抜群。岩をも砕く戦士の鎚。" },
                 { id: "w27", name: "魔人の斧", attack: 95, price: 0, description: "【呪】高い攻撃力だが、時々自分の力を吸い取られる。" },
                 { id: "w28", name: "王者のつるぎ（王者）", attack: 120, price: 0, description: "古の英雄が使ったと伝わる、天空に並ぶ聖剣。" },
@@ -110,13 +110,13 @@
                 // ==========================================
                 { id: "w04", name: "鉄のヤリ（槍）", attack: 20, price: 350, description: "リーチが長く扱いやすい。" },
                 { id: "w31", name: "デーモンスピア（槍）", attack: 85, price: 0, description: "稀に敵を即死させる、禍々しい穂先の槍。" },
-                { id: "w_2nd_04", name: "聖槍ロンギヌス（槍）", attack: 310, price: 75000, description: "【戦士/僧侶用】かつて神を貫いたと伝わる奇跡の槍。僧侶も装備可能。" },
+                { id: "w_2nd_04", name: "聖槍ロンギヌス（槍）", attack: 310, price: 75000, element: "light", description: "【戦士/僧侶用】かつて神を貫いたと伝わる奇跡の槍。僧侶も装備可能。" },
                 { id: "w_2nd_05", name: "竜騎士の魔槍（槍）", attack: 350, price: 88000, description: "【戦士用】竜の力を持つ騎士の槍。急所を貫き敵を即死させることがある。" },
                 { id: "w_spear_01", name: "竹のヤリ（槍）", attack: 5, price: 50, description: "竹を斜めに切っただけの簡素な槍。" },
                 { id: "w_spear_02", name: "とがったホネ（槍）", attack: 9, price: 120, description: "魔物の骨を研いだ野蛮な槍。" },
                 { id: "w_spear_03", name: "さすまた（槍）", attack: 15, price: 250, description: "対象を押さえ込むための防犯用の長い槍。" },
                 { id: "w_spear_04", name: "はがねのヤリ（槍）", attack: 28, price: 1200, description: "硬い鋼で鍛えられた本格的な槍。" },
-                { id: "w_spear_05", name: "ホーリーランス（槍）", attack: 39, price: 3200, description: "教会で清められた神聖な槍。アンデッドに強い。" },
+                { id: "w_spear_05", name: "ホーリーランス（槍）", attack: 39, price: 3200, element: "light", description: "教会で清められた神聖な槍。アンデッドに強い。" },
                 { id: "w_spear_06", name: "パルチザン（槍）", attack: 45, price: 4400, description: "刃先が広く、斬り払いもできる実戦用の槍。" },
                 { id: "w_spear_07", name: "プラチナランス（槍）", attack: 55, price: 7500, description: "白金で作られた美しく鋭い槍。" },
                 { id: "w_spear_08", name: "バトルフォーク（槍）", attack: 68, price: 9800, description: "先端が三叉に分かれた戦闘用のフォーク。" },
@@ -133,20 +133,20 @@
                 // ▼ 杖（全20種類）
                 // ==========================================
                 { id: "w19", name: "まふうじの杖（杖）", attack: 40, price: 4000, description: "使うと敵の呪文を封じ込める魔法の杖。" },
-                { id: "w25", name: "マグマの杖（杖）", attack: 50, price: 0, description: "地底の熱を宿した杖。使うと岩をも溶かす衝撃波を放つ。" },
+                { id: "w25", name: "マグマの杖（杖）", attack: 50, price: 0, element: "fire", description: "地底の熱を宿した杖。使うと岩をも溶かす衝撃波を放つ。" },
                 { id: "w33", name: "賢者の杖（杖）", attack: 42, price: 12000, description: "使うと自分にベホイミ（中回復）の効果がある杖。" },
                 { id: "w36", name: "理力の杖（杖）", attack: 55, price: 2500, description: "攻撃の際、力の代わりにMPを消費して大ダメージを与える。" },
-                { id: "w_2nd_06", name: "大神官の杖（杖）", attack: 250, price: 60000, description: "【僧侶用】奇跡を呼ぶ杖。道具として使うと味方全員のHPを完全回復する。" },
+                { id: "w_2nd_06", name: "大神官の杖（杖）", attack: 250, price: 60000, element: "light", description: "【僧侶用】奇跡を呼ぶ杖。道具として使うと味方全員のHPを完全回復する。" },
                 { id: "w_2nd_07", name: "創世の魔杖（杖）", attack: 280, price: 78000, description: "【魔法使い用】世界の理を捻じ曲げる杖。呪文の消費MPをゼロにする。" },
                 { id: "w_staff_01", name: "かしの杖（杖）", attack: 4, price: 60, description: "硬い樫の木で作られた杖。魔法の力はない。" },
-                { id: "w_staff_02", name: "いかずちの杖（杖）", attack: 29, price: 2500, description: "使うと敵グループに電撃を放つ。" },
+                { id: "w_staff_02", name: "いかずちの杖（杖）", attack: 29, price: 2500, element: "lightning", description: "使うと敵グループに電撃を放つ。" },
                 { id: "w_staff_03", name: "さざなみの杖（杖）", attack: 33, price: 3500, description: "使うとマホカンタ（呪文反射）の効果がある。" },
-                { id: "w_staff_04", name: "炎の杖（杖）", attack: 35, price: 4200, description: "使うと火炎の魔法を放つ熱い杖。" },
+                { id: "w_staff_04", name: "炎の杖（杖）", attack: 35, price: 4200, element: "fire", description: "使うと火炎の魔法を放つ熱い杖。" },
                 { id: "w_staff_05", name: "ルーンスタッフ（杖）", attack: 38, price: 5800, description: "使うと味方全員の守備力が上がる。" },
-                { id: "w_staff_06", name: "吹雪の杖（杖）", attack: 45, price: 7000, description: "使うと冷気を放つ氷の杖。" },
-                { id: "w_staff_07", name: "天罰の杖（杖）", attack: 55, price: 9500, description: "使うと敵全体に強烈な風の刃を巻き起こす。" },
+                { id: "w_staff_06", name: "吹雪の杖（杖）", attack: 45, price: 7000, element: "ice", description: "使うと冷気を放つ氷の杖。" },
+                { id: "w_staff_07", name: "天罰の杖（杖）", attack: 55, price: 9500, element: "wind", description: "使うと敵全体に強烈な風の刃を巻き起こす。" },
                 { id: "w_staff_08", name: "復活の杖（杖）", attack: 66, price: 45000, description: "使うと仲間を確実に生き返らせる奇跡の杖。" },
-                { id: "w_staff_09", name: "ドラゴンの杖（杖）", attack: 85, price: 0, description: "使うとドラゴンの炎を吐き出す、魔法使いの憧れ。" },
+                { id: "w_staff_09", name: "ドラゴンの杖（杖）", attack: 85, price: 0, element: "fire", description: "使うとドラゴンの炎を吐き出す、魔法使いの憧れ。" },
                 { id: "w_staff_10", name: "精霊王の杖（杖）", attack: 180, price: 55000, description: "【魔法使い用】四大精霊を従える王の杖。" },
                 { id: "w_staff_11", name: "世界樹の杖（杖）", attack: 210, price: 70000, description: "【僧侶用】使うと味方全員のHPを大きく回復する。" },
                 { id: "w_staff_12", name: "大魔道の杖（杖）", attack: 240, price: 85000, description: "【魔法使い用】放つ魔法の威力が2倍になる恐るべき杖。" },
@@ -156,12 +156,12 @@
                 // --- 扇（踊り子・賢者・魔法使い向け）追加5種 ---
                 { id: "w_fan_01", name: "扇子（扇）", attack: 8, price: 180, description: "踊り子が使う優雅な扇子。軽くて扱いやすい入門武器。" },
                 { id: "w_fan_02", name: "戦扇（扇）", attack: 22, price: 1200, description: "扇の縁に刃がついた戦闘用の扇。舞いながら斬る。" },
-                { id: "w_fan_03", name: "紅蓮の扇（扇）", attack: 45, price: 6000, description: "使うとメラミ（中炎の魔法）の効果がある炎の扇。" },
-                { id: "w_fan_04", name: "嵐の扇（扇）", attack: 68, price: 15000, description: "使うと敵全体に吹雪を呼ぶ嵐の扇。" },
+                { id: "w_fan_03", name: "紅蓮の扇（扇）", attack: 45, price: 6000, element: "fire", description: "使うとメラミ（中炎の魔法）の効果がある炎の扇。" },
+                { id: "w_fan_04", name: "嵐の扇（扇）", attack: 68, price: 15000, element: "wind", description: "使うと敵全体に吹雪を呼ぶ嵐の扇。" },
                 { id: "w_fan_05", name: "月影の扇（扇）", attack: 95, price: 0, description: "月の光を宿した幻惑の扇。攻撃時に敵を眠らせることがある。" },
 
                 // --- 短剣・ナイフ追加（忍者・踊り子向け）追加3種 ---
-                { id: "w_dagger_01", name: "風魔の短剣（短剣）", attack: 35, price: 3500, description: "素早さを奪う毒が塗られた短剣。命中時に麻痺させることがある。" },
+                { id: "w_dagger_01", name: "風魔の短剣（短剣）", attack: 35, price: 3500, element: "wind", description: "素早さを奪う毒が塗られた短剣。命中時に麻痺させることがある。" },
                 { id: "w_dagger_02", name: "夜刀の短剣（短剣）", attack: 55, price: 9000, description: "夜に輝く神秘の短剣。急所を狙い会心の一撃が出やすい。" },
                 { id: "w_dagger_03", name: "毒牙の短剣（短剣）", attack: 42, price: 5500, description: "毒が塗られた細い刃。命中時に毒を与えることがある。" }
             ],
@@ -2212,7 +2212,7 @@ async function showWorldMap() {
         ctx2.fillText('⛵', _sbx + 1, _sby + 1);
     }
 
-    // 現在地（赤点）
+    // 現在地（点滅マーカー・別レイヤーでCSSアニメーション表示するため座標だけ算出）
     const pMapId=partyData.pos.map;
     let pgx=-1,pgy=-1,ppx=-1,ppy=-1;
     if(pMapId&&/^map_field_\d+_\d+$/.test(pMapId)){
@@ -2226,14 +2226,16 @@ async function showWorldMap() {
         else if(partyData.last_field_pos&&/^map_field_/.test(partyData.last_field_pos.map)){rpx=partyData.last_field_pos.x;rpy=partyData.last_field_pos.y;}
         ppx=pgx*SPM*SPIX+Math.floor(rpx/STEP)*SPIX;
         ppy=pgy*SPM*SPIX+Math.floor(rpy/STEP)*SPIX;
-        ctx2.fillStyle='#ff2222'; ctx2.fillRect(ppx-2,ppy-2,6,6);
-        ctx2.fillStyle='#ff8888'; ctx2.fillRect(ppx-1,ppy-1,4,4);
-        ctx2.fillStyle='#ffffff'; ctx2.fillRect(ppx,ppy,2,2);
-        ctx2.strokeStyle='#ff4444'; ctx2.lineWidth=1; ctx2.beginPath();
-        ctx2.moveTo(ppx+1,ppy-2); ctx2.lineTo(ppx+1,ppy-6); ctx2.stroke();
     }
 
     const imgSrc=cv.toDataURL();
+    // 現在地マーカー（表示270pxへスケールしてCSS点滅させるオーバーレイ）
+    let markerHtml='';
+    if(ppx>=0&&ppy>=0){
+        const _sc=270/CW;
+        const mx=(ppx+1)*_sc, my=(ppy+1)*_sc;
+        markerHtml=`<div class="blink" style="position:absolute;left:${mx}px;top:${my}px;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:radial-gradient(circle,#fff 0%,#ff8888 35%,#ff2222 70%);box-shadow:0 0 8px 2px rgba(255,40,40,0.9);pointer-events:none;"></div>`;
+    }
     // 凡例
     const lgItems=[
         {c:'#48b028',t:'草原'},{c:'#164a08',t:'森'},{c:'#887860',t:'山'},{c:'#4e4a68',t:'高山'},
@@ -2246,7 +2248,7 @@ async function showWorldMap() {
     const lgHtml=lgItems.map(l=>`<span style="display:inline-flex;align-items:center;gap:2px;margin:1px 3px;font-size:10px;"><span style="width:9px;height:9px;background:${l.c};border:1px solid rgba(255,255,255,0.3);display:inline-block;border-radius:1px;"></span>${l.t}</span>`).join('');
 
     let html=`<div style="font-size:14px;border-bottom:1px solid #446;margin-bottom:6px;padding-bottom:3px;text-align:center;letter-spacing:3px;color:#d0e8ff;font-weight:bold;">せ か い ち ず</div>`;
-    html+=`<div style="text-align:center;"><img src="${imgSrc}" style="image-rendering:pixelated;image-rendering:crisp-edges;width:270px;height:270px;border:2px solid #446;display:block;margin:0 auto;box-shadow:0 0 12px rgba(0,80,200,0.5);"/></div>`;
+    html+=`<div style="text-align:center;"><div style="position:relative;width:270px;height:270px;margin:0 auto;border:2px solid #446;box-shadow:0 0 12px rgba(0,80,200,0.5);"><img src="${imgSrc}" style="image-rendering:pixelated;image-rendering:crisp-edges;width:270px;height:270px;display:block;"/>${markerHtml}</div></div>`;
     html+=`<div style="margin-top:5px;text-align:center;line-height:1.7;">${lgHtml}</div>`;
     html+=`<div style="margin-top:6px;text-align:right;font-size:12px;" class="blink">▼とじる</div>`;
     document.getElementById('status-window').innerHTML=html;
@@ -7054,7 +7056,7 @@ function stopMoveLoop() { if (moveInterval) { clearInterval(moveInterval); moveI
 function simKey(key) { AudioManager.init(); handleInput(key); }
 document.addEventListener('keydown', (e) => { let key = e.key; if(key === 'z' || key === ' ') key = 'Enter'; if(key === 'x') key = 'Escape'; if(key.startsWith('Arrow')) { unlockAudio(); pressBtn(key); } else { if(!pressedKeys[key]) { pressedKeys[key] = true; unlockAudio(); handleInput(key); } } });
 document.addEventListener('keyup', (e) => { let key = e.key; if(key === 'z' || key === ' ') key = 'Enter'; if(key === 'x') key = 'Escape'; if(key.startsWith('Arrow')) { releaseBtn(key); } else { pressedKeys[key] = false; } });
-function handleInput(key) { AudioManager.init(); if(inputCallback) { inputCallback(key); } else if(state === 'FIELD') { handleFieldInput(key); } }
+function handleInput(key) { AudioManager.init(); if (key === 'Escape' && window._autoBattleActive) { window._autoBattleCancelPending = true; } if(inputCallback) { inputCallback(key); } else if(state === 'FIELD') { handleFieldInput(key); } }
 
 function onStep() {
     if (partyData.tramana_steps && partyData.tramana_steps > 0) partyData.tramana_steps--;
@@ -7287,6 +7289,22 @@ function canEquip(char, item) {
     return true;
 }
 
+// 属性ダメージ倍率: 武器/呪文のelementと 敵traits の weak_xxx / resist_xxx / xxx_element / all_element_resist を照合
+function getElementMultiplier(element, defender) {
+    if (!defender) return 1;
+    const traits = defender.traits || [];
+    if (!element || element === 'none') {
+        if (traits.includes('weak_physical')) return 1.5;
+        if (traits.includes('resist_physical')) return 0.5;
+        return 1;
+    }
+    const alias = element === 'lightning' ? 'thunder' : element;
+    if (traits.includes('weak_' + element) || traits.includes('weak_' + alias)) return 1.5;
+    if (traits.includes('all_element_resist')) return 0.6;
+    if (traits.includes(element + '_element') || traits.includes('resist_' + element) || traits.includes('resist_' + alias)) return 0.5;
+    return 1;
+}
+
 function calculateDamage(attacker, defender) {
     // metal_body: ダメージ上限1（はぐれグラちゃん等）
     if (defender.traits && defender.traits.includes('metal_body')) {
@@ -7294,13 +7312,13 @@ function calculateDamage(attacker, defender) {
     }
     let atkMod = attacker.tmpAtk > 0 ? 1.5 : attacker.tmpAtk < 0 ? 0.5 : 1.0;
     let defMod = defender.tmpDef > 0 ? 1.5 : defender.tmpDef < 0 ? 0.5 : 1.0;
-    
+
     if (window.isGuraKingBattle && attacker.job) {
         atkMod *= 0.9;
     }
-    
+
     const finalAttack = getAtk(attacker) * atkMod; const finalDefense = getDef(defender) * defMod;
-    
+
     let criticalRate = 0.1;
     if (attacker.job === "忍者" || attacker.job === "踊り子") {
         criticalRate = 0.15;
@@ -7309,15 +7327,21 @@ function calculateDamage(attacker, defender) {
     }
     if (attacker.equipment && attacker.equipment.weapon === 'w13') criticalRate = 0.4; // まじんのカナヅチ
     if (attacker.equipment && attacker.equipment.accessory && masterData.items[attacker.equipment.accessory]?.effect === 'atk_up_crit') criticalRate = Math.min(0.8, criticalRate + 0.3);
-    
+
     const isCritical = Math.random() < criticalRate && attacker.job;
 
+    // 武器の属性と敵の弱点・耐性を照合
+    const _wpnId = attacker.equipment && attacker.equipment.weapon;
+    const _wpnElem = (_wpnId && masterData.items[_wpnId] && masterData.items[_wpnId].element) || null;
+    const elemMult = getElementMultiplier(_wpnElem, defender);
+    const elemResult = elemMult >= 1.5 ? 'weak' : (elemMult < 1 ? 'resist' : 'normal');
+
     if (isCritical) {
-        const critDmg = Math.floor(finalAttack * (0.9 + Math.random() * 0.2));
-        return { isCritical: true, value: Math.max(1, critDmg) };
+        const critDmg = Math.floor(finalAttack * (0.9 + Math.random() * 0.2) * elemMult);
+        return { isCritical: true, value: Math.max(1, critDmg), elemResult };
     } else {
-        let baseDmg = Math.floor(finalAttack/2 - finalDefense/4) + Math.floor(Math.random()*2);
-        return { isCritical: false, value: Math.max(1, baseDmg) };
+        let baseDmg = Math.floor((finalAttack/2 - finalDefense/4) * elemMult) + Math.floor(Math.random()*2);
+        return { isCritical: false, value: Math.max(1, baseDmg), elemResult };
     }
 }
 
@@ -13985,8 +14009,106 @@ async function openMainMenu() {
     hideAllWindows(); state = 'FIELD'; drawMap();
 }
 
+// ── オート戦闘（さくせん）AI ──────────────────────────────────
+function _autoLowestHpEnemy(enemies) {
+    const alive = enemies.filter(e => e.hp > 0);
+    if (!alive.length) return null;
+    return alive.reduce((a, b) => b.hp < a.hp ? b : a);
+}
+function _autoMostInjuredAlly(members) {
+    const alive = members.filter(m => m.hp > 0);
+    if (!alive.length) return null;
+    return alive.reduce((a, b) => (b.hp / b.max_hp) < (a.hp / a.max_hp) ? b : a);
+}
+function _autoDeadAlly(members) { return members.find(m => m.hp <= 0) || null; }
+function _autoHealSpellFor(m) {
+    if (!m.spells) return null;
+    const cands = m.spells.map(sid => masterData.spells[sid]).filter(s => s && s.type === 'heal' && s.target !== 'self' && !s.id.includes('zao') && m.mp >= s.mp);
+    if (!cands.length) return null;
+    cands.sort((a, b) => b.value - a.value);
+    return cands[0];
+}
+function _autoReviveSpellFor(m) {
+    if (!m.spells) return null;
+    return m.spells.map(sid => masterData.spells[sid]).find(s => s && s.id.includes('zao') && m.mp >= s.mp) || null;
+}
+function _autoReviveItemIndexFor(m) {
+    if (!m.inventory) return -1;
+    return m.inventory.findIndex(id => { const it = masterData.items[id]; return it && it.effect === 'revive'; });
+}
+function _autoHealItemIndexFor(m) {
+    if (!m.inventory) return -1;
+    return m.inventory.findIndex(id => { const it = masterData.items[id]; return it && (it.effect === 'hp_recovery' || it.effect === 'heal'); });
+}
+function _autoAttackSpellFor(m, preferStrong) {
+    if (!m.spells) return null;
+    const cands = m.spells.map(sid => masterData.spells[sid]).filter(s => s && s.type === 'attack' && m.mp >= s.mp);
+    if (!cands.length) return null;
+    cands.sort((a, b) => preferStrong ? (b.value - a.value) : (a.mp - b.mp));
+    return cands[0];
+}
+function decideAutoAction(m, strategy, enemies, partyData) {
+    const spd = getSpd(m) + Math.random() * 5;
+    const target = _autoLowestHpEnemy(enemies);
+    if (!target) return { actor: m, type: 'attack', target: null, spd };
+
+    if (strategy === 'survival') { // 生きる喜び: HP0の仲間の蘇生・瀕死の仲間の回復を最優先
+        const dead = _autoDeadAlly(partyData.members);
+        if (dead) {
+            const rItemIdx = _autoReviveItemIndexFor(m);
+            if (rItemIdx >= 0) return { actor: m, type: 'item', item: masterData.items[m.inventory[rItemIdx]], itemIndex: rItemIdx, target: dead, spd };
+            const rSpell = _autoReviveSpellFor(m);
+            if (rSpell) return { actor: m, type: 'spell', spell: rSpell, target: dead, spd };
+        }
+        const hurt = _autoMostInjuredAlly(partyData.members);
+        if (hurt && hurt.hp / hurt.max_hp <= 0.65) {
+            const hSpell = _autoHealSpellFor(m);
+            if (hSpell) return { actor: m, type: 'spell', spell: hSpell, target: hSpell.target === 'allies' ? 'allies' : hurt, spd };
+            const hItemIdx = _autoHealItemIndexFor(m);
+            if (hItemIdx >= 0) return { actor: m, type: 'item', item: masterData.items[m.inventory[hItemIdx]], itemIndex: hItemIdx, target: hurt, spd };
+        }
+        return { actor: m, type: 'attack', target, spd };
+    }
+
+    if (strategy === 'economy') { // エコノミー: MP消費を抑え、物理攻撃中心。瀕死時のみ道具で回復
+        const hurt = _autoMostInjuredAlly(partyData.members);
+        if (hurt && hurt.hp / hurt.max_hp <= 0.3) {
+            const hItemIdx = _autoHealItemIndexFor(m);
+            if (hItemIdx >= 0) return { actor: m, type: 'item', item: masterData.items[m.inventory[hItemIdx]], itemIndex: hItemIdx, target: hurt, spd };
+        }
+        return { actor: m, type: 'attack', target, spd };
+    }
+
+    if (strategy === 'moderate') { // ちょっとマジ: 余裕をもった攻撃。MPに余裕がある時だけ呪文
+        const hurt = _autoMostInjuredAlly(partyData.members);
+        if (hurt && hurt.hp / hurt.max_hp <= 0.4) {
+            const hSpell = _autoHealSpellFor(m);
+            if (hSpell) return { actor: m, type: 'spell', spell: hSpell, target: hSpell.target === 'allies' ? 'allies' : hurt, spd };
+        }
+        if (m.max_mp > 0 && m.mp >= m.max_mp * 0.5) {
+            const aSpell = _autoAttackSpellFor(m, false);
+            if (aSpell) return { actor: m, type: 'spell', spell: aSpell, target: aSpell.target === 'enemies' ? 'enemies' : target, spd };
+        }
+        return { actor: m, type: 'attack', target, spd };
+    }
+
+    // ガチ攻め: 最高の攻撃力でガンガン攻める。MPを気にせず全力
+    {
+        const hurt = _autoMostInjuredAlly(partyData.members);
+        if (hurt && hurt.hp / hurt.max_hp <= 0.15) {
+            const hSpell = _autoHealSpellFor(m);
+            if (hSpell) return { actor: m, type: 'spell', spell: hSpell, target: hSpell.target === 'allies' ? 'allies' : hurt, spd };
+        }
+        if (!m._zenryokuUsed && m.job) return { actor: m, type: 'zenryoku', target, spd };
+        const aSpell = _autoAttackSpellFor(m, true);
+        if (aSpell) return { actor: m, type: 'spell', spell: aSpell, target: aSpell.target === 'enemies' ? 'enemies' : target, spd };
+        return { actor: m, type: 'attack', target, spd };
+    }
+}
+
 async function executeBattle(fixedEnemies = null) {
     state = 'BATTLE'; partyData.members.forEach(m => { m._zenryokuUsed = false; }); document.getElementById('screen').style.display = 'none'; const bScreen = document.getElementById('battle-screen'); bScreen.style.display = 'flex';
+    let autoStrategy = null; window._autoBattleActive = false; window._autoBattleCancelPending = false;
     let mapId = partyData.pos.map || ""; let bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/81d36868-2c8b-4bee-aaae-28d51fab8810.jpeg";
     const _demonBg = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/2afa8b0a-bae3-41ce-9603-c4aeffb287b0.jpeg";
     // 偽王討伐編: グラ城・城下エニシアは魔王城と同じバトル背景
@@ -14163,43 +14285,58 @@ async function executeBattle(fixedEnemies = null) {
     const addReward = (eRef) => { if(eRef) { let eExp = parseInt(eRef.exp); if(isNaN(eExp) || eExp <= 0) eExp = 1; let eGold = parseInt(eRef.gold); if(isNaN(eGold) || eGold < 0) eGold = 1; totalExp += eExp; totalGold += eGold; if(eRef.id) killedEnemyIds.push(eRef.id); } };
 
     while(enemies.length > 0 && partyData.members.some(m=>m.hp>0) && !escaped) {
+        if (window._autoBattleCancelPending) {
+            autoStrategy = null; window._autoBattleActive = false; window._autoBattleCancelPending = false;
+            await typeMessage(`さくせんを かいじょした！`);
+        }
         let actionsArray = []; let aliveMembers = partyData.members.filter(m => m.hp > 0); let mIdx = 0;
         while(mIdx < aliveMembers.length) {
             let m = aliveMembers[mIdx]; let commandChosen = false; let goBack = false;
+            if (autoStrategy) {
+                actionsArray[mIdx] = decideAutoAction(m, autoStrategy, enemies, partyData);
+                commandChosen = true;
+            }
             while(!commandChosen && !goBack) {
-                await typeMessage(`${m.name}の こうどう`); let cmdIdx = await selectMenu(['たたかう', 'じゅもん', 'どうぐ', 'ぜんりょく', 'にげる'], 'cmd-window', 1, true);
+                await typeMessage(`${m.name}の こうどう`); let cmdIdx = await selectMenu(['さくせん', 'たたかう', 'じゅもん', 'どうぐ', 'ぜんりょく', 'にげる'], 'cmd-window', 1, true);
                 if (cmdIdx === -1) { if (mIdx > 0) goBack = true; continue; }
-                if(cmdIdx === 0) { let targetIdx = await selectMenu(enemies.map(e=>e.displayName), 'cmd-window', 1, true); if(targetIdx === -1) continue; actionsArray[mIdx] = { actor: m, type: 'attack', target: enemies[targetIdx], spd: getSpd(m) + Math.random()*5 }; commandChosen = true;
-                } else if(cmdIdx === 1) { 
+                if (cmdIdx === 0) {
+                    const _stratNames = ['ガチ攻め', 'ちょっとマジ', 'エコノミー', '生きる喜び'];
+                    const _stratKeys = ['aggressive', 'moderate', 'economy', 'survival'];
+                    let sIdx = await selectMenu(_stratNames, 'cmd-window', 1, true); if (sIdx === -1) continue;
+                    autoStrategy = _stratKeys[sIdx]; window._autoBattleActive = true; window._autoBattleCancelPending = false;
+                    await typeMessage(`さくせんを 「${_stratNames[sIdx]}」に せっていした！\nなかま ぜんいんが オートで たたかう！\n（Bボタンで このターンの あと かいじょできる）`);
+                    actionsArray[mIdx] = decideAutoAction(m, autoStrategy, enemies, partyData); commandChosen = true;
+                } else if(cmdIdx === 1) { let targetIdx = await selectMenu(enemies.map(e=>e.displayName), 'cmd-window', 1, true); if(targetIdx === -1) continue; actionsArray[mIdx] = { actor: m, type: 'attack', target: enemies[targetIdx], spd: getSpd(m) + Math.random()*5 }; commandChosen = true;
+                } else if(cmdIdx === 2) {
                     if(!m.spells || m.spells.length === 0) { await typeMessage("じゅもんを しらない！"); continue; }
                     let spellNames = m.spells.map(sid => masterData.spells[sid] ? masterData.spells[sid].name : sid); spellNames.push("やめる"); let spellIdx = await selectMenu(spellNames, 'cmd-window', 1, true); if(spellIdx === -1 || spellIdx === spellNames.length - 1) continue;
                     let spellData = masterData.spells[m.spells[spellIdx]]; if(!spellData) continue; if(m.mp < spellData.mp) { await typeMessage("MPが たりない！"); continue; }
                     let targetObj = null;
                     if (spellData.target === 'self') {
                         targetObj = m;
-                    } else if (spellData.target === 'ally') { 
-                        let tIdx = await selectMenu(partyData.members.map(mb=>mb.name), 'cmd-window', 1, true); if(tIdx === -1) continue; targetObj = partyData.members[tIdx]; 
-                    } else if (spellData.target === 'enemy') { 
-                        let tIdx = await selectMenu(enemies.map(e=>e.displayName), 'cmd-window', 1, true); if(tIdx === -1) continue; targetObj = enemies[tIdx]; 
-                    } else if (spellData.target === 'enemies' || spellData.target === 'allies') { 
-                        targetObj = spellData.target; 
+                    } else if (spellData.target === 'ally') {
+                        let tIdx = await selectMenu(partyData.members.map(mb=>mb.name), 'cmd-window', 1, true); if(tIdx === -1) continue; targetObj = partyData.members[tIdx];
+                    } else if (spellData.target === 'enemy') {
+                        let tIdx = await selectMenu(enemies.map(e=>e.displayName), 'cmd-window', 1, true); if(tIdx === -1) continue; targetObj = enemies[tIdx];
+                    } else if (spellData.target === 'enemies' || spellData.target === 'allies') {
+                        targetObj = spellData.target;
                     }
                     actionsArray[mIdx] = { actor: m, type: 'spell', spell: spellData, target: targetObj, spd: getSpd(m) + Math.random()*5 }; commandChosen = true;
-                } else if(cmdIdx === 2) {
+                } else if(cmdIdx === 3) {
                     if(!m.inventory || m.inventory.length === 0) { await typeMessage("もちものが ない！"); continue; }
                     let itemIdx = await selectMenu(m.inventory.map(id => masterData.items[id] ? masterData.items[id].name : "なぞのアイテム"), 'cmd-window', 1, true); if(itemIdx === -1) continue;
                     let itemData = masterData.items[m.inventory[itemIdx]]; if(itemData.type !== 'tool') { await typeMessage("ここでは つかえない！"); continue; }
                     let tIdx = await selectMenu(partyData.members.map(mb=>mb.name), 'cmd-window', 1, true); if(tIdx === -1) continue; let targetObj = partyData.members[tIdx];
                     actionsArray[mIdx] = { actor: m, type: 'item', item: itemData, itemIndex: itemIdx, target: targetObj, spd: getSpd(m) + Math.random()*5 }; commandChosen = true;
-                } else if(cmdIdx === 3) {
+                } else if(cmdIdx === 4) {
                     if (m._zenryokuUsed) { await typeMessage(`${m.name}は もう ぜんりょくを つかった！`); continue; }
                     let _zTIdx = await selectMenu(enemies.map(e=>e.displayName), 'cmd-window', 1, true); if(_zTIdx === -1) continue;
                     actionsArray[mIdx] = { actor: m, type: 'zenryoku', target: enemies[_zTIdx], spd: getSpd(m) + Math.random()*5 }; commandChosen = true;
-                } else if(cmdIdx === 4) { actionsArray[mIdx] = { actor: m, type: 'run', spd: getSpd(m) + 20, isBoss: fixedEnemies !== null }; commandChosen = true; }
+                } else if(cmdIdx === 5) { actionsArray[mIdx] = { actor: m, type: 'run', spd: getSpd(m) + 20, isBoss: fixedEnemies !== null }; commandChosen = true; }
             }
             if (goBack) mIdx--; else mIdx++;
         }
-        
+
         let actions = actionsArray.filter(a => a !== undefined);
         // モンスター固有の特殊行動率テーブル（通常モンスター + ボス）
         const _specialRates = {
@@ -14289,7 +14426,12 @@ async function executeBattle(fixedEnemies = null) {
                                 AudioManager.playSE('attack_hit');
                             }
                             _t.hp = Math.max(0, _t.hp - dmg);
-                            if (!dmgResult.isMetalBody) await typeMessage(`${_t.displayName}に ${dmg}の ダメージ！`);
+                            if (!dmgResult.isMetalBody) {
+                                let _dmgMsg = `${_t.displayName}に ${dmg}の ダメージ！`;
+                                if (dmgResult.elemResult === 'weak') _dmgMsg += `\nこうかは ばつぐんだ！`;
+                                else if (dmgResult.elemResult === 'resist') _dmgMsg += `\n（てきの たいせいで ダメージが おさえられた）`;
+                                await typeMessage(_dmgMsg);
+                            }
                             _lastDmg = dmg;
                             if (_t.isGuraKing && !_t.voidBarrierUsed && _t.hp > 0 && _t.hp <= _t.max_hp / 2) {
                                 _t.voidBarrierUsed = true; _t.voidBarrierTurns = 3;
@@ -15008,19 +15150,24 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${t.displayName || t.name}には まほうが ぜんぜん きかない！`);
                             continue;
                         }
-                        let dmg = Math.max(1, (act.spell.value * magicDmgMultiplier) + Math.floor(Math.random()*10 - 5));
+                        const _elemMult = getElementMultiplier(act.spell.element, t);
+                        let dmg = Math.max(1, Math.floor(((act.spell.value * magicDmgMultiplier) + Math.floor(Math.random()*10 - 5)) * _elemMult));
                         if (t.tmpResist > 0) dmg = Math.floor(dmg / 2);
-                        
+
                         if (t.voidBarrierTurns > 0) dmg = Math.max(1, Math.floor(dmg * 0.7));
-                        
+
                         if (t.tmpReflect > 0) {
                             await typeMessage(`${t.displayName || t.name}は じゅもんを はねかえした！`);
                             let refT = act.actor; if(refT.tmpResist > 0) dmg = Math.floor(dmg / 2);
                             refT.hp = Math.max(0, refT.hp - dmg); await typeMessage(`${refT.displayName || refT.name}に ${dmg}の ダメージ！`);
                             if(refT.hp <= 0 && refT.displayName) { refT.isPoisoned=false; await typeMessage(`${refT.displayName}を たおした！`); addReward(refT); }
                         } else {
-                            t.hp = Math.max(0, t.hp - dmg); await typeMessage(`${t.displayName || t.name}に ${dmg}の ダメージ！`); 
-                            
+                            t.hp = Math.max(0, t.hp - dmg);
+                            let _dmgMsg = `${t.displayName || t.name}に ${dmg}の ダメージ！`;
+                            if (_elemMult >= 1.5) _dmgMsg += `\nこうかは ばつぐんだ！`;
+                            else if (_elemMult < 1) _dmgMsg += `\n（てきの たいせいで ダメージが おさえられた）`;
+                            await typeMessage(_dmgMsg);
+
                             if (t.isGuraKing && !t.voidBarrierUsed && t.hp > 0 && t.hp <= t.max_hp / 2) {
                                 t.voidBarrierUsed = true;
                                 t.voidBarrierTurns = 3;
@@ -15451,7 +15598,7 @@ async function init() {
     // アイテムDB
     if (window.ITEM_DATABASE) {
         const db = window.ITEM_DATABASE;
-        (db.weapons||[]).forEach(w => masterData.items[w.id] = {id:w.id,name:w.name,type:'weapon',price:w.price,power:w.attack,desc:w.description});
+        (db.weapons||[]).forEach(w => masterData.items[w.id] = {id:w.id,name:w.name,type:'weapon',price:w.price,power:w.attack,element:w.element,desc:w.description});
         (db.armors||[]).forEach(a => masterData.items[a.id] = {id:a.id,name:a.name,type:'armor',price:a.price,power:a.defense,desc:a.description});
         (db.shields||[]).forEach(s => masterData.items[s.id] = {id:s.id,name:s.name,type:'shield',price:s.price,power:s.defense,desc:s.description});
         (db.helmets||[]).forEach(h => masterData.items[h.id] = {id:h.id,name:h.name,type:'helmet',price:h.price,power:h.defense,desc:h.description});
