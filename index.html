@@ -8521,9 +8521,87 @@ function drawMap() {
                             ctx.fillStyle='rgba(255,255,255,0.55)';ctx.beginPath();ctx.arc(_fx-_sz*0.3,_fy-_sz*0.3,_sz*0.35,0,Math.PI*2);ctx.fill();
                         });
                         ctx.restore();
+                    } else if(npc.id==='obj_deco_lamp_post') {
+                        // 中世風 街灯（鉄柱＋ランタン、夜は炎が揺らめく）
+                        const _topY=py-_T,_lx=px+_T/2;
+                        const _flick=Date.now()/260;
+                        ctx.save();
+                        ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(_lx,py+_T*0.97,_T*0.26,_T*0.08,0,0,Math.PI*2);ctx.fill();
+                        // 鉄の支柱（先細り）
+                        ctx.fillStyle='#2a2a30';ctx.beginPath();ctx.moveTo(_lx-3,py+_T*0.95);ctx.lineTo(_lx-1.4,_topY+_T*0.55);ctx.lineTo(_lx+1.4,_topY+_T*0.55);ctx.lineTo(_lx+3,py+_T*0.95);ctx.closePath();ctx.fill();
+                        ctx.fillStyle='#3d3d46';ctx.fillRect(_lx-3.6,py+_T*0.4,7.2,_T*0.14);
+                        ctx.fillStyle='#3d3d46';ctx.fillRect(_lx-4.2,_topY+_T*0.52,8.4,_T*0.06);
+                        // ランタン本体（鉄格子の箱）
+                        const _lw=_T*0.42,_lh=_T*0.5,_ly=_topY+_T*0.02;
+                        ctx.fillStyle='#1c1c22';ctx.fillRect(_lx-_lw/2,_ly,_lw,_lh);
+                        // 炎の光（揺らめき）
+                        const _fl=0.75+Math.sin(_flick)*0.2;
+                        const _lg=ctx.createRadialGradient(_lx,_ly+_lh*0.55,1,_lx,_ly+_lh*0.55,_T*0.85);
+                        _lg.addColorStop(0,`rgba(255,200,90,${0.55*_fl})`);_lg.addColorStop(0.4,`rgba(255,150,30,${0.28*_fl})`);_lg.addColorStop(1,'rgba(255,120,0,0)');
+                        ctx.fillStyle=_lg;ctx.beginPath();ctx.arc(_lx,_ly+_lh*0.55,_T*0.85,0,Math.PI*2);ctx.fill();
+                        ctx.fillStyle=`rgba(255,${190+Math.floor(Math.sin(_flick*1.3)*30)},80,0.95)`;
+                        ctx.beginPath();ctx.ellipse(_lx,_ly+_lh*0.58,_lw*0.28,_lh*0.32*_fl,0,0,Math.PI*2);ctx.fill();
+                        // 格子（縦線）
+                        ctx.strokeStyle='rgba(0,0,0,0.7)';ctx.lineWidth=1.2;
+                        for(let gi=1;gi<4;gi++){ctx.beginPath();ctx.moveTo(_lx-_lw/2+_lw*gi/4,_ly);ctx.lineTo(_lx-_lw/2+_lw*gi/4,_ly+_lh);ctx.stroke();}
+                        ctx.strokeStyle='#0c0c10';ctx.lineWidth=1.6;ctx.strokeRect(_lx-_lw/2,_ly,_lw,_lh);
+                        // 屋根飾り
+                        ctx.fillStyle='#1c1c22';ctx.beginPath();ctx.moveTo(_lx-_lw*0.6,_ly);ctx.lineTo(_lx,_ly-_T*0.12);ctx.lineTo(_lx+_lw*0.6,_ly);ctx.closePath();ctx.fill();
+                        ctx.restore();
+                    } else if(npc.id==='obj_deco_well') {
+                        // 中世風 井戸（石積み＋木の屋根＋滑車とロープ）
+                        const T=_T,_wx=px+T/2,_wTop=py-T*0.4;
+                        ctx.save();
+                        ctx.fillStyle='rgba(0,0,0,0.22)';ctx.beginPath();ctx.ellipse(_wx,py+T*0.95,T*0.42,T*0.1,0,0,Math.PI*2);ctx.fill();
+                        // 石積み胴（円柱）
+                        ctx.fillStyle='#8a8272';ctx.fillRect(px+T*0.12,py+T*0.4,T*0.76,T*0.5);
+                        ['#7a7262','#94886e','#7a7262','#8a8070'].forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(px+T*0.12,py+T*0.4+i*T*0.125,T*0.76,T*0.06);});
+                        ctx.fillStyle='#9a9282';ctx.beginPath();ctx.ellipse(_wx,py+T*0.4,T*0.4,T*0.09,0,0,Math.PI*2);ctx.fill();
+                        ctx.fillStyle='#3a3226';ctx.beginPath();ctx.ellipse(_wx,py+T*0.4,T*0.28,T*0.06,0,0,Math.PI*2);ctx.fill();
+                        // 木の支柱＋屋根
+                        ctx.fillStyle='#6b4a2a';ctx.fillRect(px+T*0.14,_wTop,T*0.08,T*0.42);ctx.fillRect(px+T*0.78,_wTop,T*0.08,T*0.42);
+                        ctx.fillStyle='#7a5230';ctx.beginPath();ctx.moveTo(px-T*0.05,_wTop+T*0.06);ctx.lineTo(_wx,_wTop-T*0.22);ctx.lineTo(px+T*1.05,_wTop+T*0.06);ctx.lineTo(px+T*0.95,_wTop+T*0.14);ctx.lineTo(_wx,_wTop-T*0.1);ctx.lineTo(px+T*0.05,_wTop+T*0.14);ctx.closePath();ctx.fill();
+                        // 滑車とロープ、バケツ
+                        ctx.strokeStyle='#3a2a18';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(_wx,_wTop-T*0.08);ctx.lineTo(_wx,py+T*0.32);ctx.stroke();
+                        ctx.fillStyle='#5a3d20';ctx.fillRect(_wx-T*0.1,py+T*0.3,T*0.2,T*0.16);
+                        ctx.fillStyle='#3a2a18';ctx.beginPath();ctx.arc(_wx,_wTop-T*0.08,3,0,Math.PI*2);ctx.fill();
+                        ctx.restore();
+                    } else if(npc.id==='obj_deco_barrel') {
+                        // 木樽（鉄帯付き）
+                        const T=_T,_bx=px+T*0.2,_bw=T*0.6,_bh=T*0.66,_by=py+T-_bh;
+                        ctx.save();
+                        ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(_bx+_bw/2,py+T*0.97,_bw*0.55,T*0.07,0,0,Math.PI*2);ctx.fill();
+                        const _brg=ctx.createLinearGradient(_bx,0,_bx+_bw,0);
+                        _brg.addColorStop(0,'#5a3a1e');_brg.addColorStop(0.5,'#8a5c30');_brg.addColorStop(1,'#5a3a1e');
+                        ctx.fillStyle=_brg;
+                        ctx.beginPath();ctx.moveTo(_bx,_by+T*0.08);ctx.quadraticCurveTo(_bx-T*0.05,_by+_bh/2,_bx,_by+_bh-T*0.08);
+                        ctx.lineTo(_bx+_bw,_by+_bh-T*0.08);ctx.quadraticCurveTo(_bx+_bw+T*0.05,_by+_bh/2,_bx+_bw,_by+T*0.08);
+                        ctx.closePath();ctx.fill();
+                        ctx.strokeStyle='#2a2a2a';ctx.lineWidth=2;
+                        [0.14,0.5,0.86].forEach(r=>{ctx.beginPath();ctx.moveTo(_bx-1,_by+_bh*r);ctx.lineTo(_bx+_bw+1,_by+_bh*r);ctx.stroke();});
+                        ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1;
+                        [0.3,0.5,0.7].forEach(r=>{ctx.beginPath();ctx.moveTo(_bx+_bw*r,_by+T*0.1);ctx.lineTo(_bx+_bw*r,_by+_bh-T*0.1);ctx.stroke();});
+                        ctx.restore();
+                    } else if(npc.id==='obj_deco_sign_inn'||npc.id==='obj_deco_sign_shop'||npc.id==='obj_deco_sign_potion') {
+                        // ぶら下げ看板（宿屋/道具屋/薬屋）
+                        const T=_T,_sx2=px+T*0.2,_topY2=py-T*0.2;
+                        ctx.save();
+                        ctx.strokeStyle='#4a3820';ctx.lineWidth=2.4;
+                        ctx.beginPath();ctx.moveTo(_sx2-T*0.05,_topY2-T*0.12);ctx.lineTo(_sx2+T*0.55,_topY2+T*0.02);ctx.stroke();
+                        ctx.strokeStyle='#2a2a2a';ctx.lineWidth=1;
+                        ctx.beginPath();ctx.moveTo(_sx2+T*0.1,_topY2+T*0.02);ctx.lineTo(_sx2+T*0.1,_topY2+T*0.1);ctx.stroke();
+                        ctx.beginPath();ctx.moveTo(_sx2+T*0.42,_topY2+T*0.02);ctx.lineTo(_sx2+T*0.42,_topY2+T*0.1);ctx.stroke();
+                        const _signG=ctx.createLinearGradient(_sx2,_topY2+T*0.1,_sx2,_topY2+T*0.5);
+                        _signG.addColorStop(0,'#c08040');_signG.addColorStop(1,'#8a5828');
+                        ctx.fillStyle=_signG;ctx.fillRect(_sx2,_topY2+T*0.1,T*0.52,T*0.4);
+                        ctx.strokeStyle='#4a3820';ctx.lineWidth=1.6;ctx.strokeRect(_sx2,_topY2+T*0.1,T*0.52,T*0.4);
+                        ctx.font=`${Math.floor(T*0.28)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+                        const _signIcon = npc.id.includes('inn') ? '🛏' : npc.id.includes('potion') ? '🧪' : '⚔';
+                        ctx.fillText(_signIcon,_sx2+T*0.26,_topY2+T*0.3);
+                        ctx.restore();
                     } else {
-                        // 噴水フォールバック絵文字
-                        const _decoEmoji2 = { fountain_l:'⛲', fountain_s:'💧' };
+                        // その他装飾のフォールバック絵文字
+                        const _decoEmoji2 = { fountain_l:'⛲', fountain_s:'💧', vase:'🏺', clock:'🕰️', fireplace:'🔥', rug_red:'🟥', rug_blue:'🟦' };
                         const _ek2 = npc.id.replace('obj_deco_','');
                         const _isWide2 = npc.id.includes('fountain_l');
                         ctx.font=(_isWide2?Math.floor(_T*1.1):18)+'px serif';
