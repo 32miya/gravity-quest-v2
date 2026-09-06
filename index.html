@@ -6374,6 +6374,25 @@ async function fetchExternalMap(url) { const loading = document.getElementById('
             }
         }
 
+        // 監査で発覚: 商都バザール／サルモン漁村は町→フィールドの出口はあるが
+        // フィールド側に帰りの入口が一つも無く、地図(ちず)コマンドにもアイコンが
+        // 出ない・二度と入れない状態だった。findLandで最寄りの陸地に入口を新設する。
+        {
+            // map_field_6_3 は全面が海(陸地皆無)のため、隣接する map_field_6_2 の陸地に入口を設置
+            const _bzp = findLand("map_field_6_2", 22, 44);
+            if (_bzp) {
+                externalMapData["map_field_6_2"].tiles[_bzp.y*(externalMapData["map_field_6_2"].width||45)+_bzp.x] = 22;
+                externalMapData["map_field_6_2"].exits[_bzp.k] = { map: "map_town_bazaar", x: 12, y: 18 };
+            }
+        }
+        {
+            const _slp = findLand("map_field_4_8", 12, 26);
+            if (_slp) {
+                externalMapData["map_field_4_8"].tiles[_slp.y*(externalMapData["map_field_4_8"].width||45)+_slp.x] = 22;
+                externalMapData["map_field_4_8"].exits[_slp.k] = { map: "map_town_salmon", x: 8, y: 14 };
+            }
+        }
+
         // 南の果てマップ: 港町ポートピア入り口を右下に移動、上部には設定しない
         {
             const _sk = Object.keys(externalMapData).find(k => k === 'map_field_south_2' || (k.includes('south') && k.includes('field')));
