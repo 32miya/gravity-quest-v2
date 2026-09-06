@@ -2313,7 +2313,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
     const _atkTypes = ['fire','ice','lightning','wind','explosion','dark','generic'];
 
     // アニメーション時間・パーティクル数・RNG（コズミックブロックより前に定義が必要）
-    const dur = [900, 1200, 1550, 2000][tier - 1];
+    const dur = [1050, 1400, 1800, 2300][tier - 1]; // 余韻を伸ばすため従来より長め
     const N = [40, 70, 110, 160][tier - 1];
     const rng = (s) => { let x = ((s + 1) * 1664525 + 1013904223) & 0x7fffffff; return x / 0x7fffffff; };
 
@@ -2327,7 +2327,17 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
         Object.assign(_cosmicCvs.style, {position:'absolute',top:'0',left:'0',width:'100%',height:'100%',pointerEvents:'none',zIndex:'0'});
         layer.appendChild(_cosmicCvs);
         const _cc = _cosmicCvs.getContext('2d');
-        const _cosmicStars = Array.from({length:90},(_,i)=>({x:rng(i*7+1)*W,y:rng(i*7+2)*H,r:0.5+rng(i*7+3)*2.2,spd2:0.18+rng(i*7+4)*0.85,tw:rng(i*7+5)*Math.PI*2,hue4:rng(i*7+6)*60}));
+        const _cosmicStars = Array.from({length:_isUltima?150:90},(_,i)=>({x:rng(i*7+1)*W,y:rng(i*7+2)*H,r:0.5+rng(i*7+3)*2.2,spd2:0.18+rng(i*7+4)*0.85,tw:rng(i*7+5)*Math.PI*2,hue4:rng(i*7+6)*60}));
+        // アルティマ専用: 銀河の渦腕(対数螺旋)＋流れ星
+        const _galaxyArms = _isUltima ? Array.from({length:3},(_,ai)=>Array.from({length:34},(_,pi)=>{
+            const pf=pi/34, ang=ai*(Math.PI*2/3)+pf*Math.PI*2.6, rad=(0.06+pf*0.62)*Math.min(W,H)*0.62;
+            return {ang,rad,tw:rng(ai*97+pi*3+1)*Math.PI*2,sz:0.7+rng(ai*97+pi*3+2)*1.8};
+        })) : [];
+        const _shootingStars = _isUltima ? Array.from({length:5},(_,i)=>({
+            delay:rng(i*31+1)*0.7, dur2:0.16+rng(i*31+2)*0.1,
+            sx:rng(i*31+3)*W, sy:rng(i*31+4)*H*0.5,
+            ang:Math.PI*0.18+rng(i*31+5)*0.3, len:60+rng(i*31+6)*70,
+        })) : [];
         // 色味: 風=青緑, 爆発=赤橙, 闇/アルテマ=深紫
         const _nebRGB = _isUltima?[40,0,80,0.72]:(etype==='wind'?[0,30,60,0.62]:(etype==='explosion'?[60,10,0,0.62]:[20,0,50,0.68]));
         const _nebCol = `rgba(${_nebRGB[0]},${_nebRGB[1]},${_nebRGB[2]},${_nebRGB[3]})`;
@@ -2345,6 +2355,42 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
             const nG=_cc.createRadialGradient(tcx,tcy,0,tcx,tcy,W*0.65);
             nG.addColorStop(0,_nebCol); nG.addColorStop(0.55,_nebColMid); nG.addColorStop(1,'rgba(0,0,0,0)');
             _cc.fillStyle=nG; _cc.fillRect(0,0,W,H);
+            // アルティマ専用: ゆっくり回転する銀河の渦腕
+            if(_isUltima && _galaxyArms.length){
+                const rot=ct5*Math.PI*0.7;
+                for(let armI=0; armI<_galaxyArms.length; armI++){
+                    const arm=_galaxyArms[armI];
+                    for(let pi2=0; pi2<arm.length; pi2++){
+                        const p=arm[pi2];
+                        const a2=p.ang+rot;
+                        const px2=tcx+Math.cos(a2)*p.rad, py2=tcy+Math.sin(a2)*p.rad*0.72;
+                        const tw3=Math.sin(p.tw+ct5*Math.PI*6)*0.4+0.6;
+                        _cc.globalAlpha=bgAc*tw3*0.62;
+                        _cc.shadowColor='#cc99ff'; _cc.shadowBlur=p.sz*2.4;
+                        _cc.fillStyle=rng(armI*97+pi2*3)<0.5?'#ddbbff':'#ffffff';
+                        _cc.beginPath(); _cc.arc(px2,py2,p.sz*tw3,0,Math.PI*2); _cc.fill();
+                    }
+                }
+                // 中心の脈動する「宇宙の瞳」
+                _cc.globalAlpha=bgAc*(0.55+0.3*Math.sin(ct5*Math.PI*8));
+                _cc.shadowColor='#ddaaff'; _cc.shadowBlur=40;
+                const eyeG=_cc.createRadialGradient(tcx,tcy,0,tcx,tcy,46+Math.sin(ct5*Math.PI*8)*8);
+                eyeG.addColorStop(0,'#ffffff'); eyeG.addColorStop(0.35,'#ddaaff'); eyeG.addColorStop(0.7,'rgba(120,40,200,0.5)'); eyeG.addColorStop(1,'rgba(60,0,120,0)');
+                _cc.fillStyle=eyeG; _cc.beginPath(); _cc.arc(tcx,tcy,46,0,Math.PI*2); _cc.fill();
+                _cc.shadowBlur=0;
+                // 流れ星
+                for(const sh of _shootingStars){
+                    const sht=Math.max(0,ct5-sh.delay); if(sht<=0||sht>=sh.dur2) continue;
+                    const sp2=sht/sh.dur2;
+                    const hx=sh.sx+Math.cos(sh.ang)*sh.len*sp2, hy=sh.sy+Math.sin(sh.ang)*sh.len*sp2;
+                    const tx2=hx-Math.cos(sh.ang)*sh.len*0.5, ty2=hy-Math.sin(sh.ang)*sh.len*0.5;
+                    _cc.globalAlpha=bgAc*Math.sin(sp2*Math.PI)*0.9;
+                    _cc.strokeStyle='#ffffff'; _cc.lineWidth=1.6;
+                    _cc.shadowColor='#ccbbff'; _cc.shadowBlur=8;
+                    _cc.beginPath(); _cc.moveTo(tx2,ty2); _cc.lineTo(hx,hy); _cc.stroke();
+                    _cc.shadowBlur=0;
+                }
+            }
             // 流れ星パーティクル
             for(const s of _cosmicStars){
                 const tw2=Math.sin(s.tw+ct5*Math.PI*9*s.spd2)*0.45+0.55;
@@ -2520,6 +2566,46 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
         clearGlow(); ctx.globalAlpha=1;
     };
 
+    // 共通: 三日月型の光跡（参考画像の緑の弧のような煌めく軌跡）
+    // 弧を描くように発光しながら両端にきらめきの粒子を纏う。任意の属性で使い回せる。
+    const drawCrescentTrail = (t, cx, cy, palKey, startT=0.08, span=0.42, angleOffset=-Math.PI*0.62, sweep=Math.PI*1.3) => {
+        const pal = MAGIC_PALETTES[palKey] || MAGIC_PALETTES.wind;
+        const lt = (t - startT) / span;
+        if (lt < 0 || lt > 1) return;
+        const R = (52 + tier*30);
+        const baseAngle = angleOffset + lt*Math.PI*0.35;
+        const fadeIn = Math.min(lt/0.22, 1);
+        const fadeOut = lt > 0.68 ? Math.max(0, 1-(lt-0.68)/0.32) : 1;
+        const al = fadeIn * fadeOut;
+        if (al <= 0) return;
+        const drawSweep = sweep * Math.min(lt/0.3, 1);
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = al*0.9;
+        ctx.shadowColor = pal.glow; ctx.shadowBlur = 14+tier*3;
+        ctx.strokeStyle = pal.ring1; ctx.lineWidth = 4+tier*1.4;
+        ctx.beginPath(); ctx.arc(cx, cy, R, baseAngle, baseAngle+drawSweep); ctx.stroke();
+        ctx.globalAlpha = al*0.5;
+        ctx.strokeStyle = pal.star; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(cx, cy, R, baseAngle, baseAngle+drawSweep); ctx.stroke();
+        for (const ea of [baseAngle, baseAngle+drawSweep]) {
+            const ex = cx+Math.cos(ea)*R, ey = cy+Math.sin(ea)*R;
+            ctx.globalAlpha = al; ctx.fillStyle = pal.star; ctx.shadowBlur = 20+tier*4;
+            ctx.beginPath(); ctx.arc(ex, ey, 2.6+tier*0.7, 0, Math.PI*2); ctx.fill();
+        }
+        const sparkN = 8+tier*4;
+        for (let si=0; si<sparkN; si++) {
+            const sf = si/sparkN; const sa = baseAngle + drawSweep*sf;
+            const jitter = (rng(si*7+1)-0.5)*10;
+            const sx = cx+Math.cos(sa)*(R+jitter), sy = cy+Math.sin(sa)*(R+jitter);
+            const sSz = (1+rng(si*7+2)*2.2)*fadeIn;
+            if (sSz<=0) continue;
+            ctx.globalAlpha = al*(0.5+rng(si*7+3)*0.5);
+            ctx.fillStyle = pal.rune;
+            ctx.beginPath(); ctx.arc(sx,sy,sSz,0,Math.PI*2); ctx.fill();
+        }
+        ctx.globalCompositeOperation = 'source-over'; clearGlow(); ctx.globalAlpha = 1;
+    };
+
     // ── 炎属性: 業火の龍が螺旋突撃 → 画面が深紅に染まる → マグマ噴出
     const drawFire = (t) => {
         drawMagicCircle(t, tcx, tcy, 'fire');
@@ -2562,6 +2648,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
 
         // ★ 炎の特徴3: 螺旋炎アーム — オレンジ/赤のみ、白を使わない
         if(t<F_BOOM+0.1){
+            ctx.globalCompositeOperation='lighter'; // 加算合成で密集時も発光感を保つ
             const armN=tier>=4?6:tier>=3?5:tier>=2?3:2;
             for(let ai=0;ai<armN;ai++){
                 const aD=ai/armN*0.09;
@@ -2595,10 +2682,12 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
                     clearGlow();
                 }
             }
+            ctx.globalCompositeOperation='source-over';
         }
 
         // ★ 炎の特徴4: 足元からマグマ火柱 (深紅〜橙、白くない)
         if(t>=F_LAVA){
+            ctx.globalCompositeOperation='lighter';
             const lt=(t-F_LAVA)/(F_BOOM-F_LAVA+0.2);
             const pilN=tier>=4?7:tier>=3?5:tier>=2?3:1;
             for(let pi=0;pi<pilN;pi++){
@@ -2635,6 +2724,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
                 ctx.fillStyle=`hsl(${12+Math.floor(rng(mi*4+3)*18)},100%,${42+Math.floor(rng(mi*4)*18)}%)`;
                 ctx.beginPath(); ctx.arc(mx,my,mR,0,Math.PI*2); ctx.fill(); clearGlow();
             }
+            ctx.globalCompositeOperation='source-over';
         }
 
         // ★ 炎の特徴5: 爆発はオレンジ/深紅 (白くない)
@@ -2669,6 +2759,24 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
             ctx.fillStyle=pt<0.3?'#ff9900':(pt<0.6?'#ff4400':'#bb1100');
             ctx.beginPath(); ctx.arc(lx,ly,sz,0,Math.PI*2); ctx.fill(); clearGlow();
         }
+        // ★ 余韻: 着弾後も漂う残り火（ゆっくり上昇して静かに消える）
+        if (t > 0.72) {
+            const emT = (t - 0.72) / 0.28;
+            ctx.globalCompositeOperation = 'lighter';
+            for (let ei = 0; ei < 10 + tier * 3; ei++) {
+                const ea = rng(ei*13+1) * Math.PI * 2;
+                const er = 20 + rng(ei*13+2) * (60 + tier*20);
+                const ex = tcx + Math.cos(ea) * er * (0.4 + emT*0.6);
+                const ey = tcy + Math.sin(ea) * er * 0.4 - emT * (30 + rng(ei*13+3)*40);
+                const eSz = (1.5 + rng(ei*13+4)*3) * Math.max(0, 1 - emT*0.5);
+                const eA = Math.max(0, 1 - emT) * (0.35 + rng(ei*13+5)*0.35);
+                if (eSz<=0 || eA<=0) continue;
+                ctx.globalAlpha = eA; ctx.shadowColor = '#ff6600'; ctx.shadowBlur = eSz*2.4;
+                ctx.fillStyle = rng(ei*13+6) > 0.4 ? '#ff8822' : '#ffcc55';
+                ctx.beginPath(); ctx.arc(ex, ey, eSz, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.globalCompositeOperation = 'source-over'; clearGlow();
+        }
         ctx.globalAlpha=1;
     };
     // ── ヒャド系（氷）: FFXブリザガ風 巨大氷晶→砕け散る→ダイヤモンドダスト
@@ -2685,6 +2793,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
 
         // 2. 氷の槍が空から降り注ぐ (tier2+)
         if (tier >= 2) {
+            ctx.globalCompositeOperation='lighter';
             const spearN = tier >= 4 ? 9 : tier >= 3 ? 7 : 4;
             for (let si=0; si<spearN; si++) {
                 const delay = si*0.065;
@@ -2707,6 +2816,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
                 ctx.lineTo(sx2+spW*0.4, by2-spH); ctx.lineTo(sx2+spW, by2-spH*0.72);
                 ctx.closePath(); ctx.fill(); clearGlow();
             }
+            ctx.globalCompositeOperation='source-over';
         }
 
         // 3. 巨大氷結晶が中心から出現 (FFXブリザガ)
@@ -2926,6 +3036,8 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
     };
     const drawWind = (t) => {
         drawMagicCircle(t, tcx, tcy, 'wind');
+        drawCrescentTrail(t, tcx, tcy, 'wind');
+        drawCrescentTrail(t, tcx, tcy, 'wind', 0.14, 0.4, Math.PI*0.55, Math.PI*1.3);
         const SPHERE_ST = 0.28, CRIT_ST = 0.58;
 
         // 1. 背景薄緑染め
