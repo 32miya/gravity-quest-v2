@@ -2826,6 +2826,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
             const burstP = t>=BURST_T ? (t-BURST_T)/0.14 : 0;
             const crystA = burstP>0 ? Math.max(0,1-burstP*1.6) : Math.min(riseP*2,1);
             if (crystA > 0) {
+                ctx.globalCompositeOperation='lighter';
                 const cH = (72+tier*38)*Math.min(riseP*1.6,1);
                 const cW = 16+tier*11;
                 ctx.globalAlpha = crystA;
@@ -2844,11 +2845,13 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
                 ctx.strokeStyle='rgba(255,255,255,0.92)'; ctx.lineWidth=1.5;
                 ctx.beginPath(); ctx.moveTo(tcx, tcy-cH*0.95); ctx.lineTo(tcx-cW*0.3, tcy-cH*0.28); ctx.lineTo(tcx-cW*0.1, tcy+cH*0.22); ctx.stroke();
                 clearGlow();
+                ctx.globalCompositeOperation='source-over';
             }
         }
 
         // 4. 氷晶が砕け散る — 破片が全方向へ
         if (t >= BURST_T) {
+            ctx.globalCompositeOperation='lighter';
             const bt3 = (t-BURST_T)/(1-BURST_T);
             dqRing(t, 'rgba(155,218,255,0.95)', 4.5, 1.12);
             const shardN = 10+tier*7;
@@ -2864,10 +2867,12 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
                 ctx.save(); ctx.translate(shx2,shy2); ctx.rotate(sha2+bt3*Math.PI);
                 ctx.fillRect(-shSz2/3,-shSz2,shSz2*0.67,shSz2*2); ctx.restore(); clearGlow();
             }
+            ctx.globalCompositeOperation='source-over';
         }
 
         // 5. ダイヤモンドダスト — 画面全体に細かい氷粒が舞う
         if (t >= DUST_ST) {
+            ctx.globalCompositeOperation='lighter';
             const dt2 = (t-DUST_ST)/(1-DUST_ST);
             const dustN = tier >= 4 ? 50 : tier >= 3 ? 32 : tier >= 2 ? 20 : 11;
             for (let di=0; di<dustN; di++) {
@@ -2882,6 +2887,25 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
                 ctx.beginPath(); ctx.arc(dx2,dy2,dsz2,0,Math.PI*2); ctx.fill();
             }
             clearGlow();
+            ctx.globalCompositeOperation='source-over';
+        }
+        // ★ 余韻: 着弾後にゆっくり漂う霜のきらめき
+        if (t > 0.75) {
+            const frT = (t - 0.75) / 0.25;
+            ctx.globalCompositeOperation = 'lighter';
+            for (let fi = 0; fi < 8 + tier*3; fi++) {
+                const fa2 = rng(fi*17+1) * Math.PI * 2;
+                const fr2 = 16 + rng(fi*17+2) * (55 + tier*18);
+                const fx2 = tcx + Math.cos(fa2) * fr2 * (0.5 + frT*0.5);
+                const fy2 = tcy + Math.sin(fa2) * fr2 * 0.4 + frT * (18 + rng(fi*17+3)*22);
+                const fSz2 = (1 + rng(fi*17+4)*2.4) * Math.max(0, 1 - frT*0.4);
+                const fA2 = Math.max(0, 1 - frT) * (0.4 + rng(fi*17+5)*0.4);
+                if (fSz2<=0 || fA2<=0) continue;
+                ctx.globalAlpha = fA2; ctx.shadowColor = '#aaddff'; ctx.shadowBlur = fSz2*2.6;
+                ctx.fillStyle = rng(fi*17+6) > 0.4 ? '#eaf8ff' : '#aaddff';
+                ctx.beginPath(); ctx.arc(fx2, fy2, fSz2, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.globalCompositeOperation = 'source-over'; clearGlow();
         }
         ctx.globalAlpha=1;
     };
@@ -2968,6 +2992,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
 
         // ★ 雷の特徴3: 極太の青白い雷撃が垂直に降り注ぐ (水平には広がらない)
         if(t>=LB_ST){
+            ctx.globalCompositeOperation='lighter';
             const boltN=tier>=4?9:tier>=3?7:tier>=2?5:3;
             const waveN=tier>=3?2:1;
             const cirY=tcy-H*0.25;
@@ -2999,6 +3024,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
                     ctx.fillStyle=iG; ctx.beginPath(); ctx.arc(tX,tY,iR,0,Math.PI*2); ctx.fill(); clearGlow();
                 }
             }
+            ctx.globalCompositeOperation='source-over';
         }
 
         // ★ 雷の特徴4: 画面が青白く明滅 (炎と真逆の色)
@@ -3013,6 +3039,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
 
         // ★ 雷の特徴5: 青白いスパークが画面全体に (炎の火の粉とは色が真逆)
         if(t>=LB_ST){
+            ctx.globalCompositeOperation='lighter';
             const lSt=(t-LB_ST)/(1-LB_ST);
             const spN=tier>=4?65:tier>=3?46:tier>=2?30:16;
             for(let si=0;si<spN;si++){
@@ -3027,6 +3054,28 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
                 ctx.beginPath(); ctx.arc(lsx,lsy,lssz,0,Math.PI*2); ctx.fill();
             }
             clearGlow();
+            ctx.globalCompositeOperation='source-over';
+        }
+        // ★ 余韻: 着弾後にパチパチと弾ける残留アーク
+        if (t > 0.7) {
+            const arT = (t - 0.7) / 0.3;
+            ctx.globalCompositeOperation = 'lighter';
+            for (let ai2 = 0; ai2 < 5 + tier*2; ai2++) {
+                const flick = Math.sin((t*40 + ai2*13) ) > 0.3;
+                if (!flick) continue;
+                const cx3 = tcx + (rng(ai2*23+1)-0.5) * W * 0.7;
+                const cy3 = tcy + rng(ai2*23+2) * (H-tcy) * 0.8;
+                const arA = Math.max(0, 1-arT) * 0.5;
+                if (arA<=0) continue;
+                ctx.globalAlpha = arA; ctx.strokeStyle='#aaccff'; ctx.shadowColor='#6699ff'; ctx.shadowBlur=6;
+                ctx.lineWidth = 1.2;
+                ctx.beginPath();
+                ctx.moveTo(cx3-4-rng(ai2*23+3)*6, cy3-3);
+                ctx.lineTo(cx3, cy3);
+                ctx.lineTo(cx3+4+rng(ai2*23+4)*6, cy3+3);
+                ctx.stroke();
+            }
+            ctx.globalCompositeOperation = 'source-over'; clearGlow();
         }
 
         // ★ 雷の特徴6: 環境光は青紫 (炎の橙と真逆)
@@ -3153,6 +3202,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
         }
 
         // 光の粒が上昇（DQ6回復呪文の特徴的な演出）
+        ctx.globalCompositeOperation='lighter';
         const starCount = 6 + tier * 4;
         for (let si=0; si<starCount; si++) {
             const ph = (si/starCount);
@@ -3187,6 +3237,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
                 ctx.stroke(); clearGlow();
             }
         }
+        ctx.globalCompositeOperation='source-over';
 
         // ザオーン: 天使の翼（薄い弧線）
         if(isRevive && t<0.65) {
@@ -3202,6 +3253,24 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
         ctx.globalAlpha = Math.sin(t*Math.PI)*0.12;
         ctx.fillStyle = isGold?'rgba(255,240,100,0.5)':'rgba(80,255,140,0.4)'; ctx.fillRect(0,0,W,H);
         ctx.globalAlpha = 1;
+        // ★ 余韻: ふわりと漂って消える光の残滓
+        if (t > 0.78) {
+            const hfT = (t - 0.78) / 0.22;
+            ctx.globalCompositeOperation = 'lighter';
+            for (let hi = 0; hi < 6 + tier*2; hi++) {
+                const ha2 = rng(hi*19+1) * Math.PI * 2;
+                const hr2 = 14 + rng(hi*19+2) * (46 + tier*14);
+                const hx2 = tcx + Math.cos(ha2) * hr2;
+                const hy2 = tcy + Math.sin(ha2) * hr2 * 0.5 - hfT * (14 + rng(hi*19+3)*18);
+                const hSz2 = (1 + rng(hi*19+4)*2) * Math.max(0, 1 - hfT*0.3);
+                const hA2 = Math.max(0, 1 - hfT) * 0.5;
+                if (hSz2<=0 || hA2<=0) continue;
+                ctx.globalAlpha = hA2; ctx.shadowColor = c1; ctx.shadowBlur = hSz2*2.4;
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath(); ctx.arc(hx2, hy2, hSz2, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.globalCompositeOperation = 'source-over'; clearGlow();
+        }
     };
 
     // ── イオ系（爆発）: DQ6風 白フラッシュ → 衝撃波リング連続 ──────
@@ -3221,6 +3290,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
 
         // 2. エネルギー球が各方向から収束
         if(t<BOOM_ST2+0.06){
+            ctx.globalCompositeOperation='lighter';
             const orbN2=tier>=4?9:tier>=3?7:tier>=2?5:3;
             for(let oi3=0;oi3<orbN2;oi3++){
                 const oph2=oi3/orbN2;
@@ -3245,10 +3315,12 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
                 const trailStart2=Math.max(0,convP2-0.1);
                 ctx.beginPath();ctx.moveTo(tcx+Math.cos(startA2)*startR2*(1-trailStart2),tcy+Math.sin(startA2)*startR2*(1-trailStart2)*0.62);ctx.lineTo(ox2,oy2);ctx.stroke();clearGlow();
             }
+            ctx.globalCompositeOperation='source-over';
         }
 
         // 3. 核爆発コア — 白核が急拡大
         if(t>=BOOM_ST2){
+            ctx.globalCompositeOperation='lighter';
             const bt6=(t-BOOM_ST2)/(1-BOOM_ST2);
             dqFlash(t,BOOM_ST2,'#ffffff');
             const coreR2=bt6<0.38?bt6/0.38*(88+tier*62):Math.max(5,(88+tier*62)*(1-(bt6-0.38)/0.62));
@@ -3303,6 +3375,25 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
                 }
                 clearGlow();
             }
+            ctx.globalCompositeOperation='source-over';
+        }
+        // ★ 余韻: 燻る残り火が最後まで漂う
+        if (t > 0.8) {
+            const exT = (t - 0.8) / 0.2;
+            ctx.globalCompositeOperation = 'lighter';
+            for (let xi = 0; xi < 9 + tier*3; xi++) {
+                const xa2 = rng(xi*29+1) * Math.PI * 2;
+                const xr2 = 18 + rng(xi*29+2) * (70 + tier*22);
+                const xx2 = tcx + Math.cos(xa2) * xr2;
+                const xy2 = tcy + Math.sin(xa2) * xr2 * 0.55 + exT * (10 + rng(xi*29+3)*16);
+                const xSz2 = (1.4 + rng(xi*29+4)*2.6) * Math.max(0, 1 - exT*0.4);
+                const xA2 = Math.max(0, 1 - exT) * (0.35 + rng(xi*29+5)*0.35);
+                if (xSz2<=0 || xA2<=0) continue;
+                ctx.globalAlpha = xA2; ctx.shadowColor = '#ff7700'; ctx.shadowBlur = xSz2*2.4;
+                ctx.fillStyle = rng(xi*29+6) > 0.4 ? '#ffaa33' : '#ffdd88';
+                ctx.beginPath(); ctx.arc(xx2, xy2, xSz2, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.globalCompositeOperation = 'source-over'; clearGlow();
         }
         ctx.globalAlpha=1;
     };
@@ -3322,15 +3413,17 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
 
             // 飛来中の暗黒球
             if (flyP < 1) {
+                ctx.globalCompositeOperation='lighter';
                 const or2 = (12+tier*7) * flyP;
                 ctx.globalAlpha = flyP * 0.9;
                 ctx.shadowColor = '#aa00ff'; ctx.shadowBlur = or2*2;
                 const og = ctx.createRadialGradient(ox,oy_src,0,ox,oy_src,or2);
-                og.addColorStop(0,'rgba(60,0,80,1)'); og.addColorStop(0.6,'rgba(120,0,160,0.8)');
+                og.addColorStop(0,'rgba(180,80,220,1)'); og.addColorStop(0.6,'rgba(140,0,180,0.85)');
                 og.addColorStop(1,'rgba(60,0,120,0)');
                 ctx.fillStyle = og;
                 ctx.beginPath(); ctx.arc(ox,oy_src,or2,0,Math.PI*2); ctx.fill();
                 clearGlow();
+                ctx.globalCompositeOperation='source-over';
             }
 
             // 着弾暗転（画面が暗くなる）
@@ -3345,20 +3438,23 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
             // 着弾爆発（紫の球が広がる）
             const explP = Math.max(0, (ot-0.3)/0.5);
             if (explP > 0 && explP < 1) {
+                ctx.globalCompositeOperation='lighter';
                 const er = explP * (42+tier*24);
                 const ea = Math.max(0, 1-explP*1.1);
                 ctx.globalAlpha = ea * 0.9;
                 ctx.shadowColor = '#9900ff'; ctx.shadowBlur = er;
                 const eg = ctx.createRadialGradient(ox,tcy,0,ox,tcy,er);
-                eg.addColorStop(0,'#660099'); eg.addColorStop(0.5,'rgba(120,0,180,0.8)');
+                eg.addColorStop(0,'#aa33dd'); eg.addColorStop(0.5,'rgba(140,0,200,0.85)');
                 eg.addColorStop(1,'rgba(60,0,100,0)');
                 ctx.fillStyle = eg;
                 ctx.beginPath(); ctx.arc(ox,tcy,er,0,Math.PI*2); ctx.fill();
                 clearGlow();
+                ctx.globalCompositeOperation='source-over';
             }
 
             // 闇の触手（tier2+）
             if (tier >= 2 && ot > 0.28 && ot < 0.75) {
+                ctx.globalCompositeOperation='lighter';
                 const tenT = (ot-0.28)/0.47;
                 const tenA = Math.sin(tenT*Math.PI) * 0.8;
                 const tenN = 4+tier*2;
@@ -3373,7 +3469,26 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
                     ctx.quadraticCurveTo(ox+Math.cos(ta+0.5)*tl*0.5,tcy+Math.sin(ta+0.5)*tl*0.5,ox+Math.cos(ta)*tl,tcy+Math.sin(ta)*tl*0.7);
                     ctx.stroke(); clearGlow();
                 }
+                ctx.globalCompositeOperation='source-over';
             }
+        }
+        // ★ 余韻: 消えゆく闇の残り火（紫の粒がゆっくり沈んでいく）
+        if (t > 0.75) {
+            const dkT = (t - 0.75) / 0.25;
+            ctx.globalCompositeOperation = 'lighter';
+            for (let di3 = 0; di3 < 7 + tier*2; di3++) {
+                const da3 = rng(di3*31+1) * Math.PI * 2;
+                const dr3 = 16 + rng(di3*31+2) * (50 + tier*16);
+                const dx3 = tcx + Math.cos(da3) * dr3;
+                const dy3 = tcy + Math.sin(da3) * dr3 * 0.5 + dkT * (16 + rng(di3*31+3)*20);
+                const dSz3 = (1 + rng(di3*31+4)*2.4) * Math.max(0, 1 - dkT*0.4);
+                const dA3 = Math.max(0, 1 - dkT) * (0.35 + rng(di3*31+5)*0.35);
+                if (dSz3<=0 || dA3<=0) continue;
+                ctx.globalAlpha = dA3; ctx.shadowColor = '#aa33ff'; ctx.shadowBlur = dSz3*2.6;
+                ctx.fillStyle = rng(di3*31+6) > 0.4 ? '#cc66ff' : '#7711bb';
+                ctx.beginPath(); ctx.arc(dx3, dy3, dSz3, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.globalCompositeOperation = 'source-over'; clearGlow();
         }
         ctx.globalAlpha = 1;
     };
@@ -3386,6 +3501,7 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
         const dir = isDebuff ? 1 : -1;
 
         // 魔法陣（外円 + 六芒星）
+        ctx.globalCompositeOperation='lighter';
         const runeA = Math.sin(Math.min(t,0.85)/0.85*Math.PI) * 0.9;
         const runeR = Math.min(t/0.18,1) * (30+tier*18);
         if (runeA>0 && runeR>0) {
@@ -3416,10 +3532,29 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
             ctx.fillRect(-sz,-sz,sz*2,sz*2); ctx.restore();
         }
         clearGlow();
+        ctx.globalCompositeOperation='source-over';
 
         const stA=Math.max(0,0.12*(1-t*2.2));
         if(stA>0){ctx.globalAlpha=stA;ctx.fillStyle=isDebuff?'rgba(80,0,180,0.5)':'rgba(140,255,40,0.35)';ctx.fillRect(0,0,W,H);}
         ctx.globalAlpha=1;
+        // ★ 余韻: 効果が定着する瞬間の残り煌めき
+        if (t > 0.72) {
+            const bfT = (t - 0.72) / 0.28;
+            ctx.globalCompositeOperation = 'lighter';
+            for (let bi3 = 0; bi3 < 6 + tier*2; bi3++) {
+                const ba3 = rng(bi3*37+1) * Math.PI * 2;
+                const br3 = 12 + rng(bi3*37+2) * (36 + tier*10);
+                const bx3 = tcx + Math.cos(ba3) * br3;
+                const by3 = tcy + Math.sin(ba3) * br3 * 0.6 + dir * bfT * (14 + rng(bi3*37+3)*14);
+                const bSz3 = (1 + rng(bi3*37+4)*2) * Math.max(0, 1 - bfT*0.5);
+                const bA3 = Math.max(0, 1 - bfT) * 0.5;
+                if (bSz3<=0 || bA3<=0) continue;
+                ctx.globalAlpha = bA3; ctx.shadowColor = c; ctx.shadowBlur = bSz3*2.4;
+                ctx.fillStyle = c;
+                ctx.beginPath(); ctx.arc(bx3, by3, bSz3, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.globalCompositeOperation = 'source-over'; clearGlow();
+        }
     };
 
     const drawWarp = (t) => {
