@@ -1606,6 +1606,18 @@ let npcFacingDir = {};         // { npc.id: 0=down,1=up,2=left,3=right }
         _img.src = b64;
     }
 })();
+// ── 地面タイル画像（town/castle 床、シームレスタイリング用）──────────────────────────
+(function() {
+    const _groundTileData = {
+        'townFloorGQ': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFcklEQVR4nL1Xy1NbZRT/5RJeTQpIIAkpD5WH4S0ttB1d0HYqPoZh1KkLx3FVFt260nHpP+DGccXCXWfURYdhnBFaKzo6TKUwgT4iNrThcRueAoIJUMD5nZtzG+siWSBnJpN7v3y/77x+3zknjs9vOg+y13tRurQGSsXGItBQhdm5OELHokD/IlZ2Amh8Pg/u54rw4O4YioPNqCjPw+xcAjkbW4iZ01ioC6J1c0eeaxpPyj70eNPiDSofnLiGpdIiLNxbwa8bBRj46id57i4OYmfbidoWD0LuHKzu7aL1YocoHZz5C6vhSTnUH3gRvqmwPFOopPt0Ffyj7rR4h0ZAxbw6JJu2Hu/h3tgEcnKf4PbvBzj1kkMsJ9jX4JG9oeu/yTcN2Clw2dHg+91HCRw/WEyLd6rymLkOT/038AfOy/vmn2sCZjiBMTGKgImZArSY07KHv7nKsuSZBoMRMCGRuNCQhdB1My3eoRGImH3IH66yvacB69tOFOY+Ee8YLvWW4eyqPC4H6rvmn1xgOnj4fGwzLd7QCKQqp1f04pHHkHARzPDxQyX1RrZwRHLf4JF3rlN4MM8hDzLBOz760nkQWS5BdckyzmZfsplNIZjvxVnZEpHBkWWc66qyvaEiHkRpL9/DjUiueKw3gY6kwxtidcvbqA70YmT32yQfpiVsDBHB9IYRaancEDCB9EaI5M6R/eEtD+IrU4KjUHkmeMcX164cJMZj1tUYWZZNDI2GlMLNCqTQa/2dd5zX7Fm8OpIOb+wW9iGvzY9Y+ya6zpbIJlor4a0L2kYwpPSIHFGyUc60+S1lSbwaz0hkgjdIwvHbs7gTeYj2rnLJGfNFK8lsqY7leRLGLXeNVeHIj6mwKOP7/f1dqXiaDq4Tkwne0JcPys5J+WXOSCitaiynU+Prstl1YcP2iBHSMOph/Fama5FKhzfofeD918TzQNO2kIeEsqV/EfFX12Rz699V1pX11FkECzZLKDXsmmt+Kw/S4Y22UxVSfud9Axj/ehMV5fm2bl5DIU7/omxWENmuYteAHq9NNC3JmeAdrAOV9YB2ROaeKZgt8Mozmf3umzXCC712LDaMmNznZMfToqT40TmrRKfDO3o+8x+wDrAUbzx+HZeL4jZYCaUsV0Wa+9RCROXscMTTeLb1gVvRtHiH9gJeR0rgwSXLUpIog35+aPNA9novCn9+x1J+LJpxPz/UeWB/OCKhIlt/+G4+o35+aPOAeXVIgLR6tiAhIYuZRzgPJMZjWPPl460XmJu4kOvI5oHEeAyrdQsoWohjYDUs3rAsH+k88Imr4T/9nHeX1v/v80DTXZeU39WmIRid1Si9ErXrwJHMAxGzTwYSJaMQhv8JkrWcvULXD3secKQOpTSCV5Gi14pEPOF3y1qww20TlJ6TbIzW3o/dwqHUBkalbNPaITUSWrB03DNUOXnAbxUeyJrAsDKczOHo4JwdmcuveMXTrP7z9jywEC62wD1eqXS+4Oq/5gHu19vC9FCHpECVshyn1gV6t2R2IP+XImmpqcJipX/dJEVbIakhqXWfhhRP+cQACXv7pvzbYhRVjFSvVTnX7jRuYeb+034ecLVa/ZwHJ/PIw+OdT7kihKTyZN65n8rZ4nUeUOVcYwqcSj7lgDQl05qUuWZ0nsZ+/y0kgjGEwpOiML8fiGER8dqoTV6u+4aB1krrasbMScz7onDhPYBKe7wIISpGk5ChJMaROg88K5oS/m3zBwrt9dSoUYgnF3iFT0amMFZdZ+NvfNqMlz8MwvvHsn1tC8q+x4mFbhmCDJJPiUhFqQokBVI+C2WNXVN+5x+ZQK98FP+w9qbgqTwV/8bHZ0S59fs0OIERw0mc0fsHAuMW+RvvJSgAAAAASUVORK5CYII=',
+        'castleFloorGQ': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACI0lEQVR4nO2WMUgcQRSG3w4aiSIoKqhF1FwuHDainhItEoTjjBIxnUUSrwnCgVxvmnTWXiEHwUZIioBgoUg4BMFSRLCRgCzGFImocIIoGOFW/kn+ZW4PC50u7A/DsDvzvZ15783sc7LZrHe0vS8X9UqgSCQi+Xxe0um05HI5/Vy4PpD6yg6/3/+5J7HRKfm+9kleDo2JDe/MvJv2CNcUitpQMpnUcLHyShpbHgpFI/FYQr5trJR9/D68ao5Hy+D5hTkNq+sqPRkgxB1AGINs+QrXdTVEAX48OCxXZ4dSVdem3Ylx15Uy0d02vNPXP+g1tlb7LxGb8x+bJRN/7x78M+L6Hz0+KfjjNryK9TZI9FGnbkFhB9Do+48aMuGBZ3EBa8srxgYNRpCZte3PNQg3dvdNyuriB3k6niqBMZ+y4VVw1TQCkDDd2tLVod2Nndymu/IqaICDANFepWb9mMLg6a9LfYTM7LbhnUwm45nHAwaYLOhxacAIjSLDoa2lZXn7ZkLPseEr/q74dpfisqAboQd1bfLn7FC6Ej3y+ctXbcSGd3AMMYDYYDJWzUvF3A3cxlgyu5Fku+s7YsMrrASN7iOMnjAaby6CvGhseYUXPDYQYXMH1JOmdn/16GHEllfITP7VeG2asPljQSw7oy/8XTCzbXhn5HXCY+xMiMaCv1Qzq5nZNrwT1gPNYT3QH9YDEtYDJQrrgaDCeiAS1gPJ/7weuAGWQCFdzX92vwAAAABJRU5ErkJggg==',
+    };
+    for (const [key, b64] of Object.entries(_groundTileData)) {
+        const _img = new Image();
+        _img.onload = function() { externalImages[key] = _img; };
+        _img.src = b64;
+    }
+})();
 let _lastWanderMapId = null;    // マップ変更検出用
 let _walkPhase = 0; let _lastMoveTime = 0;
 // 静的タイルキャッシュ（カメラ位置が変わるまで再描画不要な背景レイヤー）
@@ -8303,7 +8315,7 @@ function drawMap() {
             } else if (tile === 1 || tile === 4 || tile === 15) {
                 if (_tileIsCastle) color = '#445'; else if (_tileIsTown) color = '#764'; else if (isCave) color = '#222'; else if (isMountain) color = '#333';
             }
-            let floorKeys = _tileIsCastle ? ['castleFloor', 'floor'] : (_tileIsTown ? ['townFloor', 'floor', 'townPath'] : (isCave ? ['caveFloor', 'ground', 'floor'] : (_isTower || _isDemon || _isShrine ? [] : ['fieldGrass', 'grass']))); if(isMountain) floorKeys = ['northMountainFloor', 'mountainFloor', 'plainRock', 'rock'];
+            let floorKeys = _tileIsCastle ? ['castleFloorGQ', 'castleFloor', 'floor'] : (_tileIsTown ? ['townFloorGQ', 'townFloor', 'floor', 'townPath'] : (isCave ? ['caveFloor', 'ground', 'floor'] : (_isTower || _isDemon || _isShrine ? [] : ['fieldGrass', 'grass']))); if(isMountain) floorKeys = ['northMountainFloor', 'mountainFloor', 'plainRock', 'rock'];
             for(let k of floorKeys) { if(externalImages[k] && externalImages[k].complete && externalImages[k].naturalHeight > 0) { bgImg = externalImages[k]; break; } }
             if (tile === 1 || tile === 4) {
                let wallKeys = _tileIsCastle ? ['castleWall', 'wall'] : (_tileIsTown ? ['townWall', 'wall', 'brickWall'] : (isCave ? ['caveWall', 'rockWall', 'wall'] : ['plainRock', 'rock', 'mountainWall'])); if(isMountain) wallKeys = ['northMountainWall', 'mountainWall', 'plainRock', 'rock'];
@@ -8312,7 +8324,7 @@ function drawMap() {
             } else if (tile === 3 || tile === 6 || tile === 7 || tile === 8) { bgImg = null; if (tile === 3) color = '#cccc00'; if (tile === 6 || tile === 7) color = '#800080'; if (tile === 8) color = '#ff00ff';
             } else if (tile === 5) { bgImg = null; color = '#33ccff'; 
             } else if (tile === 9) { bgImg = null; color = _tileIsCastle ? '#8c0c0c' : '#c00'; let k = externalImages['carpet'] ? 'carpet' : 'redCarpet'; if(externalImages[k]) fgImg = externalImages[k];
-            } else if (tile === 10) { let k = externalImages['townPath'] ? 'townPath' : 'path'; if(externalImages[k]) fgImg = externalImages[k]; else { bgImg = null; color = '#d2b48c'; } 
+            } else if (tile === 10) { let k = externalImages['townFloorGQ'] ? 'townFloorGQ' : (externalImages['townPath'] ? 'townPath' : 'path'); if(externalImages[k]) fgImg = externalImages[k]; else { bgImg = null; color = '#d2b48c'; } 
             } else if (tile === 11) { let k = externalImages['fieldGrass'] ? 'fieldGrass' : 'grass'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = '#3a823f'; } 
             } else if (tile === 12) { let k = externalImages['fieldTallGrass'] ? 'fieldTallGrass' : 'tallGrass'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = '#1a1'; } 
             } else if (tile === 15) { if(externalImages['castleWall']) bgImg = externalImages['castleWall'];
