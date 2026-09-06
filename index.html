@@ -7932,7 +7932,7 @@ function getEnemyImageHtml(enemyId) {
 
 function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
     const T = TILE_SIZE;
-    const { castle, town, cave, demon, tower, shrine, smallTown, capitalTown, townElement } = mc;
+    const { castle, town, cave, demon, tower, shrine, smallTown, capitalTown, townElement, caveElement } = mc;
     const fl = Math.floor;
     const fr = (c, rx, ry, rw, rh) => { ctx.fillStyle = c; ctx.fillRect(px + rx, py + ry, rw, rh); };
     const ln = (c, lw, x1, y1, x2, y2) => { ctx.strokeStyle = c; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(px + x1, py + y1); ctx.lineTo(px + x2, py + y2); ctx.stroke(); };
@@ -8163,19 +8163,30 @@ function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
             fr('#271230', 0, 0, T, T); fr('#311838', 4, 4, T - 8, T - 8);
             if (rand < 0.07) { ln('#7722bb', 1, fl(rand * T), 0, fl((1 - rand) * T), T); ctx.strokeStyle = 'rgba(100,20,180,0.22)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(px + fl(rand * T), py); ctx.lineTo(px + fl((1 - rand) * T), py + T); ctx.stroke(); }
         } else if (cave) {
-            // 洞窟床 DQ4スタイル: 岩肌の粒状テクスチャ + 苔 + ひび割れ
-            const _cfBase = rand<0.33?'#373340':rand>0.67?'#3f3b4a':'#3a3644';
-            fr(_cfBase, 0, 0, T, T); fr('#413d4c', 3, 3, T - 6, T - 6);
+            // 洞窟床 DQ4スタイル: 岩肌の粒状テクスチャ + 苔 + ひび割れ（洞窟の種類ごとに色調変化）
+            const _cavePal = {
+                ice:     { base:['#28394e','#2d3f56','#304256'], hi:'rgba(160,200,255,0.22)', moss:false },
+                lava:    { base:['#3a1c16','#421f18','#3c1e16'], hi:'rgba(255,110,40,0.20)',  moss:false },
+                crystal: { base:['#2c1e40','#312348','#2e2044'], hi:'rgba(190,120,240,0.22)', moss:false },
+                shadow:  { base:['#120e18','#15111c','#130f1a'], hi:'rgba(80,60,110,0.18)',   moss:false },
+                sea:     { base:['#0e2c38','#11323e','#0f2e3a'], hi:'rgba(80,200,220,0.20)',  moss:false },
+            }[caveElement] || null;
+            const _cfBase = _cavePal ? _cavePal.base[fl(rand*3)] : (rand<0.33?'#373340':rand>0.67?'#3f3b4a':'#3a3644');
+            fr(_cfBase, 0, 0, T, T); fr(_cavePal ? _cavePal.hi : '#413d4c', 3, 3, T - 6, T - 6);
             ctx.fillStyle='rgba(0,0,0,0.28)';
             for(let di=0;di<10;di++) ctx.fillRect(px+fl((rand*11+di*3.4)%(T-2))+1,py+fl((rand*9+di*2.7)%(T-2))+1,fl(rand*2)+1,fl(rand*2)+1);
             ctx.fillStyle='rgba(150,140,160,0.16)';
             for(let di=0;di<6;di++) ctx.fillRect(px+fl((rand*8+di*4.6)%(T-2))+1,py+fl((rand*6+di*3.8)%(T-2))+1,2,1);
-            if(rand<0.35){
+            if(rand<0.35 && (!_cavePal || _cavePal.moss !== false)){
                 ctx.fillStyle='rgba(60,110,40,0.32)';
                 for(let mi=0;mi<3;mi++) ctx.fillRect(px+fl((rand*13+mi*7.1)%(T-4))+2,py+fl((rand*10+mi*5.3)%(T-4))+2,fl(rand*3)+2,fl(rand*2)+1);
             }
             if (rand > 0.9) { ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 0.7; ctx.beginPath(); ctx.moveTo(px + fl(rand * 10) + 6, py + fl(rand * 8) + 6); ctx.lineTo(px + fl(rand * 10) + 16, py + fl(rand * 10) + 14); ctx.stroke(); }
             if (rand < 0.08) fr('rgba(0,0,0,0.35)', fl(rand * (T - 8)) + 2, fl(rand * (T - 6)) + 2, fl(rand * 4) + 4, fl(rand * 2) + 3);
+            // 属性演出: 氷=きらめき結晶 / 溶岩=マグマの発光ひび / 水晶=紫の結晶脈
+            if (caveElement === 'ice' && rand > 0.93) { ctx.fillStyle='rgba(220,240,255,0.55)'; ctx.beginPath(); ctx.moveTo(px+T/2,py+T/2-4); ctx.lineTo(px+T/2+3,py+T/2); ctx.lineTo(px+T/2,py+T/2+4); ctx.lineTo(px+T/2-3,py+T/2); ctx.closePath(); ctx.fill(); }
+            else if (caveElement === 'lava' && rand > 0.88) { ctx.strokeStyle='rgba(255,140,30,0.55)'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(px+fl(rand*8)+4,py+fl(rand*6)+6); ctx.lineTo(px+fl(rand*8)+14,py+fl(rand*8)+12); ctx.stroke(); lights.push({ x: px+T/2, y: py+T/2, radius: 18+rand*8, color:'rgba(255,100,20,0.12)' }); }
+            else if (caveElement === 'crystal' && rand > 0.9) { ctx.fillStyle='rgba(210,150,255,0.5)'; ctx.beginPath(); ctx.moveTo(px+T/2,py+T/2-5); ctx.lineTo(px+T/2+2,py+T/2+3); ctx.lineTo(px+T/2-2,py+T/2+3); ctx.closePath(); ctx.fill(); }
         } else {
             // Field sand/desert (DQ3 style)
             let sc = rand < 0.35 ? '#c4ba6c' : rand > 0.65 ? '#d0c47e' : '#c8be78';
@@ -8313,8 +8324,15 @@ function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
                 lights.push({ x: px + 16, y: py + 6, radius: 44 + rand * 14, color: 'rgba(160,30,220,0.23)' });
             }
         } else if (cave) {
-            const _cwBase = rand<0.4?'#201e2c':'#241f30';
-            fr(_cwBase, 0, 0, T, T); fr('#2a2835', 1, 0, T - 2, 5); fr('#1a1826', 1, 5, T - 2, T - 6);
+            const _cwPal = {
+                ice:     ['#1c2c40','#20304a','#16243a'],
+                lava:    ['#2c1610','#301810','#20100c'],
+                crystal: ['#221636','#26183c','#1a1028'],
+                shadow:  ['#0c0910','#0e0a12','#0a070e'],
+                sea:     ['#0a2028','#0c242e','#081a20'],
+            }[caveElement] || null;
+            const _cwBase = _cwPal ? _cwPal[rand<0.4?0:rand<0.7?1:2] : (rand<0.4?'#201e2c':'#241f30');
+            fr(_cwBase, 0, 0, T, T); fr(_cwPal ? _cwPal[0] : '#2a2835', 1, 0, T - 2, 5); fr(_cwPal ? _cwPal[2] : '#1a1826', 1, 5, T - 2, T - 6);
             ctx.fillStyle='rgba(0,0,0,0.25)';
             for(let di=0;di<6;di++) ctx.fillRect(px+fl((rand*10+di*4.2)%(T-4))+2,py+fl((rand*11+di*3.6)%(T-4))+6,fl(rand*3)+2,fl(rand*2)+2);
             if(rand>0.85 && rand<0.9){
@@ -8479,10 +8497,19 @@ function drawMap() {
         else if (_elemMatch(_METAL_TOWN_IDS)) _townElement = 'metal';
         else if (_elemMatch(_WATER_TOWN_IDS)) _townElement = 'water';
     }
+    // 洞窟の種類による色調差別化: 氷/溶岩/水晶/闇/海の5系統。未分類の洞窟は従来の紫グレー岩肌のまま。
+    let _caveElement = null;
+    if (isCave) {
+        if (_mapId.includes('ice')) _caveElement = 'ice';
+        else if (_mapId.includes('lava')) _caveElement = 'lava';
+        else if (_mapId.includes('crystal')) _caveElement = 'crystal';
+        else if (_mapId.includes('shadow') || _mapId.includes('fortress')) _caveElement = 'shadow';
+        else if (_mapId.includes('sea') || _mapId.includes('coral')) _caveElement = 'sea';
+    }
     // 偽王討伐編: 城下町・グラマニア城を魔王城スタイルで描画
     const _is2ndDarkMap = false; // 2周目暗黒化廃止（1周目完結）
     const _isDemon = _mapId.includes('demon') || _is2ndDarkMap; const _isTower = _mapId.includes('tower'); const _isShrine = _mapId.includes('shrine') || _mapId.includes('temple') || _mapId.includes('dharma');
-    const _mc = { castle: isCastle && !_isDemon, town: isTown && !_is2ndDarkMap, cave: isCave, demon: _isDemon, tower: _isTower, shrine: _isShrine, smallTown: _isSmallTown, capitalTown: _isCapitalTown, townElement: _townElement };
+    const _mc = { castle: isCastle && !_isDemon, town: isTown && !_is2ndDarkMap, cave: isCave, demon: _isDemon, tower: _isTower, shrine: _isShrine, smallTown: _isSmallTown, capitalTown: _isCapitalTown, townElement: _townElement, caveElement: _caveElement };
     const _drawNow = Date.now();
     let lights = [];
     const _fieldMatch = _mapId && _mapId.match(/^map_field_(\d)_(\d)$/);
@@ -8539,10 +8566,10 @@ function drawMap() {
             } else if (tile === 1 || tile === 4 || tile === 15) {
                 if (_tileIsCastle) color = '#445'; else if (_tileIsTown) color = '#764'; else if (isCave) color = '#222'; else if (isMountain) color = '#333';
             }
-            let floorKeys = _tileIsCastle ? ['castleFloorGQ', 'castleFloor', 'floor'] : (_tileIsTown ? ['townFloorGQ', 'townFloor', 'floor', 'townPath'] : (isCave ? ['caveFloorGQ', 'caveFloor', 'ground', 'floor'] : (_isTower || _isDemon || _isShrine ? [] : ['fieldGrass', 'grass']))); if(isMountain) floorKeys = ['northMountainFloor', 'mountainFloor', 'plainRock', 'rock']; if(_isDesertMap) floorKeys = ['desertFloorGQ'].concat(floorKeys);
+            let floorKeys = _tileIsCastle ? ['castleFloorGQ', 'castleFloor', 'floor'] : (_tileIsTown ? ['townFloorGQ', 'townFloor', 'floor', 'townPath'] : (isCave ? (_caveElement ? [] : ['caveFloorGQ', 'caveFloor', 'ground', 'floor']) : (_isTower || _isDemon || _isShrine ? [] : ['fieldGrass', 'grass']))); if(isMountain) floorKeys = ['northMountainFloor', 'mountainFloor', 'plainRock', 'rock']; if(_isDesertMap) floorKeys = ['desertFloorGQ'].concat(floorKeys);
             for(let k of floorKeys) { if(externalImages[k] && externalImages[k].complete && externalImages[k].naturalHeight > 0) { bgImg = externalImages[k]; break; } }
             if (tile === 1 || tile === 4) {
-               let wallKeys = _tileIsCastle ? ['castleWall', 'wall'] : (_tileIsTown ? (_isSmallTown ? ['smallTownWallGQ', 'townWall', 'wall', 'brickWall'] : (_isCapitalTown ? ['capitalTownWallGQ', 'townWall', 'wall', 'brickWall'] : ['townWall', 'wall', 'brickWall'])) : (isCave ? ['caveWall', 'rockWall', 'wall'] : ['plainRock', 'rock', 'mountainWall'])); if(isMountain) wallKeys = ['northMountainWall', 'mountainWall', 'plainRock', 'rock'];
+               let wallKeys = _tileIsCastle ? ['castleWall', 'wall'] : (_tileIsTown ? (_isSmallTown ? ['smallTownWallGQ', 'townWall', 'wall', 'brickWall'] : (_isCapitalTown ? ['capitalTownWallGQ', 'townWall', 'wall', 'brickWall'] : ['townWall', 'wall', 'brickWall'])) : (isCave ? (_caveElement ? [] : ['caveWall', 'rockWall', 'wall']) : ['plainRock', 'rock', 'mountainWall'])); if(isMountain) wallKeys = ['northMountainWall', 'mountainWall', 'plainRock', 'rock'];
                bgImg = null; for(let k of wallKeys) { if(externalImages[k] && externalImages[k].complete && externalImages[k].naturalHeight > 0) { bgImg = externalImages[k]; break; } } if (tile === 1 && _tileIsCastle) color = '#555';
             } else if (tile === 2) { let k = externalImages['townCounter'] ? 'townCounter' : 'counter'; if(externalImages[k]) fgImg = externalImages[k]; else { bgImg = null; color = '#3366ff'; } 
             } else if (tile === 3 || tile === 6 || tile === 7 || tile === 8) { bgImg = null; if (tile === 3) color = '#cccc00'; if (tile === 6 || tile === 7) color = '#800080'; if (tile === 8) color = '#ff00ff';
