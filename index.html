@@ -1789,6 +1789,34 @@ let _lastWanderMapId = null;    // マップ変更検出用
 // そこから完全に離れるまで_findBuildingFootprintExit経由の再入場を抑制するための記憶
 let _footprintGraceDoor = null; // { map, x, y } | null
 let _walkPhase = 0; let _lastMoveTime = 0;
+// フィールド移動のスムーズスクロール用: パーティーは常に画面上の固定点に描画され、
+// カメラ(camX/camY)側が動くため、カメラの基準座標をタイル単位で瞬間移動させず
+// 短時間で補間することで「マスを超えて瞬間移動しているように見える」問題を解消する。
+let _moveAnimMap = null, _moveAnimFromX = 0, _moveAnimFromY = 0, _moveAnimToX = 0, _moveAnimToY = 0, _moveAnimStart = 0;
+const MOVE_ANIM_DUR = 130;
+function _getDisplayPartyPos() {
+    if (!partyData || !partyData.pos) return { x: 0, y: 0 };
+    if (_moveAnimMap !== partyData.pos.map) {
+        // マップ切り替え・ワープ・戦闘後の再配置等: 補間せず即座に現在地へ合わせる
+        _moveAnimMap = partyData.pos.map;
+        _moveAnimFromX = _moveAnimToX = partyData.pos.x;
+        _moveAnimFromY = _moveAnimToY = partyData.pos.y;
+        _moveAnimStart = performance.now();
+        return { x: partyData.pos.x, y: partyData.pos.y };
+    }
+    if (_moveAnimToX !== partyData.pos.x || _moveAnimToY !== partyData.pos.y) {
+        // moveParty() を経由しない直接的な位置変更(同一マップ内テレポート等)のフォールバック
+        _moveAnimFromX = _moveAnimToX = partyData.pos.x;
+        _moveAnimFromY = _moveAnimToY = partyData.pos.y;
+        _moveAnimStart = performance.now();
+        return { x: partyData.pos.x, y: partyData.pos.y };
+    }
+    const t = Math.min(1, (performance.now() - _moveAnimStart) / MOVE_ANIM_DUR);
+    return {
+        x: _moveAnimFromX + (_moveAnimToX - _moveAnimFromX) * t,
+        y: _moveAnimFromY + (_moveAnimToY - _moveAnimFromY) * t
+    };
+}
 // 静的タイルキャッシュ（カメラ位置が変わるまで再描画不要な背景レイヤー）
 let _staticTileCache = null; let _staticCacheKey = ''; let _cachedLights = []; let _cachedCanvas = null; let _cachedCtx = null; let _fbImagesVersion = 0;
 let _fieldRafId = null; let _lastFieldDraw = 0;
@@ -5574,7 +5602,19 @@ function generateDQStyleMaps() {
             {[`7,2`]:{id:bossId,name:bossName},[`3,8`]:{id:chestA,name:'宝箱'},[`11,8`]:{id:chestB,name:'宝箱'}},
             enc,dungName);
         externalMapData[mapId]=d;
-        if(externalMapData[fieldMapId]){let _ep=findLand(fieldMapId,fdx,fdy-2);if(_ep){externalMapData[fieldMapId].tiles[_ep.y*(externalMapData[fieldMapId].width||45)+_ep.x]=22;externalMapData[fieldMapId].exits[_ep.k]={map:mapId,x:7,y:11};}}
+        if(externalMapData[fieldMapId]){
+            const _fm5 = externalMapData[fieldMapId];
+            // 既にこのダンジョンへの入口がフィールド側に配置済み(placeBuildingで先に配置される場合がある)
+            // なら重複した入口タイルを新設せず、既存の入口座標にダンジョン側の帰還exitを合わせる
+            const _existing5 = Object.entries(_fm5.exits||{}).find(([k,v]) => v && v.map === mapId);
+            if (_existing5) {
+                const [_ex5,_ey5] = _existing5[0].split(',').map(Number);
+                d.exits['7,12'].x=_ex5; d.exits['7,12'].y=_ey5; d.exits['8,12'].x=_ex5; d.exits['8,12'].y=_ey5;
+            } else {
+                let _ep=findLand(fieldMapId,fdx,fdy-2);
+                if(_ep){_fm5.tiles[_ep.y*(_fm5.width||45)+_ep.x]=22;_fm5.exits[_ep.k]={map:mapId,x:7,y:11};}
+            }
+        }
     }
 
     if(!externalMapData['map_ruin_ancient_1f']) mkDungeon1F('map_ruin_ancient_1f','boss_ancient_guardian','古代の守護者','obj_chest_ancient_a','obj_chest_ancient_b',encD2,'北海の古代遺跡','map_field_8_0',8,22);
@@ -5598,7 +5638,19 @@ function generateDQStyleMaps() {
             enc1,t1name);
         t1.exits['9,2']={map:`${prefix}_2f`,x:2,y:11}; t1.tiles[13*12+6]=22; t1.tiles[13*12+5]=22;
         externalMapData[`${prefix}_1f`]=t1;
-        if(externalMapData[f1Field]){let _ep=findLand(f1Field,fdx,fdy-2);if(_ep){externalMapData[f1Field].tiles[_ep.y*(externalMapData[f1Field].width||45)+_ep.x]=22;externalMapData[f1Field].exits[_ep.k]={map:`${prefix}_1f`,x:6,y:12};}}
+        if(externalMapData[f1Field]){
+            const _fm6 = externalMapData[f1Field];
+            // 既にこの塔への入口がフィールド側に配置済み(placeBuildingで先に配置される場合がある)
+            // なら重複した入口タイルを新設せず、既存の入口座標に塔側の帰還exitを合わせる
+            const _existing6 = Object.entries(_fm6.exits||{}).find(([k,v]) => v && v.map === `${prefix}_1f`);
+            if (_existing6) {
+                const [_ex6,_ey6] = _existing6[0].split(',').map(Number);
+                t1.exits['6,13'].x=_ex6; t1.exits['6,13'].y=_ey6; t1.exits['5,13'].x=_ex6; t1.exits['5,13'].y=_ey6;
+            } else {
+                let _ep=findLand(f1Field,fdx,fdy-2);
+                if(_ep){_fm6.tiles[_ep.y*(_fm6.width||45)+_ep.x]=22;_fm6.exits[_ep.k]={map:`${prefix}_1f`,x:6,y:12};}
+            }
+        }
         const t2=mkMap(12,14,
             [[1,1,10,12]],
             [],
@@ -6301,6 +6353,27 @@ function generateDQStyleMaps() {
             []);
     }
 
+    // === 建物の「フィールドへ戻る」exit座標を、実際にplaceBuilding/findLandで配置された
+    //     入口タイル座標に自動同期する ===
+    // 各建物側(城・ダンジョン・塔・祠など)の帰還exitはハードコードされた座標を持つが、
+    // findLandが海や既存オブジェクトを避けて入口を意図した座標から動かした場合、建物側の
+    // 記述が追従できずズレたままになる(例: 氷結城ノルドは海が広く、入口が数マス離れた場所に
+    // 再配置されていたため、帰還後に城のグラフィックから離れた場所へ出てしまっていた)。
+    // 全マップ生成完了後にフィールド側の実座標を正として建物側を補正する。
+    for (const [_syncFieldId, _syncFm] of Object.entries(externalMapData)) {
+        if (!/^map_field_\d+_\d+$/.test(_syncFieldId) || !_syncFm.exits) continue;
+        for (const [_syncFk, _syncFe] of Object.entries(_syncFm.exits)) {
+            if (!_syncFe || !_syncFe.map || /^map_field_\d+_\d+$/.test(_syncFe.map)) continue;
+            const _syncDest = externalMapData[_syncFe.map];
+            if (!_syncDest || !_syncDest.exits) continue;
+            const [_syncFx, _syncFy] = _syncFk.split(',').map(Number);
+            for (const _syncBe of Object.values(_syncDest.exits)) {
+                if (_syncBe && _syncBe.map === _syncFieldId && (_syncBe.x !== _syncFx || _syncBe.y !== _syncFy)) {
+                    _syncBe.x = _syncFx; _syncBe.y = _syncFy;
+                }
+            }
+        }
+    }
 }
 
 async function fetchExternalMap(url) { const loading = document.getElementById('loading-indicator'); loading.style.display = 'block'; loading.innerText = '世界を構築中...'; try { let targetUrl = url;
@@ -9195,7 +9268,8 @@ function drawMap() {
     if (npcWanderTick % 30 === 0) tickNpcWander();
 
     if (!_cachedCanvas || !_cachedCanvas.isConnected) { _cachedCanvas = document.getElementById('screen'); _cachedCtx = _cachedCanvas.getContext('2d', {alpha:false}); } const canvas = _cachedCanvas; const ctx = _cachedCtx; const cWidth = canvas.width; const cHeight = canvas.height; ctx.clearRect(0, 0, cWidth, cHeight); ctx.fillStyle='#0a0812'; ctx.fillRect(0,0,cWidth,cHeight);
-    const camX = partyData.pos.x * TILE_SIZE - cWidth/2 + TILE_SIZE/2; const camY = partyData.pos.y * TILE_SIZE - Math.floor(cHeight * 0.3) + TILE_SIZE/2;
+    const _dispPos = _getDisplayPartyPos();
+    const camX = _dispPos.x * TILE_SIZE - cWidth/2 + TILE_SIZE/2; const camY = _dispPos.y * TILE_SIZE - Math.floor(cHeight * 0.3) + TILE_SIZE/2;
     const _mapId = partyData.pos.map;
     const isCastle = _mapId.includes('castle') || _mapId.includes('gramani') || _mapId.includes('grakue') || _mapId.includes('palace'); const isTown = _mapId.includes('town') || _mapId.includes('market') || _mapId.includes('village'); const isCave = _mapId.includes('dungeon') || _mapId.includes('cave') || _mapId.includes('ruin') || _mapId.includes('fortress') || _mapId.includes('abyss'); const isMountain = _mapId === 'map_field_north_2';
     const _isDesertMap = _mapId.includes('desert') || _mapId.includes('oasis') || _mapId.includes('sand');
@@ -10845,6 +10919,13 @@ async function moveParty(dx, dy) {
     const key = `${nx},${ny}`; const _npcHere = currentMap.npcs && currentMap.npcs[key]; if (_npcHere && !(['obj_deco_rug_red','obj_deco_rug_blue','deco_rug_gold','obj_deco_rug_yellow'].includes(_npcHere.id))) { drawMap(); return; } // NPCに向き直ってすぐ話しかけられるように
     moveHistory.unshift({x: partyData.pos.x, y: partyData.pos.y, dir: partyData.dir, map: partyData.pos.map}); if(moveHistory.length > 5) moveHistory.pop();
     _walkPhase = (_walkPhase + 1) % 8; _lastMoveTime = Date.now();
+    { // スムーズスクロール: 現在の表示位置(補間中でも可)を起点に、新しいマスへ短時間で滑らかに移動する
+        const _dispNow = _getDisplayPartyPos();
+        _moveAnimMap = partyData.pos.map;
+        _moveAnimFromX = _dispNow.x; _moveAnimFromY = _dispNow.y;
+        _moveAnimToX = nx; _moveAnimToY = ny;
+        _moveAnimStart = performance.now();
+    }
     partyData.pos.x = nx; partyData.pos.y = ny;
     if (_onField) { if (!partyData.flags.visited_maps) partyData.flags.visited_maps = {}; partyData.flags.visited_maps[partyData.pos.map] = true; }
 
@@ -16144,6 +16225,29 @@ async function showTitleScreen() {
                 else if (kx === 0 && ev.x === tw - 2) ev.x = tw - 1;
                 if (ky === m.height - 1 && ev.y === 1) ev.y = 0;
                 else if (ky === 0 && ev.y === th - 2) ev.y = th - 1;
+            }
+        }
+        // 建物(城・ダンジョン・塔・祠等)の「フィールドへ戻る」exit座標を、実際に配置された
+        // 入口タイルの座標へ同期する。各建物の帰還exitはハードコードされた座標を持つが、
+        // findLandが海や既存オブジェクトを避けて入口を意図した座標から動かした場合、
+        // 建物側の記述が追従できずズレる(例: 氷結城ノルドは周囲が広い海で、入口が数マス
+        // 離れた場所に再配置されていたため、入場範囲がグラフィックから離れて見え、
+        // 帰還後も城から離れた場所に出てしまっていた)。このブロックより上ですべての
+        // 城・ダンジョン等が確定済みのため、ここで最終的なフィールド側座標を正として補正する。
+        for (const _bxFieldId of Object.keys(externalMapData)) {
+            if (!/^map_field_\d+_\d+$/.test(_bxFieldId)) continue;
+            const _bxFm = externalMapData[_bxFieldId];
+            if (!_bxFm || !_bxFm.exits) continue;
+            for (const [_bxKey, _bxEv] of Object.entries(_bxFm.exits)) {
+                if (!_bxEv || !_bxEv.map || /^map_field_\d+_\d+$/.test(_bxEv.map)) continue;
+                const _bxDest = externalMapData[_bxEv.map];
+                if (!_bxDest || !_bxDest.exits) continue;
+                const [_bxFx, _bxFy] = _bxKey.split(',').map(Number);
+                for (const _bxBe of Object.values(_bxDest.exits)) {
+                    if (_bxBe && _bxBe.map === _bxFieldId && (_bxBe.x !== _bxFx || _bxBe.y !== _bxFy)) {
+                        _bxBe.x = _bxFx; _bxBe.y = _bxFy;
+                    }
+                }
             }
         }
         // 街道の道標: 町・村の入口付近への設置は、入口周辺の通行帯を塞いで
