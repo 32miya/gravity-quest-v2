@@ -199,33 +199,33 @@
                 { id: "a04", name: "みずのはごろも", defense: 43, price: 8800, description: "天女の羽衣のような不思議な服。" },
                 { id: "a05", name: "天空のよろい（転空）", defense: 75, price: 0, description: "選ばれし勇者のみが纏える鎧。" },
                 { id: "a06", name: "毛皮のコート", defense: 22, price: 600, description: "北の地方で重宝される暖かいコート。" },
-                { id: "a07", name: "魔法の法衣", defense: 35, price: 4400, description: "呪文のダメージを少し軽減する聖なる衣。" },
-                { id: "a08", name: "ドラゴンメイル", defense: 45, price: 9800, description: "炎のブレスのダメージを和らげる堅固な鎧。" },
+                { id: "a07", name: "魔法の法衣", defense: 35, price: 4400, effect: "magic_resist", description: "呪文のダメージを少し軽減する聖なる衣。" },
+                { id: "a08", name: "ドラゴンメイル", defense: 45, price: 9800, effect: "resist_fire", description: "炎のブレスのダメージを和らげる堅固な鎧。" },
                 { id: "a09", name: "はぐれメタルの鎧", defense: 95, price: 35000, description: "究極の防御力を誇る、鈍く光る金属鎧。" },
-                { id: "a10", name: "あくまのよろい", defense: 80, price: 5000, description: "【呪】防御力は高いが、体が動かなくなることがある。" },
+                { id: "a10", name: "あくまのよろい", defense: 80, price: 5000, effect: "cursed_immobilize", description: "【呪】防御力は高いが、体が動かなくなることがある。" },
                 { id: "a11", name: "くさりかたびら", defense: 18, price: 1050, description: "細かい鎖を編み込んだ動きやすい防具。" },
                 { id: "a12", name: "踊り子の服", defense: 8, price: 400, description: "マーニャのような踊り子が着る華やかな衣装。" },
-                { id: "a13", name: "まほうのよろい", defense: 40, price: 5800, description: "呪文耐性を備えた魔法使い騎士の鎧。" },
+                { id: "a13", name: "まほうのよろい", defense: 40, price: 5800, effect: "magic_resist", description: "呪文耐性を備えた魔法使い騎士の鎧。" },
                 { id: "a14", name: "てつのまえかけ", defense: 32, price: 1260, description: "トルネコのような商人が愛用する頑丈な前掛け。" },
-                { id: "a15", name: "はぐれメタルの鎧", defense: 95, price: 35000, description: "全ての物理攻撃を跳ね返すような究極の鎧。" },
+                { id: "a15", name: "はぐれメタルの鎧", defense: 95, price: 35000, effect: "physical_reflect", description: "全ての物理攻撃を跳ね返すような究極の鎧。" },
                 { id: "a16", name: "カメのこうら", defense: 15, price: 600, description: "巨大な亀の殻。非常に硬いが、少し重い。" },
-                { id: "a17", name: "やすらぎのローブ", defense: 28, price: 3200, description: "着心地がよく、眠りなどの状態異常にかかりにくくなる。" },
+                { id: "a17", name: "やすらぎのローブ", defense: 28, price: 3200, effect: "status_resist", description: "着心地がよく、眠りなどの状態異常にかかりにくくなる。" },
                 { id: "a18", name: "厚手のよろい", defense: 35, price: 4800, description: "物理防御に特化した、騎士のための厚い鎧。" },
-                { id: "a19", name: "刃のよろい（刃）", defense: 48, price: 9500, description: "鋭い棘があり、受けたダメージの一部を敵に跳ね返す。" },
-                { id: "a20", name: "光のドレス", defense: 60, price: 0, description: "不思議な光を放つ服。受けた呪文を稀に跳ね返す。" },
-                { id: "a21", name: "はぐれメタルの鎧", defense: 95, price: 35000, description: "全ての物理攻撃を無力化するほどの硬度を誇る。" },
+                { id: "a19", name: "刃のよろい（刃）", defense: 48, price: 9500, effect: "physical_reflect", description: "鋭い棘があり、受けたダメージの一部を敵に跳ね返す。" },
+                { id: "a20", name: "光のドレス", defense: 60, price: 0, effect: "spell_reflect_low", description: "不思議な光を放つ服。受けた呪文を稀に跳ね返す。" },
+                { id: "a21", name: "はぐれメタルの鎧", defense: 95, price: 35000, effect: "physical_resist_heavy", description: "全ての物理攻撃を無力化するほどの硬度を誇る。" },
                 { id: "a22", name: "パーティドレス", defense: 40, price: 0, description: "おてんば姫がカジノで着ていそうな豪華なドレス。" },
                 { id: "a23", name: "魔法のビキニ", defense: 50, price: 0, description: "防御力は高いが、見た目が非常に派手な水着。" },
-                { id: "a24", name: "天使のレオタード", defense: 62, price: 21000, description: "冷気や吹雪のダメージを大幅に軽減する神秘的な服。" },
-                { id: "a25", name: "ミラーアーマー", defense: 70, price: 18000, description: "呪文を跳ね返すことがある、鏡のように磨かれた鎧。" },
+                { id: "a24", name: "天使のレオタード", defense: 62, price: 21000, effect: "resist_ice", description: "冷気や吹雪のダメージを大幅に軽減する神秘的な服。" },
+                { id: "a25", name: "ミラーアーマー", defense: 70, price: 18000, effect: "spell_reflect_low", description: "呪文を跳ね返すことがある、鏡のように磨かれた鎧。" },
                 { id: "a26", name: "メタルキングの鎧", defense: 115, price: 0, description: "【最強】この世で最も硬い金属を加工した究極の鎧。" },
-                { id: "a_grav_01", name: "GRAVITYの宇宙服", defense: 85, price: 0, description: "星空をそのまま紡いで作ったような防具。あらゆる属性攻撃を半減する。" },
-                
+                { id: "a_grav_01", name: "GRAVITYの宇宙服", defense: 85, price: 0, effect: "resist_all_half", description: "星空をそのまま紡いで作ったような防具。あらゆる属性攻撃を半減する。" },
+
                 // --- 後半追加鎧 ---
-                { id: "a_2nd_01", name: "神竜の鎧", defense: 280, price: 110000, description: "【勇者/戦士用】神竜の逆鱗から作られた究極の鎧。全属性のダメージを1/4にする。" },
-                { id: "a_2nd_02", name: "ギガントアーマー", defense: 340, price: 98000, description: "【戦士用】超重装甲。物理ダメージをほぼ無効化するが、少し素早さが落ちる。" },
-                { id: "a_2nd_03", name: "聖女の法衣", defense: 230, price: 85000, description: "【僧侶用】神聖なオーラで包まれる法衣。即死や状態異常を完全に防ぐ。" },
-                { id: "a_2nd_04", name: "星天のローブ", defense: 240, price: 82000, description: "【魔法使い用】星々の瞬きを織り込んだ神秘の服。敵の呪文を常に反射する。" },
+                { id: "a_2nd_01", name: "神竜の鎧", defense: 280, price: 110000, effect: "resist_all_quarter", description: "【勇者/戦士用】神竜の逆鱗から作られた究極の鎧。全属性のダメージを1/4にする。" },
+                { id: "a_2nd_02", name: "ギガントアーマー", defense: 340, price: 98000, effect: "physical_resist_heavy", description: "【戦士用】超重装甲。物理ダメージをほぼ無効化するが、少し素早さが落ちる。" },
+                { id: "a_2nd_03", name: "聖女の法衣", defense: 230, price: 85000, effect: "status_immune", description: "【僧侶用】神聖なオーラで包まれる法衣。即死や状態異常を完全に防ぐ。" },
+                { id: "a_2nd_04", name: "星天のローブ", defense: 240, price: 82000, effect: "spell_reflect_always", description: "【魔法使い用】星々の瞬きを織り込んだ神秘の服。敵の呪文を常に反射する。" },
 
                 // --- 中量鎧（サムライ・忍者・その他向け）追加9種 ---
                 { id: "a_m01", name: "胴丸", defense: 20, price: 1500, description: "和鎧の基本形。侍が愛用する軽量な胴当て。機動性を損なわない。" },
@@ -233,10 +233,10 @@
                 { id: "a_m03", name: "具足", defense: 38, price: 5200, description: "正式な和鎧一式。侍・忍者どちらも愛用する頑丈な装備。" },
                 { id: "a_m04", name: "丸胴鎧", defense: 48, price: 8800, description: "胴部を重点的に守る和風装甲。機動性も確保した精巧な作り。" },
                 { id: "a_m05", name: "黒鋼の護甲", defense: 24, price: 2200, description: "黒く焼いた鉄で作られた軽量護甲。暗闇に溶け込む。" },
-                { id: "a_m06", name: "影守りの鎧", defense: 32, price: 4000, description: "暗殺者が好む黒い鎧。敵の目をくらます効果がある。" },
+                { id: "a_m06", name: "影守りの鎧", defense: 32, price: 4000, effect: "evasion_up", description: "暗殺者が好む黒い鎧。敵の目をくらます効果がある。" },
                 { id: "a_m07", name: "影縅の鎧", defense: 42, price: 7500, description: "影を縅にした特殊な鎧。軽くて防御力が高い忍者の最高傑作。" },
-                { id: "a_m08", name: "陣羽織", defense: 16, price: 1200, description: "武将が羽織る軽量な作戦衣。動きやすく素早さが増す。" },
-                { id: "a_m09", name: "風纏いの鎧", defense: 55, price: 12000, description: "風の精霊を宿した鎧。着ると身が軽くなり回避率が上がる。" },
+                { id: "a_m08", name: "陣羽織", defense: 16, price: 1200, effect: "spd_up_small", description: "武将が羽織る軽量な作戦衣。動きやすく素早さが増す。" },
+                { id: "a_m09", name: "風纏いの鎧", defense: 55, price: 12000, effect: "evasion_up", description: "風の精霊を宿した鎧。着ると身が軽くなり回避率が上がる。" },
 
                 // --- 法衣・ローブ系（魔法使い・踊り子・僧侶向け）追加8種 ---
                 { id: "a_r01", name: "綿のローブ", defense: 6, price: 80, description: "魔法使い見習いが着る基本的なローブ。軽くて動きやすい。" },
@@ -244,9 +244,9 @@
                 { id: "a_r03", name: "魔導師のローブ", defense: 22, price: 1800, description: "魔法の力を高める文様が刺繍された礼装ローブ。" },
                 { id: "a_r04", name: "月光の法衣", defense: 30, price: 3800, description: "月の力を宿した神秘的な法衣。夜の戦いで力を発揮する。" },
                 { id: "a_r05", name: "演舞のドレス", defense: 18, price: 1200, description: "踊り子専用の動きやすい演舞用ドレス。演技中の守りを高める。" },
-                { id: "a_r06", name: "星詠みのローブ", defense: 46, price: 9500, description: "星の言葉を読む賢者が好む高級ローブ。全状態異常耐性が上がる。" },
-                { id: "a_r07", name: "紅炎の法衣", defense: 36, price: 5500, description: "炎の精霊が宿った赤い法衣。炎・爆発属性のダメージを軽減する。" },
-                { id: "a_r08", name: "神秘のローブ", defense: 58, price: 16000, description: "古代の魔法師が遺したローブ。全状態異常を完全に防ぐ奇跡の一着。" }
+                { id: "a_r06", name: "星詠みのローブ", defense: 46, price: 9500, effect: "status_resist", description: "星の言葉を読む賢者が好む高級ローブ。全状態異常耐性が上がる。" },
+                { id: "a_r07", name: "紅炎の法衣", defense: 36, price: 5500, effect: "resist_fire", description: "炎の精霊が宿った赤い法衣。炎・爆発属性のダメージを軽減する。" },
+                { id: "a_r08", name: "神秘のローブ", defense: 58, price: 16000, effect: "status_immune", description: "古代の魔法師が遺したローブ。全状態異常を完全に防ぐ奇跡の一着。" }
             ],
             shields: [
                 { id: "s01", name: "皮のたて", defense: 4, price: 90 },
@@ -258,19 +258,19 @@
                 { id: "s07", name: "せいどうのたて（青銅）", defense: 9, price: 250 },
                 { id: "s08", name: "ちからのたて（力）", defense: 22, price: 13000, description: "使うと自分にベホイミ（中回復）がかかる盾。" },
                 { id: "s09", name: "ふうじんのたて（風神）", defense: 35, price: 0, description: "使うと敵をどこかへ吹き飛ばしてしまう盾。" },
-                { id: "s10", name: "魔法のたて", defense: 20, price: 4500, description: "呪文の耐性を高める魔法の盾。" },
+                { id: "s10", name: "魔法のたて", defense: 20, price: 4500, effect: "magic_resist", description: "呪文の耐性を高める魔法の盾。" },
                 { id: "s11", name: "力の盾", defense: 30, price: 25000, description: "使うと自分の傷を癒やす（中回復）効果がある。" },
                 { id: "s12", name: "メタルキングの盾", defense: 55, price: 0, description: "王者の輝きを持つ、あらゆる災厄を弾く盾。" },
                 { id: "s13", name: "おなべのふた", defense: 2, price: 40, description: "ただの鍋の蓋。しかし、ないよりはマシ。" },
-                { id: "s14", name: "ドラゴンシールド", defense: 25, price: 7200, description: "炎や吹雪のブレスを和らげる、竜の鱗の盾。" },
+                { id: "s14", name: "ドラゴンシールド", defense: 25, price: 7200, effect: "resist_fire_ice", description: "炎や吹雪のブレスを和らげる、竜の鱗の盾。" },
                 { id: "s15", name: "天空のたて（転空）", defense: 35, price: 0, description: "使うとマホカンタ（呪文反射）が発動する聖なる盾。" },
-                { id: "s16", name: "はぐれメタルの盾", defense: 60, price: 0, description: "あらゆる属性攻撃を軽減する、鈍く光る盾。" },
-                { id: "s_grav_01", name: "守護者の盾", defense: 50, price: 0, description: "GRAVITYの世界を守る者に授けられる盾。稀に受けた呪文を反射する。" },
-                
+                { id: "s16", name: "はぐれメタルの盾", defense: 60, price: 0, effect: "resist_all_half", description: "あらゆる属性攻撃を軽減する、鈍く光る盾。" },
+                { id: "s_grav_01", name: "守護者の盾", defense: 50, price: 0, effect: "spell_reflect_low", description: "GRAVITYの世界を守る者に授けられる盾。稀に受けた呪文を反射する。" },
+
                 // --- 後半追加盾 ---
-                { id: "s_2nd_01", name: "イージスの盾", defense: 150, price: 80000, description: "【勇者/戦士用】決して砕けない神話の盾。あらゆる状態異常と痛恨の一撃を防ぐ。" },
-                { id: "s_2nd_02", name: "聖霊の盾", defense: 120, price: 65000, description: "【僧侶用】四大精霊が宿り、全てのブレス攻撃を完全に無効化する。" },
-                { id: "s_2nd_03", name: "幻影の盾", defense: 100, price: 58000, description: "【魔法使い用】腕力がなくても扱える魔法盾。物理攻撃を50%の確率で回避する。" }
+                { id: "s_2nd_01", name: "イージスの盾", defense: 150, price: 80000, effect: "status_immune", description: "【勇者/戦士用】決して砕けない神話の盾。あらゆる状態異常と痛恨の一撃を防ぐ。" },
+                { id: "s_2nd_02", name: "聖霊の盾", defense: 120, price: 65000, effect: "resist_fire_ice", description: "【僧侶用】四大精霊が宿り、全てのブレス攻撃を完全に無効化する。" },
+                { id: "s_2nd_03", name: "幻影の盾", defense: 100, price: 58000, effect: "evasion_half", description: "【魔法使い用】腕力がなくても扱える魔法盾。物理攻撃を50%の確率で回避する。" }
             ],
             helmets: [
                 { id: "h01", name: "皮のぼうし", defense: 2, price: 65 },
@@ -285,13 +285,13 @@
                 { id: "h10", name: "不思議な帽子", defense: 12, price: 0, effect: "mp_cost_reduce", description: "消費MPを少し節約できる魔導師の帽子。" },
                 { id: "h11", name: "知力の兜", defense: 28, price: 13000, description: "賢さが上がる、魔法戦士に最適な兜。" },
                 { id: "h12", name: "グレートヘルム", defense: 40, price: 20000, description: "最高級の鋼で作られた騎士用の大兜。" },
-                { id: "h13", name: "黄金のティアラ", defense: 22, price: 0, description: "女性専用。混乱や眠りなどの耐性を高める。" },
+                { id: "h13", name: "黄金のティアラ", defense: 22, price: 0, effect: "status_resist", description: "女性専用。混乱や眠りなどの耐性を高める。" },
                 { id: "h14", name: "幸せの帽子", defense: 15, price: 0, effect: "walk_mp_regen", description: "歩くたびにMPが少しずつ回復する、旅人の憧れ。" },
-                { id: "h15", name: "メタルキングの兜", defense: 48, price: 0, description: "【最強】状態異常をほぼ無効化する最高峰の兜。" },
-                { id: "h_grav_01", name: "GRAVITYのヘルメット", defense: 40, price: 0, description: "宇宙の音を聴くことができる兜。混乱や眠りを完全に無効化する。" },
-                
+                { id: "h15", name: "メタルキングの兜", defense: 48, price: 0, effect: "status_resist_high", description: "【最強】状態異常をほぼ無効化する最高峰の兜。" },
+                { id: "h_grav_01", name: "GRAVITYのヘルメット", defense: 40, price: 0, effect: "status_immune", description: "宇宙の音を聴くことができる兜。混乱や眠りを完全に無効化する。" },
+
                 // --- 後半追加兜 ---
-                { id: "h_2nd_01", name: "覇王の兜", defense: 140, price: 70000, description: "【勇者/戦士用】王の中の王のみが被ることを許される兜。精神攻撃を完全に無効化。" },
+                { id: "h_2nd_01", name: "覇王の兜", defense: 140, price: 70000, effect: "status_immune", description: "【勇者/戦士用】王の中の王のみが被ることを許される兜。精神攻撃を完全に無効化。" },
                 { id: "h_2nd_02", name: "真理の冠", defense: 110, price: 60000, effect: "mp_regen_large", description: "【僧侶/魔法使い用】世界の真理を悟る冠。戦闘中、毎ターンMPが大幅に回復し続ける。" },
 
                 // --- 軽量頭部防具（全職業装備可）追加13種 ---
@@ -7266,6 +7266,96 @@ function getSpellPowerMult(actor) {
 function hasDeathResist(char) {
     return !!(char && char.equipment && char.equipment.accessory && masterData.items[char.equipment.accessory] && masterData.items[char.equipment.accessory].effect === 'resist_death');
 }
+
+// 防具・盾・兜・アクセサリの被ダメージ軽減効果(属性耐性・物理/魔法耐性)をまとめて算出
+function getIncomingDamageMult(defender, element, isMagic) {
+    if (!defender || !defender.equipment) return 1.0;
+    let mult = 1.0;
+    for (const sl of ['armor', 'shield', 'helmet', 'accessory']) {
+        const _id = defender.equipment[sl]; const _it = _id && masterData.items[_id];
+        if (!_it || !_it.effect) continue;
+        switch (_it.effect) {
+            case 'resist_all_quarter': mult = Math.min(mult, 0.25); break;
+            case 'resist_all_half': mult = Math.min(mult, 0.5); break;
+            case 'physical_resist_heavy': if (!isMagic) mult = Math.min(mult, 0.6); break;
+            case 'magic_resist': if (isMagic) mult = Math.min(mult, 0.65); break;
+            case 'resist_fire': if (element === 'fire') mult = Math.min(mult, 0.5); break;
+            case 'resist_ice': if (element === 'ice') mult = Math.min(mult, 0.5); break;
+            case 'resist_fire_ice': if (element === 'fire' || element === 'ice') mult = Math.min(mult, 0.5); break;
+        }
+    }
+    return mult;
+}
+
+// 防具の回避率アップ効果(evasion_up/evasion_half)。物理攻撃を受ける前にチェックする
+function getEvasionChance(defender) {
+    if (!defender || !defender.equipment) return 0;
+    let chance = 0;
+    for (const sl of ['armor', 'shield', 'helmet', 'accessory']) {
+        const _id = defender.equipment[sl]; const _it = _id && masterData.items[_id];
+        if (!_it || !_it.effect) continue;
+        if (_it.effect === 'evasion_half') chance = Math.max(chance, 0.5);
+        else if (_it.effect === 'evasion_up') chance = Math.max(chance, 0.12);
+    }
+    return chance;
+}
+
+// 状態異常を完全無効化する装備(status_immune)を装備しているか
+function isStatusImmune(char) {
+    if (!char || !char.equipment) return false;
+    for (const sl of ['armor', 'shield', 'helmet', 'accessory']) {
+        const _id = char.equipment[sl]; const _it = _id && masterData.items[_id];
+        if (_it && _it.effect === 'status_immune') return true;
+    }
+    return false;
+}
+// 状態異常にかかる確率に掛ける倍率(1.0=通常、0=無効、それ未満は耐性あり)
+function getStatusResistFactor(char) {
+    if (isStatusImmune(char)) return 0;
+    if (!char || !char.equipment) return 1.0;
+    let factor = 1.0;
+    for (const sl of ['armor', 'shield', 'helmet', 'accessory']) {
+        const _id = char.equipment[sl]; const _it = _id && masterData.items[_id];
+        if (!_it || !_it.effect) continue;
+        if (_it.effect === 'status_resist_high') factor = Math.min(factor, 0.2);
+        else if (_it.effect === 'status_resist') factor = Math.min(factor, 0.5);
+    }
+    return factor;
+}
+// 状態異常無効の装備を持つのに既にかかっている状態異常を解除する(特殊行動などで直接付与された分の後処理)
+function cleanseImmuneStatus(char) {
+    if (!char || !isStatusImmune(char)) return;
+    if (char.isPoisoned) char.isPoisoned = false;
+    if (char.tmpSleep) char.tmpSleep = 0;
+    if (char.tmpBlind) char.tmpBlind = 0;
+    if (char.tmpSilence) char.tmpSilence = 0;
+    if (char.tmpConfuse) char.tmpConfuse = 0;
+    if (char.tmpParalyze) char.tmpParalyze = 0;
+}
+
+// 呪文反射(マホカンタ系装備)の発動確率
+function getSpellReflectChance(defender) {
+    if (!defender || !defender.equipment) return 0;
+    let chance = 0;
+    for (const sl of ['armor', 'shield', 'helmet', 'accessory']) {
+        const _id = defender.equipment[sl]; const _it = _id && masterData.items[_id];
+        if (!_it || !_it.effect) continue;
+        if (_it.effect === 'spell_reflect_always') chance = 1.0;
+        else if (_it.effect === 'spell_reflect_low') chance = Math.max(chance, 0.2);
+    }
+    return chance;
+}
+
+// 物理反射装備(physical_reflect)の反射率
+function getPhysicalReflectPct(defender) {
+    if (!defender || !defender.equipment) return 0;
+    let pct = 0;
+    for (const sl of ['armor', 'shield', 'helmet', 'accessory']) {
+        const _id = defender.equipment[sl]; const _it = _id && masterData.items[_id];
+        if (_it && _it.effect === 'physical_reflect') pct = Math.max(pct, 0.3);
+    }
+    return pct;
+}
 function getSpellMpCost(actor, spell) {
     if (!spell) return 0;
     const _eq = (actor && actor.equipment) || {};
@@ -7422,12 +7512,14 @@ function calculateDamage(attacker, defender) {
     const _wpnElem = (_wpnId && masterData.items[_wpnId] && masterData.items[_wpnId].element) || null;
     const elemMult = getElementMultiplier(_wpnElem, defender);
     const elemResult = elemMult >= 1.5 ? 'weak' : (elemMult < 1 ? 'resist' : 'normal');
+    // 防御側(プレイヤー)の防具耐性効果(物理耐性・属性耐性)を反映
+    const defMult = defender.job ? getIncomingDamageMult(defender, _wpnElem, false) : 1.0;
 
     if (isCritical) {
-        const critDmg = Math.floor(finalAttack * (0.9 + Math.random() * 0.2) * elemMult);
+        const critDmg = Math.floor(finalAttack * (0.9 + Math.random() * 0.2) * elemMult * defMult);
         return { isCritical: true, value: Math.max(1, critDmg), elemResult };
     } else {
-        let baseDmg = Math.floor((finalAttack/2 - finalDefense/4) * elemMult) + Math.floor(Math.random()*2);
+        let baseDmg = Math.floor((finalAttack/2 - finalDefense/4) * elemMult * defMult) + Math.floor(Math.random()*2);
         return { isCritical: false, value: Math.max(1, baseDmg), elemResult };
     }
 }
@@ -14554,6 +14646,11 @@ async function executeBattle(fixedEnemies = null) {
         for(let act of actions) {
             if(act.actor.hp <= 0 && act.type !== 'enemy_attack') continue; if(act.type === 'enemy_attack' && act.actor.hp <= 0) continue; 
             if (act.actor.tmpSleep > 0) { await typeMessage(`${act.actor.name || act.actor.displayName} は うごけない！`); continue; }
+            // あくまのよろい(cursed_immobilize): 低確率で装備者の体が硬直して動けなくなる
+            if (act.type !== 'enemy_attack' && act.actor.equipment && act.actor.equipment.armor && masterData.items[act.actor.equipment.armor] && masterData.items[act.actor.equipment.armor].effect === 'cursed_immobilize' && Math.random() < 0.15) {
+                await typeMessage(`${act.actor.name}は あくまのよろいに からだを 縛られて 動けない！`);
+                continue;
+            }
             if(act.type === 'run') { await typeMessage(`${act.actor.name}は にげだした！`); if(act.isBoss) { await typeMessage(`しかし まわりこまれてしまった！`); } else if(Math.random() > 0.3) { await typeMessage(`にげきれた！`); escaped = true; break; } else { await typeMessage(`しかし まわりこまれてしまった！`); } continue; }
             
             if(act.target && act.target !== 'allies' && act.target !== 'enemies' && act.target.hp <= 0) {
@@ -14772,7 +14869,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         await typeMessage(`${act.actor.displayName}の ${_bn}！！`);
                         AudioManager.playSE('magic_cast');
                         await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*_bm,mp:10},null);
-                        for(const _m of _alive){const _fd=Math.max(1,Math.floor(act.actor.atk*_bm*(0.8+Math.random()*0.4)-_m.def*0.12));_m.hp=Math.max(0,_m.hp-_fd);await typeMessage(`${_m.name}に ${_fd}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                        for(const _m of _alive){const _fd=Math.max(1,Math.floor((act.actor.atk*_bm*(0.8+Math.random()*0.4)-_m.def*0.12)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_fd);await typeMessage(`${_m.name}に ${_fd}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         updatePartyStatus();
 
                     } else if (_eId==='troll') {
@@ -14801,7 +14898,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         await typeMessage(`${act.actor.displayName}の ほのおの うず！`);
                         AudioManager.playSE('magic_cast');
                         await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*0.9,mp:8},null);
-                        for(const _m of _alive){const _fed=Math.max(1,Math.floor(act.actor.atk*0.9*(0.8+Math.random()*0.4)-_m.def*0.15));_m.hp=Math.max(0,_m.hp-_fed);await typeMessage(`${_m.name}に ${_fed}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                        for(const _m of _alive){const _fed=Math.max(1,Math.floor((act.actor.atk*0.9*(0.8+Math.random()*0.4)-_m.def*0.15)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_fed);await typeMessage(`${_m.name}に ${_fed}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         updatePartyStatus();
 
                     } else if (_eId==='behemoth' && _alive.length>0) {
@@ -14851,7 +14948,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         await typeMessage(`${act.actor.displayName}の メガフレア！！！`);
                         playCriticalEffect('#ff8800'); AudioManager.playSE('magic_cast');
                         await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*1.6,mp:30},null);
-                        for(const _m of _alive){const _mfd=Math.max(1,Math.floor(act.actor.atk*1.6*(0.85+Math.random()*0.3)-_m.def*0.15));_m.hp=Math.max(0,_m.hp-_mfd);await typeMessage(`${_m.name}に ${_mfd}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                        for(const _m of _alive){const _mfd=Math.max(1,Math.floor((act.actor.atk*1.6*(0.85+Math.random()*0.3)-_m.def*0.15)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_mfd);await typeMessage(`${_m.name}に ${_mfd}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         updatePartyStatus();
 
                     } else if (_eId==='death_knight' && _alive.length>0) {
@@ -14903,7 +15000,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の ほのおのいき！`);
                             AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*0.75,mp:6},_t);
-                            const _chfd=Math.max(1,Math.floor(act.actor.atk*0.75*(0.85+Math.random()*0.3)-_t.def*0.2));
+                            const _chfd=Math.max(1,Math.floor((act.actor.atk*0.75*(0.85+Math.random()*0.3)-_t.def*0.2)*getIncomingDamageMult(_t,'fire',false)));
                             _t.hp=Math.max(0,_t.hp-_chfd);
                             await typeMessage(`${_t.name}に ${_chfd}の ダメージ！`);
                             if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
@@ -14969,12 +15066,12 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         if(Math.random()<0.55){
                             await typeMessage(`${act.actor.displayName}の 吹雪のブレス！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'hyadon',type:'attack',element:'ice',value:act.actor.atk*1.2,mp:12},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.2*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.2*(0.8+Math.random()*0.4)-_m.def*0.1)*getIncomingDamageMult(_m,'ice',false)));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(Math.random()<0.5){
                             await typeMessage(`${act.actor.displayName}の 凍てつく呼気！`);
                             AudioManager.playSE('magic_cast');
                             if(!_t.tmpSleep||_t.tmpSleep<=0){_t.tmpSleep=2;await typeMessage(`${_t.name}は 凍りついて 動けない！`);}
-                            else{const _d=Math.max(1,Math.floor(act.actor.atk*0.9));_t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
+                            else{const _d=Math.max(1,Math.floor(act.actor.atk*0.9*getIncomingDamageMult(_t,'ice',false)));_t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
                         } else { _handled=false; }
                         updatePartyStatus();
 
@@ -14983,11 +15080,11 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 溶岩噴射！！`);
                             playCriticalEffect('#ff4400'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*1.25,mp:14},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.25*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.25*(0.8+Math.random()*0.4)-_m.def*0.1)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}の 爆炎の拳！！`);
                             playCriticalEffect('#ff2200'); playEnemyAttackEffect(1.8); AudioManager.playSE('attack_crit');
-                            const _d=Math.max(1,Math.floor(act.actor.atk*1.8*(0.85+Math.random()*0.3)-_t.def*0.25));
+                            const _d=Math.max(1,Math.floor((act.actor.atk*1.8*(0.85+Math.random()*0.3)-_t.def*0.25)*getIncomingDamageMult(_t,'fire',false)));
                             _t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         }
                         updatePartyStatus();
@@ -15116,7 +15213,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 混沌のブレス！！！`);
                             playCriticalEffect('#8800ff'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*1.4,mp:20},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.4*(0.82+Math.random()*0.36)-_m.def*0.08));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.4*(0.82+Math.random()*0.36)-_m.def*0.08)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(_r<0.75){
                             await typeMessage(`${act.actor.displayName}の 次元断！！（防御無視）`);
                             playCriticalEffect('#660099'); AudioManager.playSE('attack_crit');
@@ -15159,7 +15256,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 地獄の業火！！`);
                             playCriticalEffect('#ff2200'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*1.3,mp:18},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.3*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.3*(0.8+Math.random()*0.4)-_m.def*0.1)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}の 魂の吸収！！`);
                             playCriticalEffect('#440044'); AudioManager.playSE('magic_cast');
@@ -15206,7 +15303,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 竜の炎ブレス！！`);
                             playCriticalEffect('#ff6600'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*1.25,mp:14},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.25*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.25*(0.8+Math.random()*0.4)-_m.def*0.1)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(Math.random()<0.5){
                             await typeMessage(`${act.actor.displayName}の 竜の咆哮！`);
                             AudioManager.playSE('magic_cast');
@@ -15287,7 +15384,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                     } else { _handled=false; }
 
                     } catch(_spErr) { console.error('特殊行動エラー:', _spErr); _handled = false; }
-                    if(_handled) { updatePartyStatus(); continue; }
+                    if(_handled) { partyData.members.forEach(cleanseImmuneStatus); updatePartyStatus(); continue; }
                 }
                 // ── グラ王の専用特殊行動（既存）────────────────────────
                 if (act.actor.isGuraKing && act.actor.hp <= act.actor.max_hp * 0.2 && Math.random() < 0.4) {
@@ -15316,6 +15413,9 @@ ${act.actor.name}の ちからが すいとられた！`); }
                     await typeMessage(`${act.actor.displayName}の こうげき！`);
                     if (act.actor.tmpBlind > 0 && Math.random() < 0.5) {
                         await typeMessage(`しかし まぼろしに つつまれて こうげきが あたらない！`);
+                    } else if (Math.random() < getEvasionChance(act.target)) {
+                        AudioManager.playSE('cancel');
+                        await typeMessage(`${act.target.name}は ひらりと こうげきを かわした！`);
                     } else {
                         let dmgResult = calculateDamage(act.actor, act.target);
                         let dmg = dmgResult.value;
@@ -15326,8 +15426,16 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             playEnemyAttackEffect(act.actor.isGuraKing ? 1.8 : 1);
                         }
                         act.target.hp = Math.max(0, act.target.hp - dmg); await typeMessage(`${act.target.name}に ${dmg}の ダメージ！`); if(act.target.hp <= 0) { act.target.isPoisoned=false; await typeMessage(`${act.target.name}は しんでしまった！`); }
+                        const _reflPct = getPhysicalReflectPct(act.target);
+                        if (act.target.hp > 0 && _reflPct > 0 && act.actor.hp > 0) {
+                            const _reflDmg = Math.max(1, Math.floor(dmg * _reflPct));
+                            act.actor.hp = Math.max(0, act.actor.hp - _reflDmg);
+                            await typeMessage(`${act.target.name}の たてが こうげきを はねかえした！\n${act.actor.displayName}に ${_reflDmg}の ダメージ！`);
+                            if (act.actor.hp <= 0) { await typeMessage(`${act.actor.displayName}を たおした！`); }
+                        }
                     }
                 }
+                partyData.members.forEach(cleanseImmuneStatus);
             } else if(act.type === 'spell') {
                 if (act.actor.tmpSilence > 0 && !act.spell.id.includes('breath') && !act.spell.id.includes('skill')) { await typeMessage(`${act.actor.name || act.actor.displayName}は じゅもんを ふうじられている！`); continue; }
                 if (act.spell.type === 'field' || act.spell.id.includes('rula') || act.spell.id.includes('remi') || act.spell.id.includes('tohe') || act.spell.id.includes('trama')) { await typeMessage(`しかし ここでは つかえなかった！`); continue; }
