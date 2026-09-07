@@ -14249,7 +14249,10 @@ async function openMainMenu() {
             let spellNames = char.spells.map(sid => masterData.spells[sid] ? masterData.spells[sid].name : sid); spellNames.push("やめる");
             let spellIdx = await selectMenu(spellNames, 'cmd-window', 1, true); if(spellIdx === -1 || spellIdx === spellNames.length - 1) continue;
             let spellData = masterData.spells[char.spells[spellIdx]]; if(!spellData) continue; if(char.mp < spellData.mp) { await typeMessage("MPが たりない！"); continue; }
-            
+            // フィールドでの詠唱エフェクトは、戦闘時のデフォルト位置(画面下寄り)ではなく
+            // 実際のプレイヤーキャラの画面上の位置(カメラはパーティーを追従するため常に同じ座標)に表示する
+            const _fsp = (() => { const _gc = document.getElementById('game-container'); const _gw = _gc ? _gc.offsetWidth : 360, _gh = _gc ? _gc.offsetHeight : 560; return { x: _gw / 2, y: Math.floor(_gh * 0.3) }; })();
+
             if(spellData.type === 'heal' || spellData.id.includes('kiari') || spellData.id.includes('shana')) {
                 if(spellData.target === 'ally' || spellData.target === 'self') {
                     let target = char;
@@ -14261,15 +14264,15 @@ async function openMainMenu() {
                     }
                     if (spellData.id.includes('zao')) { 
                         if (target.hp > 0) { await typeMessage("しかし なにも おこらなかった！"); continue; } 
-                        char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, target); AudioManager.playSE('heal'); target.hp = Math.floor(target.max_hp / 2); await typeMessage(`${target.name}は いきかえった！`); updatePartyStatus(); hideAllWindows(); state = 'FIELD'; drawMap(); return;
+                        char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, target, _fsp); AudioManager.playSE('heal'); target.hp = Math.floor(target.max_hp / 2); await typeMessage(`${target.name}は いきかえった！`); updatePartyStatus(); hideAllWindows(); state = 'FIELD'; drawMap(); return;
                     } else if(spellData.id.includes('kiari') || spellData.id.includes('shana')) {
-                        char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, target); AudioManager.playSE('heal'); target.isPoisoned = false; await typeMessage(`${target.name}の どくや マヒが とけた！`); updatePartyStatus(); hideAllWindows(); state = 'FIELD'; drawMap(); return;
+                        char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, target, _fsp); AudioManager.playSE('heal'); target.isPoisoned = false; await typeMessage(`${target.name}の どくや マヒが とけた！`); updatePartyStatus(); hideAllWindows(); state = 'FIELD'; drawMap(); return;
                     } else {
                         if (target.hp <= 0) { await typeMessage("しんでいる なかまには きかない！"); continue; }
-                        char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, target); AudioManager.playSE('heal'); target.hp = Math.min(target.max_hp, target.hp + spellData.value); await typeMessage(`${target.name}の HPが かいふくした！`); updatePartyStatus(); hideAllWindows(); state = 'FIELD'; drawMap(); return;
+                        char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, target, _fsp); AudioManager.playSE('heal'); target.hp = Math.min(target.max_hp, target.hp + spellData.value); await typeMessage(`${target.name}の HPが かいふくした！`); updatePartyStatus(); hideAllWindows(); state = 'FIELD'; drawMap(); return;
                     }
                 } else if(spellData.target === 'allies') { 
-                    char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, 'allies'); AudioManager.playSE('heal'); 
+                    char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, 'allies', _fsp); AudioManager.playSE('heal');
                     if(spellData.id.includes('kiari') || spellData.id.includes('shana')) {
                         partyData.members.forEach(m => { m.isPoisoned = false; });
                         await typeMessage(`なかま ぜんいんの どくや マヒが とけた！`);
@@ -14321,8 +14324,8 @@ async function openMainMenu() {
                     }
                 }
                 else if(spellData.id.includes('remi')) { let _rMapId2 = partyData.pos.map || ''; if (_rMapId2.includes('dungeon') || _rMapId2.includes('cave') || _rMapId2.includes('tower') || _rMapId2.includes('demon') || _rMapId2.includes('shrine')) { char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playFieldWarpEffect(spellData.id); const _lfp = partyData.last_field_pos; if (_lfp && externalMapData && externalMapData[_lfp.map]) { partyData.pos.map = _lfp.map; partyData.pos.x = _lfp.x; partyData.pos.y = _lfp.y; currentMap = await loadExternalData('map-' + _lfp.map); } else { partyData.pos.map = "map_field_2_2"; partyData.pos.x = 23; partyData.pos.y = 23; currentMap = await loadExternalData('map-map_field_2_2'); } await typeMessage(`ダンジョンから だしゅつした！`); moveHistory = []; hideAllWindows(); state = 'FIELD'; drawMap(); updateBGM(); return; } else { await typeMessage(`しかし ここでは つかえなかった。\nレミトは ダンジョンや たいせつな しせつの 中で つかえます。`); } } 
-                else if(spellData.id.includes('tohe')) { char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, null); partyData.tohero_steps = 100; await typeMessage(`まものが ちかづかなくなった！`); hideAllWindows(); state = 'FIELD'; drawMap(); return; }
-                else if(spellData.id.includes('trama')) { char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, null); partyData.tramana_steps = 100; await typeMessage(`ダメージゾーンから みをまもる じゅもんを はった！`); hideAllWindows(); state = 'FIELD'; drawMap(); return; }
+                else if(spellData.id.includes('tohe')) { char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, null, _fsp); partyData.tohero_steps = 100; await typeMessage(`まものが ちかづかなくなった！`); hideAllWindows(); state = 'FIELD'; drawMap(); return; }
+                else if(spellData.id.includes('trama')) { char.mp -= spellData.mp; await typeMessage(`${char.name}は ${spellData.name}を となえた！`); AudioManager.playSE('magic_cast'); await playSpellEffect(spellData, null, _fsp); partyData.tramana_steps = 100; await typeMessage(`ダメージゾーンから みをまもる じゅもんを はった！`); hideAllWindows(); state = 'FIELD'; drawMap(); return; }
             } else { await typeMessage("ここでは つかえない！"); }
         } else if(cmd === 2) {
             await typeMessage("だれの どうぐ？"); let charIdx = await selectMenu(partyData.members.map(m=>m.name), 'cmd-window', 1, true); if(charIdx === -1) continue; let char = partyData.members[charIdx];
