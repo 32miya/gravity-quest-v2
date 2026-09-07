@@ -10320,7 +10320,10 @@ function drawMap() {
                 else if(npc.id.includes('village') || npc.id.includes('dungeon') || npc.id.includes('cave') || npc.id.includes('elder') || npc.id.includes('ship') || npc.id === 'bazaar_guide_1' || npc.id.includes('sub_smith') || npc.id.includes('sub_richman') || npc.id.includes('sub_rumor')) {
                     if(npc.id === 'npc_gar_elder_01') {
                         // 見た目の多様化: 専用の村の老人スプライトを基本に、たまに別の住人にする
-                        const _vrh = getMapRandom(parseInt(nx), parseInt(ny), _rMapId);
+                        // (徘徊で座標が変わっても見た目が変化しないよう、現在地ではなく
+                        //  ホーム座標=徘徊の起点を種にする。徘徊しないNPCは現在地がそのままホーム)
+                        const _wsh = npc._wk && npcWanderState[npc._wk];
+                        const _vrh = getMapRandom(_wsh ? _wsh.homeX : parseInt(nx), _wsh ? _wsh.homeY : parseInt(ny), _rMapId);
                         const _isVillageCtx = _rMapId.includes('village');
                         const _variant = Math.floor(_vrh * 4);
                         if (_variant === 2 && drawAnimatedNpcSprite(ctx, 'man', (npc._wk || npc.id), px, py, 48)) { /* npcMan系で描画済み */ }
@@ -10359,10 +10362,13 @@ function drawMap() {
             // ===== 追加キャラクター種別 =====
             } else if (npc.id.includes('gar_woman')) {
                 // 見た目の多様化: 全員メイド姿にならないよう、村ではメイドスプライトを使わない
-                const _vrw = getMapRandom(parseInt(nx), parseInt(ny), _rMapId);
+                // (徘徊で座標が変わっても見た目が変化しないよう、現在地ではなく
+                //  ホーム座標=徘徊の起点を種にする。徘徊しないNPCは現在地がそのままホーム)
+                const _wsw = npc._wk && npcWanderState[npc._wk];
+                const _vrw = getMapRandom(_wsw ? _wsw.homeX : parseInt(nx), _wsw ? _wsw.homeY : parseInt(ny), _rMapId);
                 const _isVillageCtxW = _rMapId.includes('village');
                 const _wType = _isVillageCtxW ? 'woman' : (_vrw < 0.3 ? 'maidB' : (_vrw < 0.55 ? 'woman' : (_vrw < 0.8 ? 'townWoman' : 'nobleF')));
-                if (!drawAnimatedNpcSprite(ctx, _wType, npc.id, px, py, 48)) {
+                if (!drawAnimatedNpcSprite(ctx, _wType, (npc._wk || npc.id), px, py, 48)) {
                     const _wSprite = externalImages['innGirl'] || externalImages['oldMan'];
                     if(_wSprite) { ctx.save(); ctx.filter='hue-rotate(310deg) saturate(1.4) brightness(1.05)'; drawSpriteLocal(ctx, _wSprite, px, py, 48); ctx.restore(); }
                 }
@@ -10584,9 +10590,12 @@ function drawMap() {
                 else if(_nn_fb.includes('老商人') || (_nn_fb.includes('老') && (_nn_fb.includes('人') || _nn_fb.includes('職')))) { if (!drawAnimatedNpcSprite(ctx, 'elder', (npc._wk || npc.id), px, py, 48)) { if(externalImages['oldMan']) drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); } }
                 else if(_nn_fb.includes('露天') || _nn_fb.includes('行商') || _nn_fb.includes('骨董') || _nn_fb.includes('薬草') || _nn_fb.includes('宝石') || _nn_fb.includes('修繕') || _nn_fb.includes('商人')) {
                     // 見た目の多様化: 同じ id/名前系統の商人が並んでも全員同じ顔にならないよう座標ベースで抽選
-                    const _vrm = getMapRandom(parseInt(nx), parseInt(ny), _rMapId);
+                    // (徘徊で座標が変わっても見た目が変化しないよう、現在地ではなく
+                    //  ホーム座標=徘徊の起点を種にする。徘徊しないNPCは現在地がそのままホーム)
+                    const _wsm = npc._wk && npcWanderState[npc._wk];
+                    const _vrm = getMapRandom(_wsm ? _wsm.homeX : parseInt(nx), _wsm ? _wsm.homeY : parseInt(ny), _rMapId);
                     const _mType = _vrm < 0.55 ? 'merchant' : (_vrm < 0.78 ? 'man' : (_vrm < 0.92 ? 'elder' : 'townWoman'));
-                    if (!drawAnimatedNpcSprite(ctx, _mType, npc.id, px, py, 48)) { if(externalImages['itemShop']) drawSpriteLocal(ctx, externalImages['itemShop'], px, py, 48); }
+                    if (!drawAnimatedNpcSprite(ctx, _mType, (npc._wk || npc.id), px, py, 48)) { if(externalImages['itemShop']) drawSpriteLocal(ctx, externalImages['itemShop'], px, py, 48); }
                 }
                 else if(_nn_fb.includes('踊り子') || _nn_fb.includes('令嬢') || _nn_fb.includes('主婦') || (_nn_fb.includes('女') && !_nn_fb.includes('女神') && !_nn_fb.includes('女性')) || _nn_fb.includes('奥さん') || _nn_fb.includes('娘')) { if (!drawAnimatedNpcSprite(ctx, 'townWoman', (npc._wk || npc.id), px, py, 48)) { if(externalImages['innGirl']) drawSpriteLocal(ctx, externalImages['innGirl'], px, py, 48); } }
                 else if (!drawAnimatedNpcSprite(ctx, 'man', (npc._wk || npc.id), px, py, 48)) { if(externalImages['oldMan']) { drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); } }
