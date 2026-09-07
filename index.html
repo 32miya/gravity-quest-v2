@@ -164,7 +164,7 @@
                 { id: "w33", name: "賢者の杖（杖）", attack: 42, price: 12000, description: "使うと自分にベホイミ（中回復）の効果がある杖。" },
                 { id: "w36", name: "理力の杖（杖）", attack: 55, price: 2500, description: "攻撃の際、力の代わりにMPを消費して大ダメージを与える。" },
                 { id: "w_2nd_06", name: "大神官の杖（杖）", attack: 250, price: 60000, element: "light", description: "【僧侶用】奇跡を呼ぶ杖。道具として使うと味方全員のHPを完全回復する。" },
-                { id: "w_2nd_07", name: "創世の魔杖（杖）", attack: 280, price: 78000, description: "【魔法使い用】世界の理を捻じ曲げる杖。呪文の消費MPをゼロにする。" },
+                { id: "w_2nd_07", name: "創世の魔杖（杖）", attack: 280, price: 78000, effect: "mp_cost_zero", description: "【魔法使い用】世界の理を捻じ曲げる杖。呪文の消費MPをゼロにする。" },
                 { id: "w_staff_01", name: "かしの杖（杖）", attack: 4, price: 60, description: "硬い樫の木で作られた杖。魔法の力はない。" },
                 { id: "w_staff_02", name: "いかずちの杖（杖）", attack: 29, price: 2500, element: "lightning", description: "使うと敵グループに電撃を放つ。" },
                 { id: "w_staff_03", name: "さざなみの杖（杖）", attack: 33, price: 3500, description: "使うとマホカンタ（呪文反射）の効果がある。" },
@@ -176,7 +176,7 @@
                 { id: "w_staff_09", name: "ドラゴンの杖（杖）", attack: 85, price: 0, element: "fire", description: "使うとドラゴンの炎を吐き出す、魔法使いの憧れ。" },
                 { id: "w_staff_10", name: "精霊王の杖（杖）", attack: 180, price: 55000, description: "【魔法使い用】四大精霊を従える王の杖。" },
                 { id: "w_staff_11", name: "世界樹の杖（杖）", attack: 210, price: 70000, description: "【僧侶用】使うと味方全員のHPを大きく回復する。" },
-                { id: "w_staff_12", name: "大魔道の杖（杖）", attack: 240, price: 85000, description: "【魔法使い用】放つ魔法の威力が2倍になる恐るべき杖。" },
+                { id: "w_staff_12", name: "大魔道の杖（杖）", attack: 240, price: 85000, effect: "spell_power_double", description: "【魔法使い用】放つ魔法の威力が2倍になる恐るべき杖。" },
                 { id: "w_staff_13", name: "神話の杖（杖）", attack: 270, price: 95000, description: "【僧侶用】神話の時代から伝わる、すべての状態異常を癒す杖。" },
                 { id: "w_staff_14", name: "アポカリプス（杖）", attack: 320, price: 0, description: "【魔法使い用】世界の終わりを告げる、究極の破壊杖。" },
 
@@ -279,20 +279,20 @@
                 { id: "h04", name: "天空のかぶと（転空）", defense: 30, price: 0 },
                 { id: "h05", name: "はぐれメタルの兜", defense: 50, price: 0 },
                 { id: "h06", name: "はねぼうし（羽）", defense: 8, price: 280 },
-                { id: "h07", name: "しあわせのぼうし", defense: 15, price: 0, description: "歩くたびにMPが少しずつ回復する不思議な帽子。" },
+                { id: "h07", name: "しあわせのぼうし", defense: 15, price: 0, effect: "walk_mp_regen", description: "歩くたびにMPが少しずつ回復する不思議な帽子。" },
                 { id: "h08", name: "てっかめん（鉄仮面）", defense: 25, price: 3500, description: "顔全体を覆う重厚な鉄の仮面。" },
                 { id: "h09", name: "とんがり帽子", defense: 4, price: 80 },
-                { id: "h10", name: "不思議な帽子", defense: 12, price: 0, description: "消費MPを少し節約できる魔導師の帽子。" },
+                { id: "h10", name: "不思議な帽子", defense: 12, price: 0, effect: "mp_cost_reduce", description: "消費MPを少し節約できる魔導師の帽子。" },
                 { id: "h11", name: "知力の兜", defense: 28, price: 13000, description: "賢さが上がる、魔法戦士に最適な兜。" },
                 { id: "h12", name: "グレートヘルム", defense: 40, price: 20000, description: "最高級の鋼で作られた騎士用の大兜。" },
                 { id: "h13", name: "黄金のティアラ", defense: 22, price: 0, description: "女性専用。混乱や眠りなどの耐性を高める。" },
-                { id: "h14", name: "幸せの帽子", defense: 15, price: 0, description: "歩くたびにMPが少しずつ回復する、旅人の憧れ。" },
+                { id: "h14", name: "幸せの帽子", defense: 15, price: 0, effect: "walk_mp_regen", description: "歩くたびにMPが少しずつ回復する、旅人の憧れ。" },
                 { id: "h15", name: "メタルキングの兜", defense: 48, price: 0, description: "【最強】状態異常をほぼ無効化する最高峰の兜。" },
                 { id: "h_grav_01", name: "GRAVITYのヘルメット", defense: 40, price: 0, description: "宇宙の音を聴くことができる兜。混乱や眠りを完全に無効化する。" },
                 
                 // --- 後半追加兜 ---
                 { id: "h_2nd_01", name: "覇王の兜", defense: 140, price: 70000, description: "【勇者/戦士用】王の中の王のみが被ることを許される兜。精神攻撃を完全に無効化。" },
-                { id: "h_2nd_02", name: "真理の冠", defense: 110, price: 60000, description: "【僧侶/魔法使い用】世界の真理を悟る冠。戦闘中、毎ターンMPが大幅に回復し続ける。" },
+                { id: "h_2nd_02", name: "真理の冠", defense: 110, price: 60000, effect: "mp_regen_large", description: "【僧侶/魔法使い用】世界の真理を悟る冠。戦闘中、毎ターンMPが大幅に回復し続ける。" },
 
                 // --- 軽量頭部防具（全職業装備可）追加13種 ---
                 { id: "h_l01", name: "ターバン", defense: 3, price: 55, description: "頭に巻く布製のターバン。軽くて動きやすい旅人の定番。" },
@@ -302,12 +302,12 @@
                 { id: "h_l05", name: "ベレー帽", defense: 10, price: 350, description: "おしゃれな円形の帽子。頭部を守りながら動きを妨げない。" },
                 { id: "h_l06", name: "羽根飾りの帽子", defense: 15, price: 680, description: "鳥の羽根が飾られた帽子。身に着けると士気が上がる。" },
                 { id: "h_l07", name: "絹の頭巾", defense: 18, price: 900, description: "絹製の柔らかい頭巾。状態異常にかかりにくくなる。" },
-                { id: "h_l08", name: "知恵の帽子", defense: 20, price: 1400, description: "賢者の知恵が宿る帽子。装備するとMPが少しずつ回復しやすくなる。" },
-                { id: "h_l09", name: "銀の冠", defense: 25, price: 2500, description: "銀細工で作られた美しい冠。呪文の威力が少し上がる。" },
-                { id: "h_l10", name: "曲者の頭巾", defense: 22, price: 1800, description: "忍者が使う特殊な頭巾。装備するとすばやさが上がる。" },
-                { id: "h_l11", name: "風雲の鉢巻", defense: 28, price: 3200, description: "嵐の力を宿した鉢巻。戦闘開始時にすばやさが増す。" },
-                { id: "h_l12", name: "月の冠", defense: 32, price: 5000, description: "月の力で満ちた神秘的な冠。MPが少し回復しやすくなる。" },
-                { id: "h_l13", name: "炎の鉢巻", defense: 35, price: 6500, description: "炎の精霊を宿した鉢巻。会心の一撃が出やすくなる。" }
+                { id: "h_l08", name: "知恵の帽子", defense: 20, price: 1400, effect: "walk_mp_regen", description: "賢者の知恵が宿る帽子。装備するとMPが少しずつ回復しやすくなる。" },
+                { id: "h_l09", name: "銀の冠", defense: 25, price: 2500, effect: "spell_power_up", description: "銀細工で作られた美しい冠。呪文の威力が少し上がる。" },
+                { id: "h_l10", name: "曲者の頭巾", defense: 22, price: 1800, effect: "spd_up_small", description: "忍者が使う特殊な頭巾。装備するとすばやさが上がる。" },
+                { id: "h_l11", name: "風雲の鉢巻", defense: 28, price: 3200, effect: "spd_up_small", description: "嵐の力を宿した鉢巻。戦闘開始時にすばやさが増す。" },
+                { id: "h_l12", name: "月の冠", defense: 32, price: 5000, effect: "walk_mp_regen", description: "月の力で満ちた神秘的な冠。MPが少し回復しやすくなる。" },
+                { id: "h_l13", name: "炎の鉢巻", defense: 35, price: 6500, effect: "crit_up_small", description: "炎の精霊を宿した鉢巻。会心の一撃が出やすくなる。" }
             ],
             accessories: [
                 { id: "x01", name: "星降る腕輪", effect: "speed_double", price: 0, description: "素早さが2倍になる伝説の装飾品。" },
@@ -7092,6 +7092,17 @@ function handleInput(key) { AudioManager.init(); if (key === 'Escape' && window.
 function onStep() {
     if (partyData.tramana_steps && partyData.tramana_steps > 0) partyData.tramana_steps--;
     if (partyData.tohero_steps && partyData.tohero_steps > 0) partyData.tohero_steps--;
+    // 命の指輪(regen_hp/hp_regen_walk): 装備中は歩くたびにHPが少し回復する
+    // しあわせのぼうし/幸せの帽子(walk_mp_regen): 装備中は歩くたびにMPが少し回復する
+    if (partyData.members) {
+        partyData.members.forEach(m => {
+            if (m.hp <= 0 || !m.equipment) return;
+            const _acc = m.equipment.accessory && masterData.items[m.equipment.accessory];
+            if (_acc && (_acc.effect === 'regen_hp' || _acc.effect === 'hp_regen_walk') && m.hp < m.max_hp) m.hp = Math.min(m.max_hp, m.hp + 1);
+            const _hlm = m.equipment.helmet && masterData.items[m.equipment.helmet];
+            if (_hlm && _hlm.effect === 'walk_mp_regen' && m.mp < m.max_mp) m.mp = Math.min(m.max_mp, m.mp + 1);
+        });
+    }
 }
 
 async function handleFieldInput(key) { 
@@ -7233,7 +7244,41 @@ function getSpd(char) {
         else if(acc.effect === 'agi_up') spd += 30;
         else if(acc.effect === 'all_stats_up') spd += 35;
     }
+    if(char.equipment && char.equipment.helmet && masterData.items[char.equipment.helmet] && masterData.items[char.equipment.helmet].effect === 'spd_up_small') spd += 15;
     return Math.max(0, spd);
+}
+
+// じゅもんの威力倍率(spell_power_up/spell_power_double効果を持つ装備を反映)
+function getSpellPowerMult(actor) {
+    const _eq = (actor && actor.equipment) || {};
+    for (const sl of ['weapon', 'armor', 'shield', 'helmet', 'accessory']) {
+        const _id = _eq[sl]; const _it = _id && masterData.items[_id];
+        if (_it && _it.effect === 'spell_power_double') return 2.0;
+    }
+    for (const sl of ['weapon', 'armor', 'shield', 'helmet', 'accessory']) {
+        const _id = _eq[sl]; const _it = _id && masterData.items[_id];
+        if (_it && _it.effect === 'spell_power_up') return 1.15;
+    }
+    return 1.0;
+}
+
+// じゅもんの消費MP計算(mp_cost_reduce/mp_cost_zero効果を持つ装備を反映)
+function hasDeathResist(char) {
+    return !!(char && char.equipment && char.equipment.accessory && masterData.items[char.equipment.accessory] && masterData.items[char.equipment.accessory].effect === 'resist_death');
+}
+function getSpellMpCost(actor, spell) {
+    if (!spell) return 0;
+    const _eq = (actor && actor.equipment) || {};
+    for (const sl of ['weapon', 'armor', 'shield', 'helmet', 'accessory']) {
+        const _id = _eq[sl]; const _it = _id && masterData.items[_id];
+        if (_it && _it.effect === 'mp_cost_zero') return 0;
+    }
+    let cost = spell.mp || 0;
+    for (const sl of ['weapon', 'armor', 'shield', 'helmet', 'accessory']) {
+        const _id = _eq[sl]; const _it = _id && masterData.items[_id];
+        if (_it && _it.effect === 'mp_cost_reduce') cost = Math.max(0, Math.ceil(cost * 0.7));
+    }
+    return cost;
 }
 
 // ── 職業別装備制限 (DQスタイル) ──────────────────────────────
@@ -7366,6 +7411,8 @@ function calculateDamage(attacker, defender) {
         criticalRate = 0.1;
     }
     if (attacker.equipment && attacker.equipment.weapon === 'w13') criticalRate = 0.4; // まじんのカナヅチ
+    if (attacker.equipment && attacker.equipment.weapon === 'w_dagger_02') criticalRate = Math.max(criticalRate, 0.3); // 夜刀の短剣
+    if (attacker.equipment && attacker.equipment.helmet && masterData.items[attacker.equipment.helmet] && masterData.items[attacker.equipment.helmet].effect === 'crit_up_small') criticalRate += 0.08; // 炎の鉢巻
     if (attacker.equipment && attacker.equipment.accessory && masterData.items[attacker.equipment.accessory]?.effect === 'atk_up_crit') criticalRate = Math.min(0.8, criticalRate + 0.3);
 
     const isCritical = Math.random() < criticalRate && attacker.job;
@@ -14431,7 +14478,7 @@ async function executeBattle(fixedEnemies = null) {
                 } else if(cmdIdx === 2) {
                     if(!m.spells || m.spells.length === 0) { await typeMessage("じゅもんを しらない！"); continue; }
                     let spellNames = m.spells.map(sid => masterData.spells[sid] ? masterData.spells[sid].name : sid); spellNames.push("やめる"); let spellIdx = await selectMenu(spellNames, 'cmd-window', 1, true); if(spellIdx === -1 || spellIdx === spellNames.length - 1) continue;
-                    let spellData = masterData.spells[m.spells[spellIdx]]; if(!spellData) continue; if(m.mp < spellData.mp) { await typeMessage("MPが たりない！"); continue; }
+                    let spellData = masterData.spells[m.spells[spellIdx]]; if(!spellData) continue; if(m.mp < getSpellMpCost(m, spellData)) { await typeMessage("MPが たりない！"); continue; }
                     let targetObj = null;
                     if (spellData.target === 'self') {
                         targetObj = m;
@@ -14508,16 +14555,30 @@ async function executeBattle(fixedEnemies = null) {
                 if(!act.target) continue;
             }
 
-            // mp_regen: プレイヤーターン開始時にMPを少量回復（防具・装飾品スロット両方を確認）
+            // mp_regen: プレイヤーターン開始時にMPを少量回復（武器・防具・盾・兜・装飾品すべてのスロットを確認）
             if (act.actor.job) {
                 const _eq = act.actor.equipment || {};
-                const _mpRegenSlots = ['accessory', 'armor'].filter(sl => {
+                const _mpRegenSlots = ['weapon', 'armor', 'shield', 'helmet', 'accessory'].filter(sl => {
                     const _id = _eq[sl];
                     return _id && masterData.items[_id] && masterData.items[_id].effect === 'mp_regen';
                 });
                 if (_mpRegenSlots.length > 0) {
                     const _rAmt = Math.max(1, Math.floor(act.actor.max_mp * 0.05));
                     act.actor.mp = Math.min(act.actor.max_mp, act.actor.mp + _rAmt);
+                }
+                // 真理の冠: 通常のmp_regenより大幅に多く回復
+                if (_eq.helmet && masterData.items[_eq.helmet] && masterData.items[_eq.helmet].effect === 'mp_regen_large') {
+                    const _rAmt2 = Math.max(1, Math.floor(act.actor.max_mp * 0.18));
+                    act.actor.mp = Math.min(act.actor.max_mp, act.actor.mp + _rAmt2);
+                }
+                // 祈りの指輪: ターン開始時に自動でMPを回復し、稀に壊れて外れる
+                if (_eq.accessory && masterData.items[_eq.accessory] && masterData.items[_eq.accessory].effect === 'mp_recovery_use' && act.actor.mp < act.actor.max_mp) {
+                    const _rAmt3 = Math.max(1, Math.floor(act.actor.max_mp * 0.12));
+                    act.actor.mp = Math.min(act.actor.max_mp, act.actor.mp + _rAmt3);
+                    AudioManager.playSE('heal');
+                    await typeMessage(`${act.actor.name}の 祈りの指輪が 輝いた！\nMPが ${_rAmt3} かいふくした！`);
+                    if (Math.random() < 0.1) { act.actor.equipment.accessory = null; await typeMessage(`祈りの指輪は 力を つかいはたし\n砕け散ってしまった……`); }
+                    updatePartyStatus();
                 }
             }
             if(act.type === 'attack') {
@@ -14532,7 +14593,7 @@ async function executeBattle(fixedEnemies = null) {
                 } else if (_wId === 'w13' && Math.random() < 0.35) {
                     await typeMessage(`しかし からぶってしまった！`);
                 } else {
-                    let _hits = (_wId === 'w20' || _wId === 'w29') ? 2 : 1;
+                    let _hits = (_wId === 'w20' || _wId === 'w29' || (_wId === 'w30' && act.actor.job === 'パンダ')) ? 2 : 1;
                     let _lastDmg = 0;
                     for (let _h = 0; _h < _hits; _h++) {
                         for (let _t of _attackTargets.filter(e => e.hp > 0)) {
@@ -14578,6 +14639,25 @@ ${_pt.displayName}に 追加で ${_fd}の ほのおダメージ！`); if (_pt.hp
 ${_pt.displayName}に 追加で ${_id}の こおりダメージ！`); if (_pt.hp <= 0) { _pt.isPoisoned = false; await typeMessage(`${_pt.displayName}を たおした！`); addReward(_pt); enemies = enemies.filter(e => e !== _pt); updateEnemiesDisplay(); } }
                         if (_wId === 'w27' && Math.random() < 0.2) { act.actor.tmpAtk = (act.actor.tmpAtk || 0) - Math.max(3, Math.floor(getAtk(act.actor) * 0.1)); AudioManager.playSE('damage_hero'); await typeMessage(`魔人のカナヅチの のろい！
 ${act.actor.name}の ちからが すいとられた！`); }
+                        // ドラゴンキラー/ドラゴンバスター: 竜系の敵に確定追加ダメージ
+                        if (_pt && (_wId === 'w10' || _wId === 'w34') && _pt.traits && _pt.traits.includes('dragon')) { let _dd = Math.max(5, Math.floor(getAtk(act.actor) * 0.5)); _pt.hp = Math.max(0, _pt.hp - _dd); AudioManager.playSE('attack_crit'); await typeMessage(`竜殺しの一撃！\n${_pt.displayName}に 追加で ${_dd}の ダメージ！`); if (_pt.hp <= 0) { _pt.isPoisoned = false; await typeMessage(`${_pt.displayName}を たおした！`); addReward(_pt); enemies = enemies.filter(e => e !== _pt); updateEnemiesDisplay(); } }
+                        // ゾンビキラー: アンデッド系の敵に確定追加ダメージ
+                        if (_pt && _wId === 'w18' && _pt.traits && _pt.traits.includes('undead')) { let _ud = Math.max(5, Math.floor(getAtk(act.actor) * 0.5)); _pt.hp = Math.max(0, _pt.hp - _ud); AudioManager.playSE('attack_crit'); await typeMessage(`聖なる一撃！\n${_pt.displayName}に 追加で ${_ud}の ダメージ！`); if (_pt.hp <= 0) { _pt.isPoisoned = false; await typeMessage(`${_pt.displayName}を たおした！`); addReward(_pt); enemies = enemies.filter(e => e !== _pt); updateEnemiesDisplay(); } }
+                        // どくがのナイフ/毒牙の短剣: 命中時に毒を与える
+                        if (_pt && (_wId === 'w16' || _wId === 'w_dagger_03') && !_pt.isPoisoned && Math.random() < 0.3) { _pt.isPoisoned = true; await typeMessage(`${_pt.displayName}は どくを うえつけられた！`); }
+                        // 風魔の短剣: 命中時に相手をしびれさせ動けなくする
+                        if (_pt && _wId === 'w_dagger_01' && Math.random() < 0.25) { _pt.tmpSleep = (_pt.tmpSleep || 0) + 2; await typeMessage(`${_pt.displayName}は しびれて うごけなくなった！`); }
+                        // 月影の扇: 攻撃時に相手を眠らせる
+                        if (_pt && _wId === 'w_fan_05' && Math.random() < 0.25) { _pt.tmpSleep = (_pt.tmpSleep || 0) + 3; await typeMessage(`${_pt.displayName}は ねむってしまった！`); }
+                        // いなずまの槍: 使うと雷の追加ダメージ
+                        if (_pt && _wId === 'w_spear_09' && Math.random() < 0.3) { let _ld = Math.max(5, Math.floor(getAtk(act.actor) * 0.4)); _pt.hp = Math.max(0, _pt.hp - _ld); AudioManager.playSE('magic_cast'); await typeMessage(`いなずまの槍に 雷が 落ちた！\n${_pt.displayName}に 追加で ${_ld}の ダメージ！`); if (_pt.hp <= 0) { _pt.isPoisoned = false; await typeMessage(`${_pt.displayName}を たおした！`); addReward(_pt); enemies = enemies.filter(e => e !== _pt); updateEnemiesDisplay(); } }
+                        // 銀のタロット: 攻撃のたびに何かが起きる(ランダム効果)
+                        if (_pt && _wId === 'w22' && Math.random() < 0.3) {
+                            const _tr = Math.random();
+                            if (_tr < 0.4) { let _td = Math.max(3, Math.floor(getAtk(act.actor) * 0.6)); _pt.hp = Math.max(0, _pt.hp - _td); AudioManager.playSE('magic_cast'); await typeMessage(`タロットが 力のカードを 示した！\n${_pt.displayName}に 追加で ${_td}の ダメージ！`); if (_pt.hp <= 0) { _pt.isPoisoned = false; await typeMessage(`${_pt.displayName}を たおした！`); addReward(_pt); enemies = enemies.filter(e => e !== _pt); updateEnemiesDisplay(); } }
+                            else if (_tr < 0.7) { let _th = Math.max(1, Math.floor(act.actor.max_hp * 0.15)); act.actor.hp = Math.min(act.actor.max_hp, act.actor.hp + _th); AudioManager.playSE('heal'); await typeMessage(`タロットが 太陽のカードを 示した！\n${act.actor.name}の HPが ${_th} かいふくした！`); updatePartyStatus(); }
+                            else { await typeMessage(`タロットが 意味深なカードを 示した……\nしかし 何も おこらなかった。`); }
+                        }
                     }
                 }
             } else if(act.type === 'zenryoku') {
@@ -14732,7 +14812,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の しのじゅもん！`);
                             AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'doru',type:'attack',element:'dark',value:999,mp:20},_t);
-                            if(Math.random()<0.32){_t.hp=0;_t.isPoisoned=false;await typeMessage(`${_t.name}は いのちを うばわれた！！`);}
+                            if(Math.random()<(hasDeathResist(_t)?0.1:0.32)){_t.hp=0;_t.isPoisoned=false;await typeMessage(`${_t.name}は いのちを うばわれた！！`);}
                             else{await typeMessage(`しかし ${_t.name}は たえた！`);}
                         } else {
                             const _ld=Math.floor(act.actor.atk*1.25+30);
@@ -14783,7 +14863,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         // ── 首斬り（低確率即死 or 大ダメージ）
                         await typeMessage(`${act.actor.displayName}の くびきり！！`);
                         playCriticalEffect('#880000'); playEnemyAttackEffect(1.8); AudioManager.playSE('attack_crit');
-                        if(Math.random()<0.18){_t.hp=0;_t.isPoisoned=false;await typeMessage(`${_t.name}は いちげきで たおされた！！`);}
+                        if(Math.random()<(hasDeathResist(_t)?0.05:0.18)){_t.hp=0;_t.isPoisoned=false;await typeMessage(`${_t.name}は いちげきで たおされた！！`);}
                         else{const _duld=Math.max(1,Math.floor(act.actor.atk*1.4*(0.85+Math.random()*0.3)-_t.def*0.45));_t.hp=Math.max(0,_t.hp-_duld);await typeMessage(`${_t.name}に ${_duld}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
                         updatePartyStatus();
 
@@ -14866,7 +14946,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         if(_r<0.35){
                             await typeMessage(`${act.actor.displayName}の 死の呪文！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'doru',type:'attack',element:'dark',value:999,mp:20},_t);
-                            if(Math.random()<0.28){_t.hp=0;_t.isPoisoned=false;await typeMessage(`${_t.name}は いのちを うばわれた！！`);}
+                            if(Math.random()<(hasDeathResist(_t)?0.09:0.28)){_t.hp=0;_t.isPoisoned=false;await typeMessage(`${_t.name}は いのちを うばわれた！！`);}
                             else{const _d=Math.max(1,Math.floor(act.actor.atk*1.4*(0.85+Math.random()*0.3)));_t.hp=Math.max(0,_t.hp-_d);await typeMessage(`しかし ${_t.name}は たえた！ ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
                         } else if(_r<0.65){
                             await typeMessage(`${act.actor.displayName}の 暗黒の嵐！！`);
@@ -15039,7 +15119,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の カオスフレア！！`);
                             playCriticalEffect('#ff00ff'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'doru',type:'attack',element:'dark',value:act.actor.atk*1.3,mp:18},_t);
-                            if(Math.random()<0.20){_t.hp=0;_t.isPoisoned=false;await typeMessage(`${_t.name}は 消滅した！！`);}
+                            if(Math.random()<(hasDeathResist(_t)?0.06:0.20)){_t.hp=0;_t.isPoisoned=false;await typeMessage(`${_t.name}は 消滅した！！`);}
                             else{const _d=Math.max(1,Math.floor(act.actor.atk*1.3*(0.85+Math.random()*0.3)-_t.def*0.1));_t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
                         }
                         updatePartyStatus();
@@ -15247,7 +15327,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                 if (act.spell.type === 'field' || act.spell.id.includes('rula') || act.spell.id.includes('remi') || act.spell.id.includes('tohe') || act.spell.id.includes('trama')) { await typeMessage(`しかし ここでは つかえなかった！`); continue; }
 
                 try {
-                act.actor.mp -= act.spell.mp;
+                act.actor.mp = Math.max(0, act.actor.mp - getSpellMpCost(act.actor, act.spell));
                 await typeMessage(`${act.actor.name || act.actor.displayName}は ${act.spell.name}を となえた！`);
                 AudioManager.playSE('magic_cast');
                 await playSpellEffect(act.spell, act.target);
@@ -15267,16 +15347,18 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             partyData.members.forEach(m => { if(m.hp>0) m.hp = m.max_hp; });
                             updatePartyStatus(); await typeMessage(`慈愛の 光が 仲間を 包んだ！\nなかま ぜんいんの HPが かんぜんに かいふくした！`);
                         } else {
-                            partyData.members.forEach(m => { if(m.hp>0) m.hp = Math.min(m.max_hp, m.hp + act.spell.value); });
+                            const _healAmt = Math.floor(act.spell.value * getSpellPowerMult(act.actor));
+                            partyData.members.forEach(m => { if(m.hp>0) m.hp = Math.min(m.max_hp, m.hp + _healAmt); });
                             updatePartyStatus(); await typeMessage(`なかま ぜんいんの HPが かいふくした！`);
                         }
                     }
                     else {
                         if(!t || t.hp <= 0) { await typeMessage("しんでいる なかまには きかない！"); }
-                        else { t.hp = Math.min(t.max_hp, t.hp + act.spell.value); updatePartyStatus(); await typeMessage(`${t.name}の HPが かいふくした！`); }
+                        else { t.hp = Math.min(t.max_hp, t.hp + Math.floor(act.spell.value * getSpellPowerMult(act.actor))); updatePartyStatus(); await typeMessage(`${t.name}の HPが かいふくした！`); }
                     }
                 } else if (act.spell.type === 'attack') {
                     let magicDmgMultiplier = (partyData.flags && partyData.flags.flag_2nd_maou_cleared && !act.actor.displayName) ? 2 : 1;
+                    magicDmgMultiplier *= getSpellPowerMult(act.actor);
                     let tType = act.target; let targets = [];
                     if (tType === 'enemies') targets = enemies.filter(e => e.hp > 0);
                     else if (tType === 'allies') targets = partyData.members.filter(m => m.hp > 0);
@@ -15442,6 +15524,16 @@ ${act.actor.name}の ちからが すいとられた！`); }
                 }
             }
         }
+    } else if (!escaped && partyData.members.some(m => m.equipment && m.equipment.accessory && masterData.items[m.equipment.accessory] && masterData.items[m.equipment.accessory].effect === 'reset_battle')) {
+        // 時の砂: 全滅してもゴールド半減・拠点送還を受けず、その場でHP/MP全快して仕切り直せる
+        const _sandOwner = partyData.members.find(m => m.equipment && m.equipment.accessory && masterData.items[m.equipment.accessory] && masterData.items[m.equipment.accessory].effect === 'reset_battle');
+        await typeMessage(`${_sandOwner.name}の 時の砂が 砕け散った！\n時が 巻き戻る……`);
+        partyData.members.forEach(m => { m.hp = m.max_hp; m.mp = m.max_mp; m.isPoisoned = false; });
+        _sandOwner.equipment.accessory = null;
+        updatePartyStatus();
+        partyData.members.forEach(m => { resetBattleState(m); });
+        bScreen.style.display = 'none'; document.getElementById('screen').style.display = 'block'; hideAllWindows(); state = 'FIELD'; drawMap(); updateBGM(); startFieldLoop();
+        return false;
     } else if (!escaped) {
         AudioManager.playBGM('game_over'); await typeMessage(`ゆうしゃたちは ぜんめつした...`);
         const screen = document.getElementById('screen'); screen.style.transition = 'opacity 1.5s'; screen.style.opacity = '0'; await new Promise(r => setTimeout(r, 2000));
@@ -15739,10 +15831,10 @@ async function init() {
     // アイテムDB
     if (window.ITEM_DATABASE) {
         const db = window.ITEM_DATABASE;
-        (db.weapons||[]).forEach(w => masterData.items[w.id] = {id:w.id,name:w.name,type:'weapon',price:w.price,power:w.attack,element:w.element,desc:w.description});
-        (db.armors||[]).forEach(a => masterData.items[a.id] = {id:a.id,name:a.name,type:'armor',price:a.price,power:a.defense,desc:a.description});
-        (db.shields||[]).forEach(s => masterData.items[s.id] = {id:s.id,name:s.name,type:'shield',price:s.price,power:s.defense,desc:s.description});
-        (db.helmets||[]).forEach(h => masterData.items[h.id] = {id:h.id,name:h.name,type:'helmet',price:h.price,power:h.defense,desc:h.description});
+        (db.weapons||[]).forEach(w => masterData.items[w.id] = {id:w.id,name:w.name,type:'weapon',price:w.price,power:w.attack,element:w.element,effect:w.effect,desc:w.description});
+        (db.armors||[]).forEach(a => masterData.items[a.id] = {id:a.id,name:a.name,type:'armor',price:a.price,power:a.defense,effect:a.effect,desc:a.description});
+        (db.shields||[]).forEach(s => masterData.items[s.id] = {id:s.id,name:s.name,type:'shield',price:s.price,power:s.defense,effect:s.effect,desc:s.description});
+        (db.helmets||[]).forEach(h => masterData.items[h.id] = {id:h.id,name:h.name,type:'helmet',price:h.price,power:h.defense,effect:h.effect,desc:h.description});
         (db.accessories||[]).forEach(x => masterData.items[x.id] = {id:x.id,name:x.name,type:'accessory',price:x.price,power:x.defense||0,effect:x.effect,desc:x.description});
         (db.items||[]).forEach(i => masterData.items[i.id] = {id:i.id,name:i.name,type:'tool',price:i.price,effect:i.effect,value:i.value,desc:i.description});
     }
@@ -15755,7 +15847,7 @@ async function init() {
     // モンスターDB
     if (window.MONSTER_DATABASE) {
         window.MONSTER_DATABASE.forEach(m => {
-            masterData.monsters[m.id] = {name:m.name,max_hp:m.hp,atk:m.attack,def:m.defense,spd:m.speed,exp:m.exp,gold:m.gold};
+            masterData.monsters[m.id] = {name:m.name,max_hp:m.hp,atk:m.attack,def:m.defense,spd:m.speed,exp:m.exp,gold:m.gold,traits:m.traits||[]};
             if (m.image && m.image.startsWith('http')) {
                 let img = new Image(); img.crossOrigin = "Anonymous"; img.src = m.image;
                 externalImages['enemy_' + m.id] = img;
