@@ -43,13 +43,18 @@
     #gold-window { top: 55px; right: 5px; min-width: 80px; text-align: right; z-index: 15; }
     #map-name-window { top: 55px; left: 5px; min-width: 80px; text-align: center; z-index: 15; }
     #msg-window { bottom: 0; left: 0; width: 100%; min-height: 100px; border-bottom: none; border-left: none; border-right: none; border-radius: 0; }
-    /* バトル中は画面端に余白を作り、その余白にも戦闘背景が透けて見えるように浮かせて配置 */
-    #msg-window.battle-msg { bottom: 14px; left: 14px; width: calc(100% - 28px); min-height: 90px; background: rgba(0,0,0,0.72); border: 1px solid #fff; border-radius: 8px; }
+    /* バトル中は画面端に余白を作り、その余白にも戦闘背景が透けて見えるように浮かせて配置。
+       コマンドウィンドウを右側に同じ高さで並べる(以前は上に積んでいたため下部UI全体が
+       縦に長くなり、敵の表示が不必要に高い位置に押し上げられて浮いて見えていた) */
+    #msg-window.battle-msg { bottom: 14px; left: 14px; width: calc(100% - 186px); min-height: 90px; background: rgba(0,0,0,0.72); border: 1px solid #fff; border-radius: 8px; }
     #cmd-window { bottom: 105px; right: 5px; min-width: 100px; }
-    #cmd-window.battle-cmd { bottom: 119px; right: 19px; background: rgba(0,0,0,0.85); }
+    #cmd-window.battle-cmd { bottom: 14px; right: 14px; width: 150px; min-height: 90px; box-sizing: border-box; background: rgba(0,0,0,0.85); }
     #status-window { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 94%; max-width: 440px; background: rgba(0, 0, 0, 0.95); z-index: 20; padding: 10px 12px; border: 2px solid #fff; border-radius: 8px; }
     #title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 30px; }
-    #battle-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; border: 2px solid #fff; border-radius: 10px; overflow: hidden; }
+    /* padding-top/bottomは party-status(160px) と msg/cmd-window(下14px+約90px) の実際の
+       見た目の高さぶんを避け、敵が「浮いて」見えないよう本当に見えている中央の余白内で
+       敵グループを縦方向中央に配置するためのもの */
+    #battle-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; border: 2px solid #fff; border-radius: 10px; overflow: hidden; padding-top: 168px; padding-bottom: 112px; }
     /* enemies-area: JSのupdateEnemiesDisplayがstyleを上書きするためデフォルトは最小限 */
     #enemies-area { width: 100%; padding: 4px 6px; box-sizing: border-box; display: flex; justify-content: center; align-items: flex-end; }
     .enemy-container { display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; }
@@ -14319,10 +14324,10 @@ async function executeBattle(fixedEnemies = null) {
                 backEndX = backOffX + Math.max(0, backList.length * step - gap);
                 totalW = Math.max(frontTotalW, backEndX);
             }
-            // 後列は前列の高さの約半分ぶん上（コンテナ最上部=0）に配置し、
-            // 前列はその分だけ下にずらす → 後列の下半身が前列の頭の後ろに重なって見える
-            const backRaise  = Math.round(fH * 0.5);
-            const frontTopOff = backRaise;
+            // 後列(高さbH)は上端0に配置し、前列は後列の高さの45%ぶんだけ下にずらす。
+            // → 後列は上側45%(頭・肩)だけ前列の上に見え、下側55%(下半身)は前列の絵に隠れて
+            //   グループとして重なって見えるようにする
+            const frontTopOff = Math.round(bH * 0.45);
             const boxH       = frontTopOff + fH + 20; // 名前ラベル含む高さ
 
             let html = `<div style="position:relative;width:${totalW}px;height:${boxH}px;">`;
