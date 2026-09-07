@@ -8634,6 +8634,19 @@ function getEnemyImageHtml(enemyId) {
     return `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:min(60px,70%);line-height:1;color:#f5f;">🧌</div>`;
 }
 
+// 陸地タイルが海(tile===5)に隣接する辺に、DQ4風の砂浜の縁取りを描画する
+function drawCoastlineEdge(ctx, px, py, neighbors) {
+    const T = TILE_SIZE;
+    const SAND = '#e0c484', SAND_LINE = 'rgba(196,166,102,0.7)';
+    const bw = Math.max(3, Math.round(T * 0.18));
+    ctx.save();
+    if (neighbors.n === 5) { ctx.fillStyle = SAND; ctx.fillRect(px, py, T, bw); ctx.fillStyle = SAND_LINE; ctx.fillRect(px, py + bw - 1, T, 1); }
+    if (neighbors.s === 5) { ctx.fillStyle = SAND; ctx.fillRect(px, py + T - bw, T, bw); ctx.fillStyle = SAND_LINE; ctx.fillRect(px, py + T - bw, T, 1); }
+    if (neighbors.w === 5) { ctx.fillStyle = SAND; ctx.fillRect(px, py, bw, T); ctx.fillStyle = SAND_LINE; ctx.fillRect(px + bw - 1, py, 1, T); }
+    if (neighbors.e === 5) { ctx.fillStyle = SAND; ctx.fillRect(px + T - bw, py, bw, T); ctx.fillStyle = SAND_LINE; ctx.fillRect(px + T - bw, py, 1, T); }
+    ctx.restore();
+}
+
 function drawProceduralTile(ctx, tile, px, py, rand, now, mc, lights) {
     const T = TILE_SIZE;
     const { castle, town, cave, demon, tower, shrine, smallTown, capitalTown, townElement, caveElement } = mc;
@@ -9328,6 +9341,16 @@ function drawMap() {
             if (bgImg && bgImg.complete && bgImg.naturalHeight > 0) { _dc.drawImage(bgImg, px, py, TILE_SIZE, TILE_SIZE); drawnCustom = true; }
             if (fgImg && fgImg.complete && fgImg.naturalHeight > 0) { if (!drawnCustom && color) { _dc.fillStyle = color; _dc.fillRect(px, py, TILE_SIZE, TILE_SIZE); } _dc.drawImage(fgImg, px, py, TILE_SIZE, TILE_SIZE); drawnCustom = true; }
             if (!drawnCustom) { drawProceduralTile(_dc, tile, px, py, _rand, _drawNow, _mc, lights); drawnCustom = true; }
+            // フィールドの海岸線: 陸地タイルが海(5)に隣接する辺に砂浜の縁取りを追加
+            if (_isFieldMap && tile !== 5 && ![1,2,4,15,16,17,18,25].includes(tile)) {
+                const _cn = {
+                    n: y > 0 ? _rMap.tiles[(y-1)*_rMap.width+x] : -1,
+                    s: y < _rMap.height-1 ? _rMap.tiles[(y+1)*_rMap.width+x] : -1,
+                    w: x > 0 ? _rMap.tiles[y*_rMap.width+(x-1)] : -1,
+                    e: x < _rMap.width-1 ? _rMap.tiles[y*_rMap.width+(x+1)] : -1,
+                };
+                if (_cn.n === 5 || _cn.s === 5 || _cn.w === 5 || _cn.e === 5) drawCoastlineEdge(_dc, px, py, _cn);
+            }
         }
     }
     }
