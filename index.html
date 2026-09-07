@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>GRAVITY QUEST v2.0 -旅の絆-</title>
+<script>
+// file://等、画像読み込みでcanvasがtaint扱いされる環境でtoDataURL()が例外を投げて
+// 以降の初期化処理が全て止まる（起動直後に画面が真っ暗になる）のを防ぐセーフガード。
+(function () {
+    var _origToDataURL = HTMLCanvasElement.prototype.toDataURL;
+    HTMLCanvasElement.prototype.toDataURL = function () {
+        try { return _origToDataURL.apply(this, arguments); }
+        catch (e) { return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='; }
+    };
+})();
+</script>
 <!-- マップエディタ上書きファイル。editor.html で「index.htmlに書き出す」で生成 -->
 <script src="maps_override.js"></script>
 <style>
