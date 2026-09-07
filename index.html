@@ -1080,43 +1080,17 @@ function packSaveData(pData) {
 }
 
 function _restoreRuraDestinations(pData) {
+    // 以前はここで「神父のいる町・城・祠」を訪問済みかどうかに関わらず
+    // externalMapData全件から機械的にルーラ行き先へ登録していたため、
+    // ふっかつのじゅもんで復元した直後、実際には訪れていない場所まで
+    // すべてルーラの行き先リストに表示されてしまうバグがあった。
+    // パスワード(ふっかつのじゅもん)には訪問履歴までは符号化されていないため、
+    // 復元直後は「行ったことがある場所」の情報を正しく持たない。
+    // ここでは箱(オブジェクト)の存在保証のみ行い、実際の行き先は
+    // じゅもん詠唱時点の首都フォールバック(下記)と、以後の再訪問で
+    // 自然に登録されていく既存の仕組みに委ねる。
     if (!pData.flags) pData.flags = {};
     if (!pData.flags.rura_destinations) pData.flags.rura_destinations = {};
-    const _rd = pData.flags.rura_destinations;
-    if (!externalMapData) return;
-    const _solid = [1, 2, 4, 5, 15, 16, 17, 18, 19, 20, 25];
-    for (const [mapId, map] of Object.entries(externalMapData)) {
-        if (_rd[mapId]) continue;
-        const _safe = (mapId.includes('town') || mapId.includes('village') ||
-                       mapId.includes('market') || mapId.includes('castle') ||
-                       mapId.includes('shrine')) &&
-                      !mapId.includes('demon') && !mapId.includes('death') &&
-                      !mapId.startsWith('map_field_');
-        if (!_safe || !map || !map.npcs) continue;
-        const _hasPr = Object.values(map.npcs).some(n => n.id && (n.id.includes('priest') || n.id.includes('church')));
-        if (!_hasPr) continue;
-        // 着地位置: 最下行のupstairs(22)タイルを優先、なければ中央付近のBFS
-        let wx = Math.floor(map.width / 2), wy = Math.floor(map.height / 2);
-        let _placed = false;
-        for (let y = map.height - 1; y >= 0 && !_placed; y--) {
-            for (let x = 0; x < map.width && !_placed; x++) {
-                if (map.tiles[y * map.width + x] === 22) { wx = x; wy = Math.max(1, y - 1); _placed = true; }
-            }
-        }
-        if (!_placed) {
-            for (let r = 0; r <= 10 && !_placed; r++) {
-                for (let dy = -r; dy <= r && !_placed; dy++) {
-                    for (let dx = -r; dx <= r && !_placed; dx++) {
-                        if (Math.abs(dx) !== r && Math.abs(dy) !== r) continue;
-                        const tx = wx + dx, ty = wy + dy;
-                        if (tx < 1 || ty < 1 || tx >= map.width - 1 || ty >= map.height - 1) continue;
-                        if (!_solid.includes(map.tiles[ty * map.width + tx]) && !map.npcs[`${tx},${ty}`]) { wx = tx; wy = ty; _placed = true; }
-                    }
-                }
-            }
-        }
-        _rd[mapId] = { x: wx, y: wy, name: map.name || getMapDisplayName(mapId) };
-    }
 }
 
 function unpackSaveData(pwd) {
@@ -14381,11 +14355,29 @@ async function openMainMenu() {
                             partyData.flags.rura_destinations[_t01k] = { x: 10, y: 18, name: (_t01m && _t01m.name) || '城下町エニシア' };
                         }
                         const _rdAll = partyData.flags.rura_destinations;
-                        const _rdKeys = Object.keys(_rdAll);
+                        // キー正規化による重複排除: 'castle_01' と 'map_castle_01' のように
+                        // 同じ場所がプレフィックス有無の別表記キーで externalMapData に別々に
+                        // 実在し、二重登録されているケースを1件にまとめる('map_'を外した形を
+                        // 正規キーとする。どちらが実在するかに関わらず常に同じキーに畳み込む)
+                        const _rdSeen = new Map();
+                        for (const _rk of Object.keys(_rdAll)) {
+                            if (!_rdAll[_rk]) continue;
+                            const _nk = _rk.startsWith('map_') ? _rk.slice(4) : _rk;
+                            if (!_rdSeen.has(_nk)) _rdSeen.set(_nk, _rk);
+                        }
+                        const _rdKeys = [..._rdSeen.values()];
                         if (_rdKeys.length === 0) {
                             await typeMessage(`行ける場所が まだ ありません。\n神父のいる町を 訪れると\nルーラで 飛べるように なります！`);
                         } else {
-                            const _rdNames = _rdKeys.map(k => _rdAll[k].name || getMapDisplayName(k));
+                            // 表示名は保存時の文字列より現在のマップ定義の名称を優先する
+                            // (物語のリネーム等で名称が変わった場合、旧セーブに残る古い名前を
+                            //  表示し続けないため)
+                            const _rdNames = _rdKeys.map(k => {
+                                let _nk = k;
+                                if (!externalMapData[_nk] && externalMapData['map_' + _nk]) _nk = 'map_' + _nk;
+                                const _live = externalMapData[_nk];
+                                return (_live && _live.name) || getMapDisplayName(k) || _rdAll[k].name || k;
+                            });
                             await typeMessage(`${char.name}は ${spellData.name}を となえた！\nどこへ 飛びますか？`);
                             const _rdChoice = await selectMenu(_rdNames, 'cmd-window', 1, true);
                             if (_rdChoice < 0) { /* キャンセル */ } else {
