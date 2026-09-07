@@ -33,16 +33,20 @@
     #party-status > div { flex: 1; border-right: 1px solid #555; padding: 2px 0; overflow: hidden; white-space: nowrap; text-overflow: clip; }
     #party-status > div:last-child { border-right: none; }
     /* バトル中は視認性のため表示範囲を拡大（名前/Lv/HP/MP/状態異常の5行を表示） */
-    #party-status.battle-size { height: 160px; font-size: min(15px, 3.7vw); }
-    #party-status.battle-size > div { padding: 4px 0; line-height: 1.5; }
+    /* バトル画面全体(ステータス上部/敵表示/メッセージ下部)を1枚の丸角パネルとして一体化させる:
+       party-statusの上角、msg-windowの下角のみ丸め、battle-screenの左右を白枠で繋いで縦につなげる */
+    #party-status.battle-size { height: 160px; font-size: min(15px, 3.7vw); border-top: 2px solid #fff; border-left: 2px solid #fff; border-right: 2px solid #fff; border-radius: 10px 10px 0 0; }
+    #party-status.battle-size > div { padding: 4px 0; line-height: 1.5; margin: 6px 3px; border: 1px solid #fff; border-radius: 6px; background: rgba(255,255,255,0.05); }
+    #party-status.battle-size > div:last-child { border: 1px solid #fff; }
     .dead { color: #f55; }
     #gold-window { top: 55px; right: 5px; min-width: 80px; text-align: right; z-index: 15; }
     #map-name-window { top: 55px; left: 5px; min-width: 80px; text-align: center; z-index: 15; }
     #msg-window { bottom: 0; left: 0; width: 100%; min-height: 100px; border-bottom: none; border-left: none; border-right: none; border-radius: 0; }
+    #msg-window.battle-msg { border-left: 2px solid #fff; border-right: 2px solid #fff; border-bottom: 2px solid #fff; border-radius: 0 0 10px 10px; }
     #cmd-window { bottom: 105px; right: 5px; min-width: 100px; }
     #status-window { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 94%; max-width: 440px; background: rgba(0, 0, 0, 0.95); z-index: 20; padding: 10px 12px; border: 2px solid #fff; border-radius: 8px; }
     #title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 30px; }
-    #battle-screen { position: absolute; top: 50px; left: 0; width: 100%; height: calc(100% - 150px); background: #000; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    #battle-screen { position: absolute; top: 50px; left: 0; width: 100%; height: calc(100% - 150px); background: #000; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; border-left: 2px solid #fff; border-right: 2px solid #fff; }
     /* enemies-area: JSのupdateEnemiesDisplayがstyleを上書きするためデフォルトは最小限 */
     #enemies-area { width: 100%; padding: 4px 6px; box-sizing: border-box; display: flex; justify-content: center; align-items: flex-end; }
     .enemy-container { display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; }
@@ -7093,7 +7097,7 @@ async function handleFieldInput(key) {
     if(key === 'Enter') { isMoving = true; try { await checkAction(); } finally { isMoving = false; } } 
     if(key === 'Escape') openMainMenu(); 
 }
-function showWindow(id) { document.getElementById(id).style.display = 'flex'; } function hideWindow(id) { document.getElementById(id).style.display = 'none'; } function hideAllWindows() { hideWindow('msg-window'); hideWindow('cmd-window'); hideWindow('party-status'); hideWindow('status-window'); hideWindow('gold-window'); hideWindow('map-name-window'); document.getElementById('party-status').classList.remove('battle-size'); document.getElementById('map-name-window').style.top = ''; }
+function showWindow(id) { document.getElementById(id).style.display = 'flex'; } function hideWindow(id) { document.getElementById(id).style.display = 'none'; } function hideAllWindows() { hideWindow('msg-window'); hideWindow('cmd-window'); hideWindow('party-status'); hideWindow('status-window'); hideWindow('gold-window'); hideWindow('map-name-window'); document.getElementById('party-status').classList.remove('battle-size'); document.getElementById('msg-window').classList.remove('battle-msg'); document.getElementById('map-name-window').style.top = ''; }
 async function typeMessage(text) {
     state = 'MSG';
     const _mw = document.getElementById('msg-window'); _mw.style.display = 'block';
@@ -14170,6 +14174,7 @@ async function executeBattle(fixedEnemies = null) {
       bScreen.style.backgroundImage = `${_todLayer}url('${bgUrl}')`; }
     bScreen.style.backgroundSize = "cover"; bScreen.style.backgroundPosition = "bottom center"; bScreen.style.backgroundRepeat = "no-repeat";
     showWindow('party-status'); document.getElementById('party-status').classList.add('battle-size'); updatePartyStatus();
+    document.getElementById('msg-window').classList.add('battle-msg');
     document.getElementById('map-name-window').style.top = '165px'; // バトル中は拡大したパーティーステータスの下へ
 
     if (fixedEnemies) { if (fixedEnemies.some(id => id.includes('_final') || id.includes('final_boss') || (masterData.monsters[id] && masterData.monsters[id].name.includes('最終形態')))) { AudioManager.playBGM('battle_final'); } else { AudioManager.playBGM('battle_boss'); } } 
@@ -14240,13 +14245,18 @@ async function executeBattle(fixedEnemies = null) {
     const updateEnemiesDisplay = () => {
         const cnt = enemies.length;
         const area = document.getElementById('enemies-area');
+        // バトルウィンドウの実際の幅に応じて敵表示全体を拡大縮小する
+        // (基準幅400pxのデザインを、実際の画面幅に合わせて0.85〜1.7倍の範囲でスケール)
+        const _areaW = area.clientWidth || (document.getElementById('battle-screen') || {}).clientWidth || 400;
+        const _scale = Math.max(0.85, Math.min(1.7, _areaW / 400));
+        const S = (v) => Math.round(v * _scale);
 
         // ── 1〜3体: 単列フレックス（大きく迫力あり）──────────────────
         if (cnt <= 3) {
             area.style.cssText = 'display:flex;flex-direction:row;justify-content:center;align-items:flex-end;width:100%;padding:4px 6px;box-sizing:border-box;';
-            const bW = cnt === 1 ? 188 : cnt === 2 ? 148 : 110;
-            const bH = cnt === 1 ? 210 : cnt === 2 ? 168 : 130;
-            area.style.gap = (cnt === 1 ? 0 : cnt === 2 ? 22 : 14) + 'px';
+            const bW = S(cnt === 1 ? 240 : cnt === 2 ? 190 : 142);
+            const bH = S(cnt === 1 ? 268 : cnt === 2 ? 214 : 168);
+            area.style.gap = S(cnt === 1 ? 0 : cnt === 2 ? 22 : 14) + 'px';
             area.innerHTML = enemies.map(e => {
                 const isBig = e.isGuraKing || e.isFinalForm || e.id.includes('boss_') || e.id.includes('maou') || e.id.includes('_final');
                 const mul = (isBig && cnt > 1) ? 1.25 : 1.0;
@@ -14255,25 +14265,26 @@ async function executeBattle(fixedEnemies = null) {
                 const deadOp = e.hp <= 0 ? 'opacity:0.35;' : '';
                 return `<div class="enemy-container" style="width:${eW}px;">
                     <div class="enemy-img-box" style="width:${eW}px;height:${eH}px;${deadOp}">${getEnemyImageHtml(e.id)}</div>
-                    <div style="font-size:13px;margin-top:4px;text-shadow:1px 1px 0 #000;line-height:1.2;white-space:nowrap;color:${nameC};">${e.displayName}</div>
+                    <div style="font-size:${S(13)}px;margin-top:4px;text-shadow:1px 1px 0 #000;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:${nameC};">${e.displayName}</div>
                 </div>`;
             }).join('');
 
         // ── 4体以上: 集合写真スタイル ────────────────────────────────
         // 前列(奇数番: 0,2,4) と 後列(偶数番: 1,3,5) を半身分右にずらして配置
-        // 上下2段は使わず、前列と後列はベースライン同じ、後列が半身右にずれる
+        // 後列は前列より一回り小さく、かつ前列の高さの約半分ぶん上に浮かせて配置することで
+        // 前列の陰に隠れきらず、はっきり見える2段構成にする
         } else {
             area.style.cssText = 'display:flex;justify-content:center;align-items:flex-end;width:100%;padding:4px 6px;box-sizing:border-box;gap:0;';
 
             const frontList = enemies.filter((_, i) => i % 2 === 0); // 前列: 0,2,4
             const backList  = enemies.filter((_, i) => i % 2 === 1); // 後列: 1,3,5
 
-            // 個体数によるサイズ
-            const fW = cnt <= 5 ? 98 : cnt <= 7 ? 80 : 66;
-            const fH = cnt <= 5 ? 116 : cnt <= 7 ? 95 : 80;
-            const bW = Math.round(fW * 0.85);   // 後列は少し小さく（遠近感）
-            const bH = Math.round(fH * 0.85);
-            const gap = cnt <= 5 ? 12 : cnt <= 7 ? 8 : 5;
+            // 個体数によるサイズ（基準サイズを拡大し、画面幅にも追従させる）
+            const fW = S(cnt <= 5 ? 140 : cnt <= 7 ? 114 : 94);
+            const fH = S(cnt <= 5 ? 165 : cnt <= 7 ? 134 : 112);
+            const bW = Math.round(fW * 0.8);   // 後列は少し小さく（遠近感）
+            const bH = Math.round(fH * 0.8);
+            const gap = S(cnt <= 5 ? 12 : cnt <= 7 ? 8 : 5);
 
             const step = fW + gap;                    // 前列の配置ピッチ
             const backOffX = Math.round(step / 2);   // 後列を半身（step/2）右にずらす
@@ -14282,33 +14293,42 @@ async function executeBattle(fixedEnemies = null) {
             const frontTotalW = frontList.length * step - gap;
             const backEndX   = backOffX + Math.max(0, backList.length * step - gap);
             const totalW     = Math.max(frontTotalW, backEndX);
-            // 後列は下端を前列に揃える（同じベースライン）
-            const backTopOff = fH - bH;
-            const boxH       = fH + 20; // 名前ラベル含む高さ
+            // 後列は前列の高さの約半分ぶん上（コンテナ最上部=0）に配置し、
+            // 前列はその分だけ下にずらす → 後列の下半身が前列の頭の後ろに重なって見える
+            const backRaise  = Math.round(fH * 0.5);
+            const frontTopOff = backRaise;
+            const boxH       = frontTopOff + fH + 20; // 名前ラベル含む高さ
 
             let html = `<div style="position:relative;width:${totalW}px;height:${boxH}px;">`;
 
-            // 後列を先に描画 → z-index:1（前列の後ろに隠れる）
+            // 後列を先に描画 → z-index:1（前列の後ろに隠れる）。名前ラベルは含めない
             backList.forEach((e, i) => {
                 const lx = backOffX + i * step;
-                const ty = backTopOff;
-                const nameC = e.voidBarrierTurns > 0 ? '#f0f' : (e.hp <= 0 ? '#666' : '#fff');
                 const deadOp = e.hp <= 0 ? 'opacity:0.35;' : '';
-                html += `<div class="enemy-container" style="position:absolute;left:${lx}px;top:${ty}px;width:${bW}px;z-index:1;text-align:center;">
+                html += `<div class="enemy-container" style="position:absolute;left:${lx}px;top:0;width:${bW}px;z-index:1;text-align:center;">
                     <div class="enemy-img-box" style="width:${bW}px;height:${bH}px;${deadOp}">${getEnemyImageHtml(e.id)}</div>
-                    <div style="font-size:10px;margin-top:2px;text-shadow:1px 1px 0 #000;white-space:nowrap;color:${nameC};">${e.displayName}</div>
                 </div>`;
             });
 
-            // 前列を後に描画 → z-index:2（前面）
+            // 前列を後に描画 → z-index:2（前面）。名前ラベルは含めない
+            frontList.forEach((e, i) => {
+                const lx = i * step;
+                const deadOp = e.hp <= 0 ? 'opacity:0.35;' : '';
+                html += `<div class="enemy-container" style="position:absolute;left:${lx}px;top:${frontTopOff}px;width:${fW}px;z-index:2;text-align:center;">
+                    <div class="enemy-img-box" style="width:${fW}px;height:${fH}px;${deadOp}">${getEnemyImageHtml(e.id)}</div>
+                </div>`;
+            });
+
+            // 名前ラベルは全員ぶんまとめて最前面(z-index:3)に描画し、前列の絵に隠れないようにする
+            backList.forEach((e, i) => {
+                const lx = backOffX + i * step;
+                const nameC = e.voidBarrierTurns > 0 ? '#f0f' : (e.hp <= 0 ? '#666' : '#fff');
+                html += `<div style="position:absolute;left:${lx}px;top:${bH + 2}px;width:${bW}px;z-index:3;text-align:center;font-size:${S(10)}px;text-shadow:1px 1px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:${nameC};">${e.displayName}</div>`;
+            });
             frontList.forEach((e, i) => {
                 const lx = i * step;
                 const nameC = e.voidBarrierTurns > 0 ? '#f0f' : (e.hp <= 0 ? '#666' : '#fff');
-                const deadOp = e.hp <= 0 ? 'opacity:0.35;' : '';
-                html += `<div class="enemy-container" style="position:absolute;left:${lx}px;top:0;width:${fW}px;z-index:2;text-align:center;">
-                    <div class="enemy-img-box" style="width:${fW}px;height:${fH}px;${deadOp}">${getEnemyImageHtml(e.id)}</div>
-                    <div style="font-size:10px;margin-top:2px;text-shadow:1px 1px 0 #000;white-space:nowrap;color:${nameC};">${e.displayName}</div>
-                </div>`;
+                html += `<div style="position:absolute;left:${lx}px;top:${frontTopOff + fH + 2}px;width:${fW}px;z-index:3;text-align:center;font-size:${S(10)}px;text-shadow:1px 1px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:${nameC};">${e.displayName}</div>`;
             });
 
             html += '</div>';
