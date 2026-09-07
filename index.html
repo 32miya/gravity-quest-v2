@@ -10963,7 +10963,7 @@ async function moveParty(dx, dy) {
             if (_toField) {
                 let _canExit = !!(nextMap.exits && nextMap.exits[`${_lx},${_ly}`]);
                 if (!_canExit) {
-                    const _isoS=_hasShip?[1,2,4,15,16,17,18]:[1,2,4,5,15,16,17,18,19,20];
+                    const _isoS=_hasShip?[1,2,4,15,16,17,18,25]:[1,2,4,5,15,16,17,18,25]; // 実際の移動判定(高山25のみ不可・山20/森19は通行可)と一致させる
                     const _isoV=new Set([`${_lx},${_ly}`]); const _isoQ=[[_lx,_ly]];
                     isoLoop: while(_isoQ.length>0&&_isoV.size<400){
                         const[icx,icy]=_isoQ.shift();
