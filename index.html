@@ -9629,6 +9629,22 @@ function drawMap() {
                 let chestImgClosed = externalImages['chestGQ'] || externalImages['chest'] || externalImages['treasure'] || externalImages['treasureBox'];
                 let chestImgOpen = externalImages['chestOpenGQ'] || chestImgClosed;
                 let chestImg = isOpened ? chestImgOpen : chestImgClosed;
+                // 宝箱は装飾の樽・木箱と見分けづらいため、未開封の宝箱には金色の光ときらめきを添えて目立たせる
+                if (!isOpened && npc.id !== "obj_chest_star_frag" && npc.id !== "obj_parents_relic") {
+                    const _cgNow = Date.now();
+                    const _cgPulse = 0.55 + Math.sin(_cgNow / 450) * 0.25;
+                    const _cgx = px + TILE_SIZE/2, _cgy = py + TILE_SIZE/2;
+                    const _cg = ctx.createRadialGradient(_cgx, _cgy, 1, _cgx, _cgy, TILE_SIZE*0.85);
+                    _cg.addColorStop(0, `rgba(255,220,90,${_cgPulse*0.55})`);
+                    _cg.addColorStop(1, 'rgba(255,200,60,0)');
+                    ctx.fillStyle = _cg; ctx.beginPath(); ctx.arc(_cgx, _cgy, TILE_SIZE*0.85, 0, Math.PI*2); ctx.fill();
+                    for (let _si = 0; _si < 3; _si++) {
+                        const _sa = (_cgNow/700 + _si*2.1) % (Math.PI*2);
+                        const _sr = TILE_SIZE*0.45;
+                        ctx.fillStyle = `rgba(255,255,200,${0.5+Math.sin(_cgNow/300+_si)*0.35})`;
+                        ctx.beginPath(); ctx.arc(_cgx+Math.cos(_sa)*_sr, _cgy+Math.sin(_sa)*_sr*0.6, 1.6, 0, Math.PI*2); ctx.fill();
+                    }
+                }
                 if (npc.id === "obj_chest_star_frag") { ctx.font = "24px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("✨", px + TILE_SIZE/2, py + TILE_SIZE/2); }
                 else if (npc.id === "obj_parents_relic") { ctx.font = "22px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("🖼️", px + TILE_SIZE/2, py + TILE_SIZE/2); ctx.globalAlpha = 1.0; }
                 else if(chestImg && chestImg.complete && chestImg.naturalHeight > 0) { ctx.drawImage(chestImg, px, py, TILE_SIZE, TILE_SIZE); } else { ctx.font = "24px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(isOpened ? "🧳" : "🎁", px + TILE_SIZE/2, py + TILE_SIZE/2); } ctx.globalAlpha = 1.0;
