@@ -14192,6 +14192,9 @@ async function executeBattle(fixedEnemies = null) {
     }
     let enemies = []; let counts = {};
     let hasGuraKing = false;
+    // ランダムエンカウント時の出現プール・最大同時出現数(仲間を呼ぶ処理でも使う)
+    let _encounterPool = null;
+    let maxEnemies = 4;
 
     if (fixedEnemies) {
         fixedEnemies.forEach(type => {
@@ -14208,28 +14211,29 @@ async function executeBattle(fixedEnemies = null) {
         let eTypes = currentMap.encounters; if (!eTypes || eTypes.length === 0) eTypes = ["m01", "m02"];
         let pool = [...eTypes];
 
-        let isCave = partyData.pos.map.includes('dungeon') || partyData.pos.map.includes('cave'); 
-        let isLate = partyData.pos.map.includes('death') || partyData.pos.map.includes('demon'); 
-        let isMid = partyData.pos.map.includes('tower') || partyData.pos.map.includes('desert'); 
-        
+        let isCave = partyData.pos.map.includes('dungeon') || partyData.pos.map.includes('cave');
+        let isLate = partyData.pos.map.includes('death') || partyData.pos.map.includes('demon');
+        let isMid = partyData.pos.map.includes('tower') || partyData.pos.map.includes('desert');
+
         if (partyData.flags && partyData.flags.flag_2nd_maou_cleared) {
             let isLateMap = isLate || partyData.pos.map.includes('volcano') || partyData.pos.map.includes('dungeon_b');
-            let isMidMap = isMid || partyData.pos.map.includes('mountain') || isLateMap; 
-            
+            let isMidMap = isMid || partyData.pos.map.includes('mountain') || isLateMap;
+
             let sl_keys = Object.keys(masterData.monsters).filter(k => k.startsWith('sl_m_'));
             sl_keys.forEach(k => {
                 let m = masterData.monsters[k];
-                let expectedHp = m.max_hp * 2; 
-                if (expectedHp >= 1500 && !isLateMap) return; 
-                if (expectedHp >= 800 && !isMidMap) return;   
+                let expectedHp = m.max_hp * 2;
+                if (expectedHp >= 1500 && !isLateMap) return;
+                if (expectedHp >= 800 && !isMidMap) return;
                 pool.push(k);
             });
         }
 
         let maxLv = Math.max(...partyData.members.map(m => m.lv));
-        let maxEnemies = 1; if (isCave || maxLv >= 3) maxEnemies = 2; if (isMid || maxLv >= 6) maxEnemies = 3; if (isLate || maxLv >= 10) maxEnemies = 4;
-        // レベル上限撤廃に伴い、高レベルパーティー向けに敵の集団規模もさらに拡大する
-        if (maxLv >= 20) maxEnemies = 5; if (maxLv >= 35) maxEnemies = 6;
+        maxEnemies = 1; if (isCave || maxLv >= 3) maxEnemies = 2; if (isMid || maxLv >= 6) maxEnemies = 3; if (isLate || maxLv >= 10) maxEnemies = 4;
+        // レベル上限撤廃に伴い、高レベルパーティー向けに敵の集団規模もさらに拡大する(最大9体: 前列5・後列4)
+        if (maxLv >= 20) maxEnemies = 5; if (maxLv >= 35) maxEnemies = 6; if (maxLv >= 50) maxEnemies = 7; if (maxLv >= 70) maxEnemies = 8; if (maxLv >= 90) maxEnemies = 9;
+        _encounterPool = pool;
         const num = Math.floor(Math.random() * maxEnemies) + 1;
         for(let i=0; i<num; i++) {
             const type = pool[Math.floor(Math.random()*pool.length)]; 
@@ -14433,7 +14437,9 @@ async function executeBattle(fixedEnemies = null) {
             const _ms = { name, displayName:name, max_hp:hp, hp, atk, def, spd, exp:0, gold:0, traits:[], id:'summon_'+Math.random().toString(36).slice(2,7) };
             enemies.push(_ms); updateEnemiesDisplay();
         };
-        for(let e of enemies) { let targets = partyData.members.filter(m=>m.hp>0); let t = targets[Math.floor(Math.random()*targets.length)]; const _sr = _specialRates[e.id||'']||0; actions.push({ actor: e, type: 'enemy_attack', target: t, spd: e.spd + Math.random()*5, isSpecial: Math.random() < _sr }); }
+        // 通常のランダムエンカウントでは、生存中の敵が低確率で仲間を呼び足すことがある(ボス戦は対象外)
+        const _canCallAllies = !fixedEnemies && _encounterPool && _encounterPool.length > 0;
+        for(let e of enemies) { let targets = partyData.members.filter(m=>m.hp>0); let t = targets[Math.floor(Math.random()*targets.length)]; const _sr = _specialRates[e.id||'']||0; const _willCall = _canCallAllies && !e.isGuraKing && enemies.length < maxEnemies && Math.random() < 0.07; if (_willCall) { actions.push({ actor: e, type: 'enemy_call', spd: e.spd + Math.random()*5 }); } else { actions.push({ actor: e, type: 'enemy_attack', target: t, spd: e.spd + Math.random()*5, isSpecial: Math.random() < _sr }); } }
         // two_actions / three_actions: 追加行動をキューに積む
         for(let e of enemies) {
             if (e.hp <= 0 || !e.traits) continue;
@@ -14548,6 +14554,21 @@ ${act.actor.name}の ちからが すいとられた！`); }
                 _zTgt.hp = Math.max(0, _zTgt.hp - _zDmg);
                 await typeMessage(`${_zTgt.displayName}に ${_zDmg}の ダメージ！！`);
                 if (_zTgt.hp <= 0) { _zTgt.isPoisoned = false; await typeMessage(`${_zTgt.displayName}を たおした！`); addReward(_zTgt); enemies = enemies.filter(e => e !== _zTgt); updateEnemiesDisplay(); }
+            } else if(act.type === 'enemy_call') {
+                // 仲間を呼ぶ: 同ターン内に他の敵が先に呼んで上限に達している場合は不発
+                if (!_encounterPool || _encounterPool.length === 0 || enemies.length >= maxEnemies) { continue; }
+                await typeMessage(`${act.actor.displayName}は 仲間を 呼んだ！`);
+                const _callType = _encounterPool[Math.floor(Math.random() * _encounterPool.length)];
+                const _cd = masterData.monsters[_callType] || masterData.monsters["m01"];
+                counts[_callType] = (counts[_callType] || 0) + 1;
+                const _isGK2 = (_cd.name.includes("グラ王") || _cd.name.includes("大魔王") || _callType.includes("maou") || _callType.includes("demon"));
+                const _isFinal2 = (_cd.name.includes("最終形態") || _callType.includes("final"));
+                if (_isGK2) hasGuraKing = true;
+                const _newE = { ..._cd, max_hp: Math.round(_cd.max_hp * diff), hp: Math.round(_cd.max_hp * diff), atk: Math.round(_cd.atk * diff), def: Math.round(_cd.def * diff), exp: Math.round(_cd.exp * diff), gold: Math.round(_cd.gold * diff), letter: String.fromCharCode(64 + counts[_callType]), id: _callType, isGuraKing: _isGK2, isFinalForm: _isFinal2, voidBarrierUsed: false, voidBarrierTurns: 0 };
+                enemies.push(_newE);
+                enemies.forEach(e2 => { e2.displayName = counts[e2.id] > 1 ? e2.name + e2.letter : e2.name; });
+                updateEnemiesDisplay();
+                await typeMessage(`${_newE.displayName}が あらわれた！`);
             } else if(act.type === 'enemy_attack') {
                 // high_escape_rate: 高確率で戦闘から逃走（はぐれグラちゃん等）
                 if (act.actor.traits && act.actor.traits.includes('high_escape_rate') && Math.random() < 0.75) {
