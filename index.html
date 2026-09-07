@@ -114,8 +114,8 @@
                 { id: "w18", name: "ゾンビキラー", attack: 67, price: 18000, element: "light", description: "アンデッドに絶大な威力を発揮する聖なる剣。" },
                 { id: "w20", name: "はやぶさの剣", attack: 67, price: 25000, description: "一度の攻撃で2回斬りつけることができる細身の剣。" },
                 { id: "w21", name: "もろはのつるぎ（諸刃）", attack: 99, price: 3300, description: "【呪】高い攻撃力だが、自分もダメージを受ける。" },
-                { id: "w22", name: "銀のタロット", attack: 15, price: 0, description: "占い師が使う不思議なカード。使うと何かが起きる。" },
-                { id: "w23", name: "炎のつるぎ（火）", attack: 75, price: 22000, element: "fire", description: "刀身が燃え盛る剣。使うとギラ（火炎魔法）の効果。" },
+                { id: "w22", name: "銀のタロット", attack: 15, price: 0, useEffect: "random_self", useMp: 8, description: "占い師が使う不思議なカード。使うと何かが起きる。" },
+                { id: "w23", name: "炎のつるぎ（火）", attack: 75, price: 22000, element: "fire", useEffect: "magic_single", useElement: "fire", usePower: 1.3, useMp: 4, description: "刀身が燃え盛る剣。使うとギラ（火炎魔法）の効果。" },
                 { id: "w24", name: "吹雪のつるぎ（氷）", attack: 85, price: 28000, element: "ice", description: "冷気を纏った魔法の剣。炎の魔物に絶大な威力。" },
                 { id: "w26", name: "大かなづち", attack: 48, price: 4200, description: "重いが破壊力抜群。岩をも砕く戦士の鎚。" },
                 { id: "w27", name: "魔人の斧", attack: 95, price: 0, description: "【呪】高い攻撃力だが、時々自分の力を吸い取られる。" },
@@ -159,23 +159,23 @@
                 // ==========================================
                 // ▼ 杖（全20種類）
                 // ==========================================
-                { id: "w19", name: "まふうじの杖（杖）", attack: 40, price: 4000, description: "使うと敵の呪文を封じ込める魔法の杖。" },
-                { id: "w25", name: "マグマの杖（杖）", attack: 50, price: 0, element: "fire", description: "地底の熱を宿した杖。使うと岩をも溶かす衝撃波を放つ。" },
-                { id: "w33", name: "賢者の杖（杖）", attack: 42, price: 12000, description: "使うと自分にベホイミ（中回復）の効果がある杖。" },
+                { id: "w19", name: "まふうじの杖（杖）", attack: 40, price: 4000, useEffect: "seal_enemy", useMp: 5, description: "使うと敵の呪文を封じ込める魔法の杖。" },
+                { id: "w25", name: "マグマの杖（杖）", attack: 50, price: 0, element: "fire", useEffect: "magic_all", useElement: "fire", usePower: 1.1, useMp: 10, description: "地底の熱を宿した杖。使うと岩をも溶かす衝撃波を放つ。" },
+                { id: "w33", name: "賢者の杖（杖）", attack: 42, price: 12000, useEffect: "heal_self", usePower: 0.5, useMp: 6, description: "使うと自分にベホイミ（中回復）の効果がある杖。" },
                 { id: "w36", name: "理力の杖（杖）", attack: 55, price: 2500, description: "攻撃の際、力の代わりにMPを消費して大ダメージを与える。" },
-                { id: "w_2nd_06", name: "大神官の杖（杖）", attack: 250, price: 60000, element: "light", description: "【僧侶用】奇跡を呼ぶ杖。道具として使うと味方全員のHPを完全回復する。" },
+                { id: "w_2nd_06", name: "大神官の杖（杖）", attack: 250, price: 60000, element: "light", useEffect: "heal_party", usePower: 1.0, useMp: 20, description: "【僧侶用】奇跡を呼ぶ杖。道具として使うと味方全員のHPを完全回復する。" },
                 { id: "w_2nd_07", name: "創世の魔杖（杖）", attack: 280, price: 78000, effect: "mp_cost_zero", description: "【魔法使い用】世界の理を捻じ曲げる杖。呪文の消費MPをゼロにする。" },
                 { id: "w_staff_01", name: "かしの杖（杖）", attack: 4, price: 60, description: "硬い樫の木で作られた杖。魔法の力はない。" },
-                { id: "w_staff_02", name: "いかずちの杖（杖）", attack: 29, price: 2500, element: "lightning", description: "使うと敵グループに電撃を放つ。" },
-                { id: "w_staff_03", name: "さざなみの杖（杖）", attack: 33, price: 3500, description: "使うとマホカンタ（呪文反射）の効果がある。" },
-                { id: "w_staff_04", name: "炎の杖（杖）", attack: 35, price: 4200, element: "fire", description: "使うと火炎の魔法を放つ熱い杖。" },
-                { id: "w_staff_05", name: "ルーンスタッフ（杖）", attack: 38, price: 5800, description: "使うと味方全員の守備力が上がる。" },
-                { id: "w_staff_06", name: "吹雪の杖（杖）", attack: 45, price: 7000, element: "ice", description: "使うと冷気を放つ氷の杖。" },
-                { id: "w_staff_07", name: "天罰の杖（杖）", attack: 55, price: 9500, element: "wind", description: "使うと敵全体に強烈な風の刃を巻き起こす。" },
-                { id: "w_staff_08", name: "復活の杖（杖）", attack: 66, price: 45000, description: "使うと仲間を確実に生き返らせる奇跡の杖。" },
-                { id: "w_staff_09", name: "ドラゴンの杖（杖）", attack: 85, price: 0, element: "fire", description: "使うとドラゴンの炎を吐き出す、魔法使いの憧れ。" },
+                { id: "w_staff_02", name: "いかずちの杖（杖）", attack: 29, price: 2500, element: "lightning", useEffect: "magic_all", useElement: "lightning", usePower: 0.9, useMp: 8, description: "使うと敵グループに電撃を放つ。" },
+                { id: "w_staff_03", name: "さざなみの杖（杖）", attack: 33, price: 3500, useEffect: "reflect_self", useMp: 6, description: "使うとマホカンタ（呪文反射）の効果がある。" },
+                { id: "w_staff_04", name: "炎の杖（杖）", attack: 35, price: 4200, element: "fire", useEffect: "magic_single", useElement: "fire", usePower: 1.2, useMp: 5, description: "使うと火炎の魔法を放つ熱い杖。" },
+                { id: "w_staff_05", name: "ルーンスタッフ（杖）", attack: 38, price: 5800, useEffect: "def_buff_party", useMp: 8, description: "使うと味方全員の守備力が上がる。" },
+                { id: "w_staff_06", name: "吹雪の杖（杖）", attack: 45, price: 7000, element: "ice", useEffect: "magic_single", useElement: "ice", usePower: 1.2, useMp: 5, description: "使うと冷気を放つ氷の杖。" },
+                { id: "w_staff_07", name: "天罰の杖（杖）", attack: 55, price: 9500, element: "wind", useEffect: "magic_all", useElement: "wind", usePower: 1.0, useMp: 9, description: "使うと敵全体に強烈な風の刃を巻き起こす。" },
+                { id: "w_staff_08", name: "復活の杖（杖）", attack: 66, price: 45000, useEffect: "revive_ally", useMp: 15, description: "使うと仲間を確実に生き返らせる奇跡の杖。" },
+                { id: "w_staff_09", name: "ドラゴンの杖（杖）", attack: 85, price: 0, element: "fire", useEffect: "magic_all", useElement: "fire", usePower: 1.3, useMp: 12, description: "使うとドラゴンの炎を吐き出す、魔法使いの憧れ。" },
                 { id: "w_staff_10", name: "精霊王の杖（杖）", attack: 180, price: 55000, description: "【魔法使い用】四大精霊を従える王の杖。" },
-                { id: "w_staff_11", name: "世界樹の杖（杖）", attack: 210, price: 70000, description: "【僧侶用】使うと味方全員のHPを大きく回復する。" },
+                { id: "w_staff_11", name: "世界樹の杖（杖）", attack: 210, price: 70000, useEffect: "heal_party", usePower: 0.55, useMp: 16, description: "【僧侶用】使うと味方全員のHPを大きく回復する。" },
                 { id: "w_staff_12", name: "大魔道の杖（杖）", attack: 240, price: 85000, effect: "spell_power_double", description: "【魔法使い用】放つ魔法の威力が2倍になる恐るべき杖。" },
                 { id: "w_staff_13", name: "神話の杖（杖）", attack: 270, price: 95000, description: "【僧侶用】神話の時代から伝わる、すべての状態異常を癒す杖。" },
                 { id: "w_staff_14", name: "アポカリプス（杖）", attack: 320, price: 0, description: "【魔法使い用】世界の終わりを告げる、究極の破壊杖。" },
@@ -183,8 +183,8 @@
                 // --- 扇（踊り子・賢者・魔法使い向け）追加5種 ---
                 { id: "w_fan_01", name: "扇子（扇）", attack: 8, price: 180, description: "踊り子が使う優雅な扇子。軽くて扱いやすい入門武器。" },
                 { id: "w_fan_02", name: "戦扇（扇）", attack: 22, price: 1200, description: "扇の縁に刃がついた戦闘用の扇。舞いながら斬る。" },
-                { id: "w_fan_03", name: "紅蓮の扇（扇）", attack: 45, price: 6000, element: "fire", description: "使うとメラミ（中炎の魔法）の効果がある炎の扇。" },
-                { id: "w_fan_04", name: "嵐の扇（扇）", attack: 68, price: 15000, element: "wind", description: "使うと敵全体に吹雪を呼ぶ嵐の扇。" },
+                { id: "w_fan_03", name: "紅蓮の扇（扇）", attack: 45, price: 6000, element: "fire", useEffect: "magic_all", useElement: "fire", usePower: 0.85, useMp: 8, description: "使うとメラミ（中炎の魔法）の効果がある炎の扇。" },
+                { id: "w_fan_04", name: "嵐の扇（扇）", attack: 68, price: 15000, element: "wind", useEffect: "magic_all", useElement: "ice", usePower: 1.0, useMp: 10, description: "使うと敵全体に吹雪を呼ぶ嵐の扇。" },
                 { id: "w_fan_05", name: "月影の扇（扇）", attack: 95, price: 0, description: "月の光を宿した幻惑の扇。攻撃時に敵を眠らせることがある。" },
 
                 // --- 短剣・ナイフ追加（忍者・踊り子向け）追加3種 ---
@@ -256,14 +256,14 @@
                 { id: "s05", name: "みかがみのたて", defense: 45, price: 12000 },
                 { id: "s06", name: "はぐれメタルの盾", defense: 60, price: 0 },
                 { id: "s07", name: "せいどうのたて（青銅）", defense: 9, price: 250 },
-                { id: "s08", name: "ちからのたて（力）", defense: 22, price: 13000, description: "使うと自分にベホイミ（中回復）がかかる盾。" },
-                { id: "s09", name: "ふうじんのたて（風神）", defense: 35, price: 0, description: "使うと敵をどこかへ吹き飛ばしてしまう盾。" },
+                { id: "s08", name: "ちからのたて（力）", defense: 22, price: 13000, useEffect: "heal_self", usePower: 0.5, useMp: 6, description: "使うと自分にベホイミ（中回復）がかかる盾。" },
+                { id: "s09", name: "ふうじんのたて（風神）", defense: 35, price: 0, useEffect: "knockback_enemy", useMp: 10, description: "使うと敵をどこかへ吹き飛ばしてしまう盾。" },
                 { id: "s10", name: "魔法のたて", defense: 20, price: 4500, effect: "magic_resist", description: "呪文の耐性を高める魔法の盾。" },
-                { id: "s11", name: "力の盾", defense: 30, price: 25000, description: "使うと自分の傷を癒やす（中回復）効果がある。" },
+                { id: "s11", name: "力の盾", defense: 30, price: 25000, useEffect: "heal_self", usePower: 0.5, useMp: 6, description: "使うと自分の傷を癒やす（中回復）効果がある。" },
                 { id: "s12", name: "メタルキングの盾", defense: 55, price: 0, description: "王者の輝きを持つ、あらゆる災厄を弾く盾。" },
                 { id: "s13", name: "おなべのふた", defense: 2, price: 40, description: "ただの鍋の蓋。しかし、ないよりはマシ。" },
                 { id: "s14", name: "ドラゴンシールド", defense: 25, price: 7200, effect: "resist_fire_ice", description: "炎や吹雪のブレスを和らげる、竜の鱗の盾。" },
-                { id: "s15", name: "天空のたて（転空）", defense: 35, price: 0, description: "使うとマホカンタ（呪文反射）が発動する聖なる盾。" },
+                { id: "s15", name: "天空のたて（転空）", defense: 35, price: 0, useEffect: "reflect_self", useMp: 6, description: "使うとマホカンタ（呪文反射）が発動する聖なる盾。" },
                 { id: "s16", name: "はぐれメタルの盾", defense: 60, price: 0, effect: "resist_all_half", description: "あらゆる属性攻撃を軽減する、鈍く光る盾。" },
                 { id: "s_grav_01", name: "守護者の盾", defense: 50, price: 0, effect: "spell_reflect_low", description: "GRAVITYの世界を守る者に授けられる盾。稀に受けた呪文を反射する。" },
 
@@ -14740,11 +14740,33 @@ async function executeBattle(fixedEnemies = null) {
                     }
                     actionsArray[mIdx] = { actor: m, type: 'spell', spell: spellData, target: targetObj, spd: getSpd(m) + Math.random()*5 }; commandChosen = true;
                 } else if(cmdIdx === 3) {
-                    if(!m.inventory || m.inventory.length === 0) { await typeMessage("もちものが ない！"); continue; }
-                    let itemIdx = await selectMenu(m.inventory.map(id => masterData.items[id] ? masterData.items[id].name : "なぞのアイテム"), 'cmd-window', 1, true); if(itemIdx === -1) continue;
-                    let itemData = masterData.items[m.inventory[itemIdx]]; if(itemData.type !== 'tool') { await typeMessage("ここでは つかえない！"); continue; }
+                    // 装備中の武器・盾に「使うと」効果があれば、道具リストの先頭に選択肢として表示
+                    const _useableEquip = ['weapon', 'shield'].map(slot => m.equipment && m.equipment[slot] && masterData.items[m.equipment[slot]]).filter(it => it && it.useEffect);
+                    const _hasInventory = m.inventory && m.inventory.length > 0;
+                    if (_useableEquip.length === 0 && !_hasInventory) { await typeMessage("もちものが ない！"); continue; }
+                    const _menuNames = [..._useableEquip.map(it => `${it.name}(装備)`), ...(m.inventory || []).map(id => masterData.items[id] ? masterData.items[id].name : "なぞのアイテム")];
+                    let itemIdx = await selectMenu(_menuNames, 'cmd-window', 1, true); if(itemIdx === -1) continue;
+                    if (itemIdx < _useableEquip.length) {
+                        const _weq = _useableEquip[itemIdx];
+                        if (m.mp < (_weq.useMp || 0)) { await typeMessage("MPが たりない！"); continue; }
+                        const _weTargetKind = ['magic_single','seal_enemy','knockback_enemy'].includes(_weq.useEffect) ? 'enemy'
+                            : ['magic_all','heal_party','def_buff_party'].includes(_weq.useEffect) ? 'group'
+                            : _weq.useEffect === 'revive_ally' ? 'dead_ally' : 'self';
+                        let _weTarget = m;
+                        if (_weTargetKind === 'enemy') { let tIdx = await selectMenu(enemies.map(e=>e.displayName), 'cmd-window', 1, true); if(tIdx === -1) continue; _weTarget = enemies[tIdx]; }
+                        else if (_weTargetKind === 'group') { _weTarget = null; }
+                        else if (_weTargetKind === 'dead_ally') {
+                            const _deadAllies = partyData.members.filter(mb => mb.hp <= 0);
+                            if (_deadAllies.length === 0) { await typeMessage("生き返らせる なかまが いない！"); continue; }
+                            let tIdx = await selectMenu(_deadAllies.map(mb=>mb.name), 'cmd-window', 1, true); if(tIdx === -1) continue; _weTarget = _deadAllies[tIdx];
+                        }
+                        actionsArray[mIdx] = { actor: m, type: 'weapon_use', item: _weq, target: _weTarget, spd: getSpd(m) + Math.random()*5 }; commandChosen = true;
+                        continue;
+                    }
+                    const _invIdx = itemIdx - _useableEquip.length;
+                    let itemData = masterData.items[m.inventory[_invIdx]]; if(itemData.type !== 'tool') { await typeMessage("ここでは つかえない！"); continue; }
                     let tIdx = await selectMenu(partyData.members.map(mb=>mb.name), 'cmd-window', 1, true); if(tIdx === -1) continue; let targetObj = partyData.members[tIdx];
-                    actionsArray[mIdx] = { actor: m, type: 'item', item: itemData, itemIndex: itemIdx, target: targetObj, spd: getSpd(m) + Math.random()*5 }; commandChosen = true;
+                    actionsArray[mIdx] = { actor: m, type: 'item', item: itemData, itemIndex: _invIdx, target: targetObj, spd: getSpd(m) + Math.random()*5 }; commandChosen = true;
                 } else if(cmdIdx === 4) {
                     if (m._zenryokuUsed) { await typeMessage(`${m.name}は もう ぜんりょくを つかった！`); continue; }
                     let _zTIdx = await selectMenu(enemies.map(e=>e.displayName), 'cmd-window', 1, true); if(_zTIdx === -1) continue;
@@ -15698,6 +15720,75 @@ ${act.actor.name}の ちからが すいとられた！`); }
                     console.error('呪文実行エラー:', _spellErr);
                     try { await typeMessage(`${act.spell && act.spell.name ? act.spell.name : 'じゅもん'}は うまく きまらなかった！`); } catch(e) {}
                 }
+            } else if(act.type === 'weapon_use') {
+                const _wq = act.item;
+                try {
+                    await typeMessage(`${act.actor.name}は ${_wq.name}を つかった！`);
+                    act.actor.mp = Math.max(0, act.actor.mp - (_wq.useMp || 0));
+                    const _wpAtk = getAtk(act.actor);
+                    if (_wq.useEffect === 'magic_single') {
+                        AudioManager.playSE('magic_cast');
+                        const _val = Math.floor(_wpAtk * (_wq.usePower || 1));
+                        await playSpellEffect({ id: 'meran', type: 'attack', element: _wq.useElement, value: _val, mp: 0 }, act.target);
+                        const _elemMult = getElementMultiplier(_wq.useElement, act.target);
+                        const _dmg = Math.max(1, Math.floor(_val * (0.85 + Math.random() * 0.3) * _elemMult));
+                        act.target.hp = Math.max(0, act.target.hp - _dmg);
+                        await typeMessage(`${act.target.displayName || act.target.name}に ${_dmg}の ダメージ！`);
+                        if (act.target.hp <= 0) { await typeMessage(`${act.target.displayName || act.target.name}を たおした！`); }
+                    } else if (_wq.useEffect === 'magic_all') {
+                        AudioManager.playSE('magic_cast');
+                        const _val = Math.floor(_wpAtk * (_wq.usePower || 1));
+                        await playSpellEffect({ id: 'meran', type: 'attack', element: _wq.useElement, value: _val, mp: 0 }, null);
+                        for (const en of enemies.filter(e => e.hp > 0)) {
+                            const _elemMult = getElementMultiplier(_wq.useElement, en);
+                            const _dmg = Math.max(1, Math.floor(_val * (0.8 + Math.random() * 0.4) * _elemMult));
+                            en.hp = Math.max(0, en.hp - _dmg);
+                            await typeMessage(`${en.displayName}に ${_dmg}の ダメージ！`);
+                            if (en.hp <= 0) await typeMessage(`${en.displayName}を たおした！`);
+                        }
+                        updateEnemiesDisplay();
+                    } else if (_wq.useEffect === 'heal_self') {
+                        AudioManager.playSE('heal');
+                        const _hv = Math.floor(act.actor.max_hp * (_wq.usePower || 0.5));
+                        act.actor.hp = Math.min(act.actor.max_hp, act.actor.hp + _hv);
+                        await typeMessage(`${act.actor.name}の HPが ${_hv} かいふくした！`);
+                    } else if (_wq.useEffect === 'heal_party') {
+                        AudioManager.playSE('heal');
+                        for (const mb of partyData.members.filter(x => x.hp > 0)) { const _hv = Math.floor(mb.max_hp * (_wq.usePower || 1)); mb.hp = Math.min(mb.max_hp, mb.hp + _hv); }
+                        await typeMessage(`なかま ぜんいんの HPが かいふくした！`);
+                    } else if (_wq.useEffect === 'revive_ally') {
+                        AudioManager.playSE('heal');
+                        act.target.hp = Math.floor(act.target.max_hp * 0.6);
+                        await typeMessage(`${act.target.name}は いきかえった！`);
+                    } else if (_wq.useEffect === 'def_buff_party') {
+                        AudioManager.playSE('magic_cast');
+                        for (const mb of partyData.members.filter(x => x.hp > 0)) { mb.tmpDef = 10; mb.tmpDefDuration = 3; }
+                        await typeMessage(`なかま ぜんいんの しゅびりょくが あがった！`);
+                    } else if (_wq.useEffect === 'reflect_self') {
+                        AudioManager.playSE('magic_cast');
+                        act.actor.tmpReflect = true;
+                        await typeMessage(`${act.actor.name}は じゅもんを はねかえす たいせいに なった！`);
+                    } else if (_wq.useEffect === 'seal_enemy') {
+                        AudioManager.playSE('magic_cast');
+                        act.target.tmpSilence = (act.target.tmpSilence || 0) + 3;
+                        await typeMessage(`${act.target.displayName}は じゅもんを ふうじられた！`);
+                    } else if (_wq.useEffect === 'knockback_enemy') {
+                        AudioManager.playSE('cancel');
+                        await typeMessage(`${act.target.displayName}は どこかへ ふきとばされた！`);
+                        enemies = enemies.filter(e => e !== act.target);
+                        updateEnemiesDisplay();
+                        if (enemies.length === 0) { escaped = true; }
+                    } else if (_wq.useEffect === 'random_self') {
+                        const _r = Math.random();
+                        if (_r < 0.4) { act.actor.tmpAtk = 10; act.actor.tmpAtkDuration = 3; AudioManager.playSE('magic_cast'); await typeMessage(`こうげき力が あがった！`); }
+                        else if (_r < 0.7) { const _hv = Math.floor(act.actor.max_hp * 0.3); act.actor.hp = Math.min(act.actor.max_hp, act.actor.hp + _hv); AudioManager.playSE('heal'); await typeMessage(`HPが ${_hv} かいふくした！`); }
+                        else { await typeMessage(`しかし なにも おこらなかった……`); }
+                    }
+                    updatePartyStatus();
+                } catch (_weUseErr) {
+                    console.error('武器使用エラー:', _weUseErr);
+                    await typeMessage(`しかし うまく いかなかった！`);
+                }
             } else if(act.type === 'item') {
                 await typeMessage(`${act.actor.name}は ${act.item.name}を つかった！`); let t = act.target;
                 if(act.item.id === 'i_star_frag' || act.item.id === 'acc_star_bracelet' || act.item.id === 'w_star_sword') { await typeMessage(`しかし なにも おこらなかった！`); }
@@ -16096,9 +16187,9 @@ async function init() {
     // アイテムDB
     if (window.ITEM_DATABASE) {
         const db = window.ITEM_DATABASE;
-        (db.weapons||[]).forEach(w => masterData.items[w.id] = {id:w.id,name:w.name,type:'weapon',price:w.price,power:w.attack,element:w.element,effect:w.effect,desc:w.description});
+        (db.weapons||[]).forEach(w => masterData.items[w.id] = {id:w.id,name:w.name,type:'weapon',price:w.price,power:w.attack,element:w.element,effect:w.effect,useEffect:w.useEffect,useElement:w.useElement,usePower:w.usePower,useMp:w.useMp,desc:w.description});
         (db.armors||[]).forEach(a => masterData.items[a.id] = {id:a.id,name:a.name,type:'armor',price:a.price,power:a.defense,effect:a.effect,desc:a.description});
-        (db.shields||[]).forEach(s => masterData.items[s.id] = {id:s.id,name:s.name,type:'shield',price:s.price,power:s.defense,effect:s.effect,desc:s.description});
+        (db.shields||[]).forEach(s => masterData.items[s.id] = {id:s.id,name:s.name,type:'shield',price:s.price,power:s.defense,effect:s.effect,useEffect:s.useEffect,useElement:s.useElement,usePower:s.usePower,useMp:s.useMp,desc:s.description});
         (db.helmets||[]).forEach(h => masterData.items[h.id] = {id:h.id,name:h.name,type:'helmet',price:h.price,power:h.defense,effect:h.effect,desc:h.description});
         (db.accessories||[]).forEach(x => masterData.items[x.id] = {id:x.id,name:x.name,type:'accessory',price:x.price,power:x.defense||0,effect:x.effect,desc:x.description});
         (db.items||[]).forEach(i => masterData.items[i.id] = {id:i.id,name:i.name,type:'tool',price:i.price,effect:i.effect,value:i.value,desc:i.description});
