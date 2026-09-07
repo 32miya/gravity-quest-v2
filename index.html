@@ -7,11 +7,15 @@
 <script>
 // file://等、画像読み込みでcanvasがtaint扱いされる環境でtoDataURL()が例外を投げて
 // 以降の初期化処理が全て止まる（起動直後に画面が真っ暗になる）のを防ぐセーフガード。
+// フォールバック値は「わざと壊れたPNG」にして img.onerror を発火させる。
+// （1x1透明画像などnaturalHeight>0になる値を返すと、白背景除去済み画像として
+//   externalImages[key] に登録されてしまい、本来の建物アイコン等が巨大な
+//   透明画像として引き伸ばされ描画され、黒い空白になってしまう不具合があった）
 (function () {
     var _origToDataURL = HTMLCanvasElement.prototype.toDataURL;
     HTMLCanvasElement.prototype.toDataURL = function () {
         try { return _origToDataURL.apply(this, arguments); }
-        catch (e) { return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='; }
+        catch (e) { return 'data:image/png;base64,AA=='; }
     };
 })();
 </script>
