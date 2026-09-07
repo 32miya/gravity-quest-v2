@@ -9324,9 +9324,8 @@ function drawMap() {
             } else if (tile === 17) { if(externalImages['tree']) fgImg = externalImages['tree'];
             } else if (tile === 18) { if(externalImages['flowerBed']) fgImg = externalImages['flowerBed'];
             } else if (tile === 19) { let k = externalImages['fieldForest'] ? 'fieldForest' : 'forest'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = '#040'; }
-            } else if (tile === 20) { // fieldMountainは壁用テクスチャの流用で山らしく見えないため、フィールドでは手続き描画(三角の山+雪)を優先する
-                if (_isFieldMap) { bgImg = null; color = ''; }
-                else { let k = externalImages['fieldMountain'] ? 'fieldMountain' : 'mountain'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = '#432'; } }
+            } else if (tile === 20) { // ユーザー提供の参考画像(山岳地帯の質感)に近づけるため、フィールドでもfieldMountain実画像を優先する
+                { let k = externalImages['fieldMountain'] ? 'fieldMountain' : 'mountain'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = ''; } }
             } else if (tile === 25) { bgImg = null; color = '#3c3a52'; }
             else if (tile === 21) { // フィールド: 草地 / 非フィールド: drawProceduralTile に任せる（bgImg を必ずクリア）
                 if (_isFieldMap) { const _ftk = externalImages['fieldGrass'] ? 'fieldGrass' : (externalImages['grass'] ? 'grass' : null); if (_ftk) bgImg = externalImages[_ftk]; else { bgImg = null; color = '#3a823f'; } }
