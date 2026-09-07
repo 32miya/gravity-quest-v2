@@ -6639,7 +6639,7 @@ async function fetchExternalMap(url) { const loading = document.getElementById('
                     }
                 }
             }
-            // ===== 試練の洞窟南の漁村「グラ港」(村広場14×14 + 波止場14×10 の2マップ構成) =====
+            // ===== 試練の洞窟南の漁村「ナギサ」(村広場14×14 + 波止場14×10 の2マップ構成) =====
             // 洞窟(map_field_0_4 / (10,22))の南側陸地に配置。船なしで陸路アクセス可能。
             // 小規模集落は1マップだと手狭に見えるため、村広場と波止場を分割し、
             // 南側の出口(6,7列目)で相互接続する(街の規模が大きいマップほど
@@ -6695,7 +6695,7 @@ async function fetchExternalMap(url) { const loading = document.getElementById('
                         '10,2':{id:'npc_item_shop_village',name:'道具屋（漁師の嫁）'},
                         '6,5':{id:'npc_sky_dragon_girl',name:'アリア'},
                     },
-                    name:'グラ港の漁村'
+                    name:'ナギサの漁村'
                 };
                 externalMapData[_hbId]={
                     width:_hbW,height:_hbH,tiles:_hbT,encounters:[],
@@ -6710,7 +6710,7 @@ async function fetchExternalMap(url) { const loading = document.getElementById('
                         '10,1':{id:'npc_fisher_wife',name:'漁師の妻'},
                         '6,4':{id:'npc_fisher_child',name:'漁師の子'},
                     },
-                    name:'グラ港の波止場'
+                    name:'ナギサの波止場'
                 };
                 if(_fvP&&externalMapData['map_field_0_4']){
                     const _fw=externalMapData['map_field_0_4'].width||45;
@@ -13107,7 +13107,7 @@ ${_sns[_ri(_sns.length)]}
                 else { await typeMessage("【行商人】\n南の 港に 行けば\n大きな 船が あるそうですよ。\nレベルが 十分なら 旅立つ 準備を！"); }
                 state = 'FIELD'; hideAllWindows(); drawMap(); return;
             }
-            // ===== グラ港の漁村の住民 =====
+            // ===== ナギサの漁村の住民 =====
             if (npc.id === "npc_fisher_old") {
                 const _is2F = partyData.flags.flag_2nd_maou_cleared && !partyData.flags.last_boss_defeated;
                 if (partyData.flags.last_boss_defeated) {
@@ -13125,7 +13125,7 @@ ${_sns[_ri(_sns.length)]}
                         await typeMessage("【老漁師】\n全て 思い出したか……！\n偽の 王を 倒す 時が 来た。\nわしは ここで 祈っておる。\n必ず 戻って こいよ……！");
                     }
                 } else {
-                    await typeMessage("【老漁師】\nここは グラ港の 漁村じゃ。\nわしは 何十年も ここで 漁をしてきた。\n龍の 加護で この海は 豊かだよ。");
+                    await typeMessage("【老漁師】\nここは ナギサの 漁村じゃ。\nわしは 何十年も ここで 漁をしてきた。\n龍の 加護で この海は 豊かだよ。");
                     await typeMessage("【老漁師】\nアリアって 娘を 知っておるか？\nこの村で 育った 不思議な 子でな……\n天空の 龍に 選ばれた お使いなんじゃよ。");
                     if (!partyData.flags.flag_tower_cleared) { await typeMessage("【老漁師】\nあの 南東の 暗い 島……\n子供の 頃から ずっと 不吉な 霧が 出ておる。\n昔の 船乗りが 言っておった——\n天空の 塔の 光を 宿した 者でないと\nあの 霧は 晴れない、 と な。"); }
                 }
@@ -15329,9 +15329,11 @@ ${act.actor.name}の ちからが すいとられた！`); }
         const screen = document.getElementById('screen'); screen.style.transition = 'opacity 1.5s'; screen.style.opacity = '0'; await new Promise(r => setTimeout(r, 2000));
         partyData.gold = Math.floor(partyData.gold / 2);
         if(partyData.members[0]) { partyData.members[0].hp = partyData.members[0].max_hp; partyData.members[0].mp = partyData.members[0].max_mp; } for(let i = 1; i < partyData.members.length; i++) { partyData.members[i].hp = 0; partyData.members[i].isPoisoned = false; }
-        // 復帰位置: last_save_pos（最後に神父でセーブした場所）を優先
-        let respawnPos = null;
-        try { let _s = localStorage.getItem('gravity_quest_save'); if (_s) { let _p = JSON.parse(_s); if (_p && _p.last_save_pos && _p.last_save_pos.map) respawnPos = _p.last_save_pos; } } catch(e) {}
+        // 復帰位置: last_save_pos（今回のプレイ内で最後に神父でセーブした場所）を優先。
+        // 「はじめから」で始めた今回のセッションでは partyData.last_save_pos は未設定のはずなので、
+        // ここで別途localStorageを読み直すと、この端末に残っていた「無関係な過去のセーブ」の
+        // 位置に飛んでしまう不具合があった。partyData（今回のセッションの状態）のみを参照する。
+        let respawnPos = (partyData.last_save_pos && partyData.last_save_pos.map) ? partyData.last_save_pos : null;
         if (!respawnPos) {
             // セーブなし: 城の神父の前からスタート
             let _ck = externalMapData ? (Object.keys(externalMapData).find(k => k.includes('castle_01') && !k.includes('demon')) || Object.keys(externalMapData).find(k => k.includes('castle') && !k.includes('demon'))) : null;
@@ -15535,6 +15537,7 @@ async function showTitleScreen() {
             await typeMessage(`（──争いは、いつも「向こう」から 来ると 教えられて 育った。\nけれど、老いた 門番の 囁きだけが\nずっと 胸の 奥に 引っかかっていた。\nなら、恐れるべきは 向こう側じゃない。\n恐れるべきは、確かめもせずに 心を 閉ざす、\nこちら側の 弱さだ──）`);
             await typeMessage(`（怖くないと 言えば 嘘になる。\nそれでも──たとえ 幾度 拒まれても、笑われても、傷ついても。\nわたしは、人は 再び 手を 取り合えると、\n信じ続けると 決めた。\nそれが、この 旅で わたしが 持って行ける、\nたったひとつの 武器だから。）`);
             await typeMessage(`エニシアの 城下町に 戻った ${_hero}。\nボルド王が「境界の 使者」を 選ぶという 知らせが 届いた……`);
+            await typeMessage(`まずは この 城下町の 城へ 向かい、\nボルド王に 会おう。\n（メニューの「ちず」で いつでも 現在地を 確認できる）`);
             await typeMessage(`────── だが この旅の 果てに\n${_hero}を 待つのは\n世界を もう一度 繋ぎ直す、長い 長い 道のりだった ──────`);
             _screen.style.transition = ''; _screen.style.opacity = '1';
             hideAllWindows(); state = 'FIELD'; drawMap(); updateBGM(); updatePartyStatus(); updateGoldWindow(); startFieldLoop();
