@@ -7256,8 +7256,9 @@ async function handleFieldInput(key) {
     if(key === 'ArrowDown') { dy = 1; dir = 2; } 
     if(key === 'ArrowLeft') { dx = -1; dir = 3; } 
     if(dx !== 0 || dy !== 0) { partyData.dir = dir; isMoving = true; try { await moveParty(dx, dy); } finally { isMoving = false; } } 
-    if(key === 'Enter') { isMoving = true; try { await checkAction(); } finally { isMoving = false; } } 
-    if(key === 'Escape') openMainMenu(); 
+    if(key === 'Enter') { isMoving = true; try { await checkAction(); } finally { isMoving = false; } }
+    // Bボタン(Escape)はキャンセル専用。フィールド上には取り消す対象がないため何もしない
+    // (メニューを開くのはAボタン(Enter)。checkAction()が目の前に会話相手がいなければメニューを開く)
 }
 function showWindow(id) { document.getElementById(id).style.display = 'flex'; } function hideWindow(id) { document.getElementById(id).style.display = 'none'; } function hideAllWindows() { hideWindow('msg-window'); hideWindow('cmd-window'); hideWindow('party-status'); hideWindow('status-window'); hideWindow('gold-window'); hideWindow('map-name-window'); document.getElementById('party-status').classList.remove('battle-size'); document.getElementById('msg-window').classList.remove('battle-msg'); document.getElementById('cmd-window').classList.remove('battle-cmd'); document.getElementById('map-name-window').style.top = ''; }
 async function typeMessage(text) {
