@@ -9037,7 +9037,7 @@ function drawMap() {
             } else if (tile === 1 || tile === 4 || tile === 15) {
                 if (_tileIsCastle) color = '#445'; else if (_tileIsTown) color = '#764'; else if (isCave) color = '#222'; else if (isMountain) color = '#333';
             }
-            let floorKeys = _tileIsCastle ? ['castleFloorGQ', 'castleFloor', 'floor'] : (_tileIsTown ? ['townFloorGQ', 'townFloor', 'floor', 'townPath'] : (isCave ? (_caveElement ? [] : ['caveFloorGQ', 'caveFloor', 'ground', 'floor']) : (_isTower || _isDemon || _isShrine ? [] : ['fieldGrass', 'grass']))); if(isMountain) floorKeys = ['northMountainFloor', 'mountainFloor', 'plainRock', 'rock']; if(_isDesertMap) floorKeys = ['desertFloorGQ'].concat(floorKeys);
+            let floorKeys = _tileIsCastle ? ['castleFloorGQ', 'castleFloor', 'floor'] : (_tileIsTown ? ['townFloorGQ', 'townFloor', 'floor', 'townPath'] : (isCave ? (_caveElement ? [] : ['caveFloorGQ', 'caveFloor', 'ground', 'floor']) : (_isTower || _isDemon || _isShrine ? [] : ['fieldGrass', 'grass']))); if(isMountain) floorKeys = ['mountainFloor', 'plainRock', 'rock']; /* northMountainFloorは壊れた画像(単色オレンジ)のため意図的に除外 */ if(_isDesertMap) floorKeys = ['desertFloorGQ'].concat(floorKeys);
             for(let k of floorKeys) { if(externalImages[k] && externalImages[k].complete && externalImages[k].naturalHeight > 0) { bgImg = externalImages[k]; break; } }
             if (tile === 1 || tile === 4) {
                let wallKeys = _tileIsCastle ? ['castleWall', 'wall'] : (_tileIsTown ? (_isSmallTown ? ['smallTownWallGQ', 'townWall', 'wall', 'brickWall'] : (_isCapitalTown ? ['capitalTownWallGQ', 'townWall', 'wall', 'brickWall'] : ['townWall', 'wall', 'brickWall'])) : (isCave ? (_caveElement ? [] : ['caveWall', 'rockWall', 'wall']) : ['plainRock', 'rock', 'mountainWall'])); if(isMountain) wallKeys = ['northMountainWall', 'mountainWall', 'plainRock', 'rock'];
@@ -9047,14 +9047,20 @@ function drawMap() {
             } else if (tile === 5) { bgImg = null; color = '#33ccff'; 
             } else if (tile === 9) { bgImg = null; color = _tileIsCastle ? '#8c0c0c' : '#c00'; let k = externalImages['carpet'] ? 'carpet' : 'redCarpet'; if(externalImages[k]) fgImg = externalImages[k];
             } else if (tile === 10) { let k = (_isDesertMap && externalImages['desertFloorGQ']) ? 'desertFloorGQ' : (externalImages['townFloorGQ'] ? 'townFloorGQ' : (externalImages['townPath'] ? 'townPath' : 'path')); if(externalImages[k]) fgImg = externalImages[k]; else { bgImg = null; color = '#d2b48c'; } 
-            } else if (tile === 11) { let k = externalImages['fieldGrass'] ? 'fieldGrass' : 'grass'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = '#3a823f'; } 
-            } else if (tile === 12) { let k = externalImages['fieldTallGrass'] ? 'fieldTallGrass' : 'tallGrass'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = '#1a1'; } 
+            } else if (tile === 11) { // フィールドでは手描きのDQ4風草原の方が単調な画像より見栄えが良いため、フィールドは常に手続き描画に委ねる
+                if (_isFieldMap) { bgImg = null; color = ''; }
+                else { let k = externalImages['fieldGrass'] ? 'fieldGrass' : 'grass'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = '#3a823f'; } }
+            } else if (tile === 12) {
+                if (_isFieldMap) { bgImg = null; color = ''; }
+                else { let k = externalImages['fieldTallGrass'] ? 'fieldTallGrass' : 'tallGrass'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = '#1a1'; } }
             } else if (tile === 15) { if(externalImages['castleWall']) bgImg = externalImages['castleWall'];
-            } else if (tile === 16) { if(externalImages['pillar']) fgImg = externalImages['pillar']; 
-            } else if (tile === 17) { if(externalImages['tree']) fgImg = externalImages['tree']; 
-            } else if (tile === 18) { if(externalImages['flowerBed']) fgImg = externalImages['flowerBed']; 
-            } else if (tile === 19) { let k = externalImages['fieldForest'] ? 'fieldForest' : 'forest'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = '#040'; } 
-            } else if (tile === 20) { let k = externalImages['fieldMountain'] ? 'fieldMountain' : 'mountain'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = '#432'; }
+            } else if (tile === 16) { if(externalImages['pillar']) fgImg = externalImages['pillar'];
+            } else if (tile === 17) { if(externalImages['tree']) fgImg = externalImages['tree'];
+            } else if (tile === 18) { if(externalImages['flowerBed']) fgImg = externalImages['flowerBed'];
+            } else if (tile === 19) { let k = externalImages['fieldForest'] ? 'fieldForest' : 'forest'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = '#040'; }
+            } else if (tile === 20) { // fieldMountainは壁用テクスチャの流用で山らしく見えないため、フィールドでは手続き描画(三角の山+雪)を優先する
+                if (_isFieldMap) { bgImg = null; color = ''; }
+                else { let k = externalImages['fieldMountain'] ? 'fieldMountain' : 'mountain'; if(externalImages[k]) bgImg = externalImages[k]; else { bgImg = null; color = '#432'; } }
             } else if (tile === 25) { bgImg = null; color = '#3c3a52'; }
             else if (tile === 21) { // フィールド: 草地 / 非フィールド: drawProceduralTile に任せる（bgImg を必ずクリア）
                 if (_isFieldMap) { const _ftk = externalImages['fieldGrass'] ? 'fieldGrass' : (externalImages['grass'] ? 'grass' : null); if (_ftk) bgImg = externalImages[_ftk]; else { bgImg = null; color = '#3a823f'; } }
