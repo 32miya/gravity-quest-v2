@@ -1449,15 +1449,21 @@ function checkSQ10Unlock() {
 }
 
 const battleBgImages = [
-    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/81d36868-2c8b-4bee-aaae-28d51fab8810.jpeg", 
-    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/5d96c8b0-7b34-40a5-aef8-e4ee76069d52.jpeg", 
-    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/5c2cab8a-3220-4176-ab5d-e82bbd10a455.jpeg", 
-    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/2afa8b0a-bae3-41ce-9603-c4aeffb287b0.jpeg", 
-    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/c4878090-88c8-4dcc-bb32-068ac77df005.jpeg", 
-    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/7d62c7d2-a042-44ee-bfe9-1759a6abbbd5.jpeg", 
-    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/c7ffe62e-dfb7-4de1-9068-2c22160b7384.jpeg"  
+    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/81d36868-2c8b-4bee-aaae-28d51fab8810.jpeg",
+    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/5d96c8b0-7b34-40a5-aef8-e4ee76069d52.jpeg",
+    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/5c2cab8a-3220-4176-ab5d-e82bbd10a455.jpeg",
+    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/2afa8b0a-bae3-41ce-9603-c4aeffb287b0.jpeg",
+    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/c4878090-88c8-4dcc-bb32-068ac77df005.jpeg",
+    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/7d62c7d2-a042-44ee-bfe9-1759a6abbbd5.jpeg",
+    "https://cdn.gravity.place/aiugc/game/material/2026-04-17/c7ffe62e-dfb7-4de1-9068-2c22160b7384.jpeg",
+    "./battle_bg_snow.jpg",
+    "./battle_bg_forest_day.jpg",
+    "./battle_bg_forest_night.jpg"
 ];
 battleBgImages.forEach(src => { let img = new Image(); img.src = src; });
+window._SNOW_BATTLE_BG_URL = "./battle_bg_snow.jpg";
+window._FOREST_DAY_BATTLE_BG_URL = "./battle_bg_forest_day.jpg";
+window._FOREST_NIGHT_BATTLE_BG_URL = "./battle_bg_forest_night.jpg";
 
 document.addEventListener('contextmenu', event => { if (event.target.tagName !== 'INPUT' && event.target.tagName !== 'TEXTAREA') event.preventDefault(); });
 // レイアウト: #game-wrapper は position:fixed; top:0; bottom:0 でブラウザ表示領域に固定済み
@@ -14454,13 +14460,19 @@ async function executeBattle(fixedEnemies = null) {
     // 偽王討伐編: グラ城・城下エニシアは魔王城と同じバトル背景
     if (partyData.flags && partyData.flags.flag_2nd_maou_cleared && !partyData.flags.last_boss_defeated
         && (mapId.includes('town_01') || (mapId.includes('castle_01') && !mapId.includes('demon')))) { bgUrl = _demonBg; }
+    // 雪原の村フロスト周辺(地域差で雪原化したフィールド)は専用の雪原バトル背景を使う
+    const _SNOW_BATTLE_MAP_IDS = ['field_0_5','field_0_6','field_0_7','field_0_8','field_1_5','field_1_6','field_1_7','field_1_8','field_2_5','field_2_6','field_2_7','field_2_8'];
+    const _isSnowBattleMap = _SNOW_BATTLE_MAP_IDS.some(s => mapId.includes(s));
     if (mapId.includes('demon') || mapId.includes('death') || mapId.includes('maou')) { bgUrl = _demonBg; } else if (mapId.includes('dungeon') || mapId.includes('cave')) { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/5c2cab8a-3220-4176-ab5d-e82bbd10a455.jpeg"; } else if (mapId.includes('tower') || mapId.includes('shrine')) { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/5d96c8b0-7b34-40a5-aef8-e4ee76069d52.jpeg"; } else if (/^map_field_/.test(mapId) && currentMap && currentMap.tiles) {
         const _bt = currentMap.tiles[partyData.pos.y * currentMap.width + partyData.pos.x];
-        if (_bt === 5) { bgUrl = window._SEA_BG_URL || bgUrl; } // 海上
+        const _isNightBattle = _getTimeOfDayInfo().phase === 'night' || _getTimeOfDayInfo().phase === 'dusk';
+        if (_isSnowBattleMap && (_bt === 11 || _bt === 12 || _bt === 0)) { bgUrl = window._SNOW_BATTLE_BG_URL || bgUrl; } // 雪原地域
+        else if (_bt === 5) { bgUrl = window._SEA_BG_URL || bgUrl; } // 海上
         else if (_bt === 0) { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/c7ffe62e-dfb7-4de1-9068-2c22160b7384.jpeg"; }
+        else if (_bt === 12) { bgUrl = _isNightBattle ? (window._FOREST_NIGHT_BATTLE_BG_URL || bgUrl) : (window._FOREST_DAY_BATTLE_BG_URL || bgUrl); } // 森(丈の高い草むら)
         else if (_bt === 19) { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/81d36868-2c8b-4bee-aaae-28d51fab8810.jpeg"; }
         else if (_bt === 20) { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/7d62c7d2-a042-44ee-bfe9-1759a6abbbd5.jpeg"; }
-    } else if (mapId.includes('desert') || mapId.includes('sabaku') || mapId.startsWith('map_field_4_')) { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/c7ffe62e-dfb7-4de1-9068-2c22160b7384.jpeg"; } else if (mapId.includes('mountain') || mapId === 'map_field_north_2') { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/7d62c7d2-a042-44ee-bfe9-1759a6abbbd5.jpeg"; }
+    } else if (_isSnowBattleMap) { bgUrl = window._SNOW_BATTLE_BG_URL || bgUrl; } else if (mapId.includes('desert') || mapId.includes('sabaku') || mapId.startsWith('map_field_4_')) { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/c7ffe62e-dfb7-4de1-9068-2c22160b7384.jpeg"; } else if (mapId.includes('mountain') || mapId === 'map_field_north_2') { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/7d62c7d2-a042-44ee-bfe9-1759a6abbbd5.jpeg"; }
     if (fixedEnemies) { if (fixedEnemies.some(id => id.includes('demon') || id.includes('maou') || id === 'npc_boss_maou' || id.includes('_final') || (masterData.monsters[id] && masterData.monsters[id].name.includes('グラ王')))) { bgUrl = "https://cdn.gravity.place/aiugc/game/material/2026-04-17/c4878090-88c8-4dcc-bb32-068ac77df005.jpeg"; } }
     { const _tod = _getTimeOfDayInfo(); const _todLayer = _tod.alpha > 0.001 ? `linear-gradient(rgba(${_tod.r},${_tod.g},${_tod.b},${_tod.alpha}), rgba(${_tod.r},${_tod.g},${_tod.b},${_tod.alpha})), ` : '';
       bScreen.style.backgroundImage = `${_todLayer}url('${bgUrl}')`; }
