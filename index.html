@@ -6544,6 +6544,8 @@ async function fetchExternalMap(url) { const loading = document.getElementById('
                         if (!npc || npc.id !== 'npc_merchant') continue;
                         const [mx, my] = key.split(',').map(Number);
                         merchantPositions.push([mx, my]);
+                        // 「〜の主人」は屋内の正規店舗(独自の建物・カウンター持ち)なので露店の天幕は付けない
+                        if ((npc.name || '').endsWith('の主人')) continue;
                         // 商人の1マス上(空いていれば)に屋台の天幕を配置
                         const ay = my - 1;
                         if (ay < 0) continue;
