@@ -4925,6 +4925,44 @@ function fixAllExitLandings() {
         }
     }
 }
+// NPC(会話キャラクター)が壁・柱等の通行不可タイルの上に配置されてしまっていると、
+// 見た目が壁に埋め込まれたようになり、話しかけられず、徘徊(wander)対象なら
+// 一歩も動けなくなる。装飾オブジェクト(deco_/obj_/boss_系)は壁掛け等で意図的に
+// 壁タイル上に置かれることがあるため対象外とし、それ以外のキャラクター系NPCのみ、
+// 最寄りの歩行可能・空きタイルへ再配置する。
+// エニシア城(map_castle_01)等、loadExternalData()でマップ入場のたびに焼き込み関数から
+// 再生成されるマップにも同じバグが再発しうるため、単一マップ用に切り出して再利用する。
+function _fixStuckNpcsInMap(m) {
+    if (!m || !m.npcs || !m.tiles || !m.width || !m.height) return;
+    const SOLID = [1, 2, 4, 5, 15, 16, 17, 18, 19, 20, 25];
+    for (const key of Object.keys(m.npcs)) {
+        const npc = m.npcs[key];
+        const id = (npc && npc.id) || '';
+        if (!id || id.startsWith('deco_') || id.startsWith('obj_') || id.startsWith('boss_')) continue;
+        const [x, y] = key.split(',').map(Number);
+        if (x < 0 || y < 0 || x >= m.width || y >= m.height) continue;
+        if (!SOLID.includes(m.tiles[y * m.width + x])) continue;
+        const vis = new Set([key]);
+        const q = [[x, y]];
+        let found = null;
+        while (q.length && !found) {
+            const [cx, cy] = q.shift();
+            for (const [dx, dy] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+                const nx = cx + dx, ny = cy + dy, k = `${nx},${ny}`;
+                if (vis.has(k)) continue;
+                vis.add(k);
+                if (nx < 1 || ny < 1 || nx >= m.width - 1 || ny >= m.height - 1) continue;
+                if (!SOLID.includes(m.tiles[ny * m.width + nx]) && !m.npcs[k] && !(m.exits && m.exits[k])) { found = [nx, ny]; break; }
+                if (vis.size < 300) q.push([nx, ny]);
+            }
+        }
+        if (found) { delete m.npcs[key]; m.npcs[`${found[0]},${found[1]}`] = npc; }
+    }
+}
+function fixStuckNpcs() {
+    if (!externalMapData) return;
+    for (const m of Object.values(externalMapData)) _fixStuckNpcsInMap(m);
+}
 function generateDQStyleMaps() {
     function mkMap(w, h, rooms, corridors, downstairs, upstairs, exits, npcs, enc, name) {
         let tiles = new Array(w * h).fill(1);
@@ -6995,6 +7033,7 @@ async function fetchExternalMap(url) { const loading = document.getElementById('
         fixExternalMapConnections();
         fixMapExits();
         fixAllExitLandings();
+        fixStuckNpcs();
         // === ダンジョン・塔の出口タイルを 21/22 に自動設定 ===
         // 外部JSONのwarp_pointはexitsに変換されるがtile番号は0(床)のまま。
         // exit位置のtileが通行可能タイルなら目的地の深さで21(下)か22(上/出口)を設定する。
@@ -7124,6 +7163,7 @@ async function loadExternalData(id) {
         if ((_isMainCastle || _isMainCastleByName)) {
             const _castleOv = window._GQ_PENDING_OVERRIDES && (window._GQ_PENDING_OVERRIDES['castle_01'] || window._GQ_PENDING_OVERRIDES['map_castle_01']);
             const _nc2 = (_castleOv && _castleOv.tiles && _castleOv.tiles.length > 0) ? _castleOv : buildGramanCastle01();
+            _fixStuckNpcsInMap(_nc2);
             externalMapData[rawId] = _nc2;
             externalMapData['map_castle_01'] = _nc2;
             externalMapData['castle_01'] = _nc2;
@@ -16242,6 +16282,11 @@ async function showTitleScreen() {
                 }
             }
         }
+        // NPCの壁埋め込み修正も、editorオーバーライド適用・城の強制上書きなど
+        // このブロックより上ですべてのマップ差し替えが完了した後の最終段階で行う
+        // (generateDQStyleMaps()直後に一度実行しても、editorオーバーライド適用で
+        // 古い(壁に埋まった)配置のマップデータに再度上書きされてしまうため)。
+        fixStuckNpcs();
         // 街道の道標: 町・村の入口付近への設置は、入口周辺の通行帯を塞いで
         // 移動不能を起こす個体があったため撤去(2026-09-06)。再導入する場合は
         // 入口から十分離れた安全なタイルであることをBFSで検証してから行うこと。
