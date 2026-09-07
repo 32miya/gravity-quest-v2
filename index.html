@@ -14900,7 +14900,7 @@ async function executeBattle(fixedEnemies = null) {
                             } else {
                                 AudioManager.playSE('attack_hit');
                             }
-                            _t.hp = Math.max(0, _t.hp - dmg);
+                            _t.hp = Math.max(0, _t.hp - Math.floor(dmg * getIncomingDamageMult(_t, null, false)));
                             if (!dmgResult.isMetalBody) {
                                 let _dmgMsg = `${_t.displayName}に ${dmg}の ダメージ！`;
                                 if (dmgResult.elemResult === 'weak') _dmgMsg += `\nこうかは ばつぐんだ！`;
@@ -14997,6 +14997,15 @@ ${act.actor.name}の ちからが すいとられた！`); }
                     const _eId = act.actor.id || '';
                     const _alive = partyData.members.filter(m=>m.hp>0);
                     const _t = act.target;
+                    // 防具の回避率(evasion_up/evasion_half)は特殊行動全体にも適用する
+                    // (個々の特殊行動は約30種の専用処理で構成され1つ1つに個別配線するのは非現実的なため、
+                    //  代表ターゲット(_t)の回避判定でボス特殊行動そのものを無効化する形で反映)
+                    if (_t && Math.random() < getEvasionChance(_t)) {
+                        AudioManager.playSE('cancel');
+                        await typeMessage(`${act.actor.displayName}の こうげき！\nしかし ${_t.name}は ひらりと かわした！`);
+                        updatePartyStatus();
+                        continue;
+                    }
                     let _handled = true; // continueするかのフラグ
                     try {
 
@@ -15034,7 +15043,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         // ── ほねほね攻撃（全体）
                         await typeMessage(`${act.actor.displayName}の ほねほねこうげき！`);
                         playEnemyAttackEffect(1.3); AudioManager.playSE('damage_hero');
-                        for(const _m of _alive){const _bd=Math.max(1,Math.floor(act.actor.atk*0.55-_m.def*0.3));_m.hp=Math.max(0,_m.hp-_bd);await typeMessage(`${_m.name}に ${_bd}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                        for(const _m of _alive){const _bd=Math.max(1,Math.floor(act.actor.atk*0.55-_m.def*0.3));_m.hp=Math.max(0,_m.hp-Math.floor(_bd*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_bd}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         updatePartyStatus();
 
                     } else if (_eId==='dark_mage' && _alive.length>0) {
@@ -15045,7 +15054,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         const _sd=Math.floor(act.actor.atk*_sp.mult+18);
                         await playSpellEffect({id:_sp.id,type:'attack',element:_sp.elem,value:_sd,mp:4},_t);
                         const _sdd=Math.max(1,Math.floor(_sd*(0.85+Math.random()*0.3)));
-                        _t.hp=Math.max(0,_t.hp-_sdd);
+                        _t.hp=Math.max(0,_t.hp-Math.floor(_sdd*getIncomingDamageMult(_t,null,false)));
                         await typeMessage(`${_t.name}に ${_sdd}の ダメージ！`);
                         if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         updatePartyStatus();
@@ -15057,7 +15066,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         await typeMessage(`${act.actor.displayName}の ${_bn}！！`);
                         AudioManager.playSE('magic_cast');
                         await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*_bm,mp:10},null);
-                        for(const _m of _alive){const _fd=Math.max(1,Math.floor((act.actor.atk*_bm*(0.8+Math.random()*0.4)-_m.def*0.12)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_fd);await typeMessage(`${_m.name}に ${_fd}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                        for(const _m of _alive){const _fd=Math.max(1,Math.floor((act.actor.atk*_bm*(0.8+Math.random()*0.4)-_m.def*0.12)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-Math.floor(_fd*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_fd}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         updatePartyStatus();
 
                     } else if (_eId==='troll') {
@@ -15086,7 +15095,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         await typeMessage(`${act.actor.displayName}の ほのおの うず！`);
                         AudioManager.playSE('magic_cast');
                         await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*0.9,mp:8},null);
-                        for(const _m of _alive){const _fed=Math.max(1,Math.floor((act.actor.atk*0.9*(0.8+Math.random()*0.4)-_m.def*0.15)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_fed);await typeMessage(`${_m.name}に ${_fed}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                        for(const _m of _alive){const _fed=Math.max(1,Math.floor((act.actor.atk*0.9*(0.8+Math.random()*0.4)-_m.def*0.15)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-Math.floor(_fed*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_fed}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         updatePartyStatus();
 
                     } else if (_eId==='behemoth' && _alive.length>0) {
@@ -15094,7 +15103,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         await typeMessage(`${act.actor.displayName}の だいじしん！！`);
                         playCriticalEffect('#884400'); playEnemyAttackEffect(2.2); AudioManager.playSE('damage_hero');
                         await playSpellEffect({id:'io',type:'attack',element:'explosion',value:act.actor.atk*1.1,mp:15},null);
-                        for(const _m of _alive){const _qd=Math.max(1,Math.floor(act.actor.atk*1.1*(0.75+Math.random()*0.5)-_m.def*0.15));_m.hp=Math.max(0,_m.hp-_qd);await typeMessage(`${_m.name}に ${_qd}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                        for(const _m of _alive){const _qd=Math.max(1,Math.floor(act.actor.atk*1.1*(0.75+Math.random()*0.5)-_m.def*0.15));_m.hp=Math.max(0,_m.hp-Math.floor(_qd*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_qd}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         updatePartyStatus();
 
                     } else if (_eId==='lich' && _alive.length>0) {
@@ -15111,7 +15120,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'doru',type:'attack',element:'dark',value:_ld,mp:12},_t);
                             const _ldd=Math.max(1,Math.floor(_ld*(0.85+Math.random()*0.3)));
-                            _t.hp=Math.max(0,_t.hp-_ldd);
+                            _t.hp=Math.max(0,_t.hp-Math.floor(_ldd*getIncomingDamageMult(_t,null,false)));
                             await typeMessage(`${_t.name}に ${_ldd}の ダメージ！`);
                             if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         }
@@ -15127,7 +15136,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の あんこくの ブレス！`);
                             AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'doru',type:'attack',element:'dark',value:act.actor.atk*1.1,mp:15},null);
-                            for(const _m of _alive){const _ad=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.15));_m.hp=Math.max(0,_m.hp-_ad);await typeMessage(`${_m.name}に ${_ad}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _ad=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.15));_m.hp=Math.max(0,_m.hp-Math.floor(_ad*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_ad}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                             updatePartyStatus();
                         }
 
@@ -15136,7 +15145,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         await typeMessage(`${act.actor.displayName}の メガフレア！！！`);
                         playCriticalEffect('#ff8800'); AudioManager.playSE('magic_cast');
                         await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*1.6,mp:30},null);
-                        for(const _m of _alive){const _mfd=Math.max(1,Math.floor((act.actor.atk*1.6*(0.85+Math.random()*0.3)-_m.def*0.15)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_mfd);await typeMessage(`${_m.name}に ${_mfd}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                        for(const _m of _alive){const _mfd=Math.max(1,Math.floor((act.actor.atk*1.6*(0.85+Math.random()*0.3)-_m.def*0.15)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-Math.floor(_mfd*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_mfd}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         updatePartyStatus();
 
                     } else if (_eId==='death_knight' && _alive.length>0) {
@@ -15144,7 +15153,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         await typeMessage(`${act.actor.displayName}の あんこくの けん！`);
                         playEnemyAttackEffect(1.5); AudioManager.playSE('damage_hero');
                         const _dkd=Math.max(1,Math.floor(act.actor.atk*1.2*(0.85+Math.random()*0.3)-_t.def*0.5));
-                        _t.hp=Math.max(0,_t.hp-_dkd);
+                        _t.hp=Math.max(0,_t.hp-Math.floor(_dkd*getIncomingDamageMult(_t,null,false)));
                         if(Math.random()<0.45&&!_t.isPoisoned){_t.isPoisoned=true;await typeMessage(`${_t.name}に ${_dkd}の ダメージ！\n${_t.name}は どくに おかされた！`);}
                         else{await typeMessage(`${_t.name}に ${_dkd}の ダメージ！`);}
                         if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
@@ -15155,7 +15164,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         await typeMessage(`${act.actor.displayName}の くびきり！！`);
                         playCriticalEffect('#880000'); playEnemyAttackEffect(1.8); AudioManager.playSE('attack_crit');
                         if(Math.random()<(hasDeathResist(_t)?0.05:0.18)){_t.hp=0;_t.isPoisoned=false;await typeMessage(`${_t.name}は いちげきで たおされた！！`);}
-                        else{const _duld=Math.max(1,Math.floor(act.actor.atk*1.4*(0.85+Math.random()*0.3)-_t.def*0.45));_t.hp=Math.max(0,_t.hp-_duld);await typeMessage(`${_t.name}に ${_duld}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
+                        else{const _duld=Math.max(1,Math.floor(act.actor.atk*1.4*(0.85+Math.random()*0.3)-_t.def*0.45));_t.hp=Math.max(0,_t.hp-Math.floor(_duld*getIncomingDamageMult(_t,null,false)));await typeMessage(`${_t.name}に ${_duld}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
                         updatePartyStatus();
 
                     } else if (_eId==='cyclops' && _alive.length>0) {
@@ -15163,12 +15172,12 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         if(Math.random()<0.5){
                             await typeMessage(`${act.actor.displayName}の 岩投げ！！`);
                             playEnemyAttackEffect(1.5); AudioManager.playSE('damage_hero');
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.3));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.3));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}の 巨大な一撃！！`);
                             playCriticalEffect('#886600'); playEnemyAttackEffect(2.0); AudioManager.playSE('attack_crit');
                             const _cyd=Math.max(1,Math.floor(act.actor.atk*1.6*(0.85+Math.random()*0.3)-_t.def*0.4));
-                            _t.hp=Math.max(0,_t.hp-_cyd);await typeMessage(`${_t.name}に ${_cyd}の ダメージ！`);
+                            _t.hp=Math.max(0,_t.hp-Math.floor(_cyd*getIncomingDamageMult(_t,null,false)));await typeMessage(`${_t.name}に ${_cyd}の ダメージ！`);
                             if(Math.random()<0.30&&(_t.tmpSleep||0)<=0){_t.tmpSleep=1;await typeMessage(`${_t.name}は ふっとばされて 行動できない！`);}
                             if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         }
@@ -15180,7 +15189,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の どくの つめ！`);
                             playEnemyAttackEffect(1.1); AudioManager.playSE('damage_hero');
                             const _chd=Math.max(1,Math.floor(act.actor.atk*0.9-_t.def*0.5));
-                            _t.hp=Math.max(0,_t.hp-_chd);
+                            _t.hp=Math.max(0,_t.hp-Math.floor(_chd*getIncomingDamageMult(_t,null,false)));
                             if(Math.random()<0.5&&!_t.isPoisoned){_t.isPoisoned=true;await typeMessage(`${_t.name}に ${_chd}の ダメージ！\n${_t.name}は どくに なった！`);}
                             else{await typeMessage(`${_t.name}に ${_chd}の ダメージ！`);}
                             if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
@@ -15189,7 +15198,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*0.75,mp:6},_t);
                             const _chfd=Math.max(1,Math.floor((act.actor.atk*0.75*(0.85+Math.random()*0.3)-_t.def*0.2)*getIncomingDamageMult(_t,'fire',false)));
-                            _t.hp=Math.max(0,_t.hp-_chfd);
+                            _t.hp=Math.max(0,_t.hp-Math.floor(_chfd*getIncomingDamageMult(_t,null,false)));
                             await typeMessage(`${_t.name}に ${_chfd}の ダメージ！`);
                             if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         }
@@ -15201,7 +15210,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         if(_r<0.35){
                             await typeMessage(`${act.actor.displayName}の 波濤の衝撃！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'hyadon',type:'attack',element:'water',value:act.actor.atk*1.1,mp:10},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(_r<0.65&&enemies.length<4){
                             await typeMessage(`${act.actor.displayName}「野郎ども、加勢しろ！！」`);
                             _summonMinion('海賊の部下', Math.floor(act.actor.max_hp*0.22), Math.floor(act.actor.atk*0.45), Math.floor(act.actor.def*0.4), 50);
@@ -15210,7 +15219,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 嵐の連撃！！`);
                             playEnemyAttackEffect(1.6); AudioManager.playSE('damage_hero');
                             const _d=Math.max(1,Math.floor(act.actor.atk*1.5*(0.85+Math.random()*0.3)-_t.def*0.3));
-                            _t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
+                            _t.hp=Math.max(0,_t.hp-Math.floor(_d*getIncomingDamageMult(_t,null,false)));await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         }
                         updatePartyStatus();
 
@@ -15219,7 +15228,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         if(_r<0.40){
                             await typeMessage(`${act.actor.displayName}の 暗黒魔法！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'doru',type:'attack',element:'dark',value:act.actor.atk*1.2,mp:12},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.2*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.2*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(_r<0.65&&enemies.length<4){
                             await typeMessage(`${act.actor.displayName}「闇の兵よ、来たれ！」`);
                             _summonMinion('暗黒兵士', Math.floor(act.actor.max_hp*0.25), Math.floor(act.actor.atk*0.5), Math.floor(act.actor.def*0.45), 45);
@@ -15238,11 +15247,11 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 死の呪文！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'doru',type:'attack',element:'dark',value:999,mp:20},_t);
                             if(Math.random()<(hasDeathResist(_t)?0.09:0.28)){_t.hp=0;_t.isPoisoned=false;await typeMessage(`${_t.name}は いのちを うばわれた！！`);}
-                            else{const _d=Math.max(1,Math.floor(act.actor.atk*1.4*(0.85+Math.random()*0.3)));_t.hp=Math.max(0,_t.hp-_d);await typeMessage(`しかし ${_t.name}は たえた！ ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
+                            else{const _d=Math.max(1,Math.floor(act.actor.atk*1.4*(0.85+Math.random()*0.3)));_t.hp=Math.max(0,_t.hp-Math.floor(_d*getIncomingDamageMult(_t,null,false)));await typeMessage(`しかし ${_t.name}は たえた！ ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
                         } else if(_r<0.65){
                             await typeMessage(`${act.actor.displayName}の 暗黒の嵐！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'doru',type:'attack',element:'dark',value:act.actor.atk*1.15,mp:15},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.15*(0.8+Math.random()*0.4)-_m.def*0.12));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.15*(0.8+Math.random()*0.4)-_m.def*0.12));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(enemies.length<4){
                             await typeMessage(`${act.actor.displayName}「骸よ、蘇れ……！」`);
                             _summonMinion('骸骨兵', Math.floor(act.actor.max_hp*0.18), Math.floor(act.actor.atk*0.42), Math.floor(act.actor.def*0.38), 40);
@@ -15254,12 +15263,12 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         if(Math.random()<0.55){
                             await typeMessage(`${act.actor.displayName}の 吹雪のブレス！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'hyadon',type:'attack',element:'ice',value:act.actor.atk*1.2,mp:12},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.2*(0.8+Math.random()*0.4)-_m.def*0.1)*getIncomingDamageMult(_m,'ice',false)));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.2*(0.8+Math.random()*0.4)-_m.def*0.1)*getIncomingDamageMult(_m,'ice',false)));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(Math.random()<0.5){
                             await typeMessage(`${act.actor.displayName}の 凍てつく呼気！`);
                             AudioManager.playSE('magic_cast');
                             if(!_t.tmpSleep||_t.tmpSleep<=0){_t.tmpSleep=2;await typeMessage(`${_t.name}は 凍りついて 動けない！`);}
-                            else{const _d=Math.max(1,Math.floor(act.actor.atk*0.9*getIncomingDamageMult(_t,'ice',false)));_t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
+                            else{const _d=Math.max(1,Math.floor(act.actor.atk*0.9*getIncomingDamageMult(_t,'ice',false)));_t.hp=Math.max(0,_t.hp-Math.floor(_d*getIncomingDamageMult(_t,null,false)));await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
                         } else { _handled=false; }
                         updatePartyStatus();
 
@@ -15268,12 +15277,12 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 溶岩噴射！！`);
                             playCriticalEffect('#ff4400'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*1.25,mp:14},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.25*(0.8+Math.random()*0.4)-_m.def*0.1)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.25*(0.8+Math.random()*0.4)-_m.def*0.1)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}の 爆炎の拳！！`);
                             playCriticalEffect('#ff2200'); playEnemyAttackEffect(1.8); AudioManager.playSE('attack_crit');
                             const _d=Math.max(1,Math.floor((act.actor.atk*1.8*(0.85+Math.random()*0.3)-_t.def*0.25)*getIncomingDamageMult(_t,'fire',false)));
-                            _t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
+                            _t.hp=Math.max(0,_t.hp-Math.floor(_d*getIncomingDamageMult(_t,null,false)));await typeMessage(`${_t.name}に ${_d}の ダメージ！！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         }
                         updatePartyStatus();
 
@@ -15284,11 +15293,11 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'io',type:'attack',element:'explosion',value:act.actor.atk*0.8,mp:8},_t);
                             _t.tmpSleep=(_t.tmpSleep||0)+2;
                             const _d=Math.max(1,Math.floor(act.actor.atk*0.8*(0.85+Math.random()*0.3)-_t.def*0.2));
-                            _t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！ 動きが 鈍くなった！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
+                            _t.hp=Math.max(0,_t.hp-Math.floor(_d*getIncomingDamageMult(_t,null,false)));await typeMessage(`${_t.name}に ${_d}の ダメージ！ 動きが 鈍くなった！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         } else if(_r<0.70){
                             await typeMessage(`${act.actor.displayName}の 古代の裁き！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'io',type:'attack',element:'explosion',value:act.actor.atk*1.1,mp:12},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.15));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.15));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             const _rh=Math.floor(act.actor.max_hp*0.08);
                             act.actor.hp=Math.min(act.actor.max_hp,act.actor.hp+_rh);
@@ -15300,13 +15309,13 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         if(Math.random()<0.45){
                             await typeMessage(`${act.actor.displayName}の 迷宮の呪い！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'doru',type:'attack',element:'dark',value:act.actor.atk*0.7,mp:8},null);
-                            for(const _m of _alive){if(Math.random()<0.4){_m.isPoisoned=true;}const _d=Math.max(1,Math.floor(act.actor.atk*0.7*(0.85+Math.random()*0.3)-_m.def*0.15));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.isPoisoned)await typeMessage(`${_m.name}は 毒に おかされた！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){if(Math.random()<0.4){_m.isPoisoned=true;}const _d=Math.max(1,Math.floor(act.actor.atk*0.7*(0.85+Math.random()*0.3)-_m.def*0.15));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.isPoisoned)await typeMessage(`${_m.name}は 毒に おかされた！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}の 暗黒の剣！！`);
                             playEnemyAttackEffect(1.7); AudioManager.playSE('attack_crit');
                             const _d=Math.max(1,Math.floor(act.actor.atk*1.6*(0.85+Math.random()*0.3)-_t.def*0.2));
                             if(Math.random()<0.2){_t.isPoisoned=true;}
-                            _t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
+                            _t.hp=Math.max(0,_t.hp-Math.floor(_d*getIncomingDamageMult(_t,null,false)));await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         }
                         updatePartyStatus();
 
@@ -15315,11 +15324,11 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 影の刃！！（防御貫通）`);
                             playCriticalEffect('#440044'); playEnemyAttackEffect(1.5); AudioManager.playSE('attack_crit');
                             const _d=Math.max(1,Math.floor(act.actor.atk*1.4*(0.85+Math.random()*0.3)));
-                            _t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！（防御無視）`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
+                            _t.hp=Math.max(0,_t.hp-Math.floor(_d*getIncomingDamageMult(_t,null,false)));await typeMessage(`${_t.name}に ${_d}の ダメージ！（防御無視）`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         } else {
                             await typeMessage(`${act.actor.displayName}の 闇の斬撃！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'doru',type:'attack',element:'dark',value:act.actor.atk*1.0,mp:10},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.0*(0.8+Math.random()*0.4)-_m.def*0.12));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.0*(0.8+Math.random()*0.4)-_m.def*0.12));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         }
                         updatePartyStatus();
 
@@ -15329,12 +15338,12 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 呪いの包帯！`);
                             playEnemyAttackEffect(1.3); AudioManager.playSE('damage_hero');
                             const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.85+Math.random()*0.3)-_t.def*0.4));
-                            _t.hp=Math.max(0,_t.hp-_d);if(!_t.isPoisoned){_t.isPoisoned=true;}
+                            _t.hp=Math.max(0,_t.hp-Math.floor(_d*getIncomingDamageMult(_t,null,false)));if(!_t.isPoisoned){_t.isPoisoned=true;}
                             await typeMessage(`${_t.name}に ${_d}の ダメージ！ 毒に おかされた！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         } else if(_r<0.70){
                             await typeMessage(`${act.actor.displayName}の 砂嵐！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'io',type:'attack',element:'explosion',value:act.actor.atk*0.95,mp:10},null);
-                            for(const _m of _alive){_m.tmpBlind=(_m.tmpBlind||0)+1;const _d=Math.max(1,Math.floor(act.actor.atk*0.95*(0.8+Math.random()*0.4)-_m.def*0.15));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！ 幻惑した！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){_m.tmpBlind=(_m.tmpBlind||0)+1;const _d=Math.max(1,Math.floor(act.actor.atk*0.95*(0.8+Math.random()*0.4)-_m.def*0.15));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！ 幻惑した！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}の 呪いの視線！`);
                             AudioManager.playSE('magic_cast');
@@ -15348,7 +15357,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 大津波！！！`);
                             playCriticalEffect('#0088ff'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'hyadon',type:'attack',element:'water',value:act.actor.atk*1.3,mp:15},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.3*(0.8+Math.random()*0.4)-_m.def*0.08));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.3*(0.8+Math.random()*0.4)-_m.def*0.08));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(_r<0.75&&enemies.length<4){
                             await typeMessage(`${act.actor.displayName}が 海の使いを 呼んだ！`);
                             _summonMinion('海の精霊', Math.floor(act.actor.max_hp*0.20), Math.floor(act.actor.atk*0.48), Math.floor(act.actor.def*0.40), 55);
@@ -15356,7 +15365,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         } else {
                             await typeMessage(`${act.actor.displayName}の 海神の裁き！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'hyadon',type:'attack',element:'water',value:act.actor.atk*1.1,mp:12},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.12));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.12));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         }
                         updatePartyStatus();
 
@@ -15365,7 +15374,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         if(_r<0.45){
                             await typeMessage(`${act.actor.displayName}の 魔将の業火！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'doru',type:'attack',element:'dark',value:act.actor.atk*1.25,mp:14},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.25*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.25*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(_r<0.70&&enemies.length<4){
                             await typeMessage(`${act.actor.displayName}「我が師の名のもとに！」`);
                             _summonMinion('魔将の眷属', Math.floor(act.actor.max_hp*0.22), Math.floor(act.actor.atk*0.50), Math.floor(act.actor.def*0.42), 48);
@@ -15374,7 +15383,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 暗黒魔法！！`);
                             playEnemyAttackEffect(1.6); AudioManager.playSE('magic_cast');
                             const _d=Math.max(1,Math.floor(act.actor.atk*1.5*(0.85+Math.random()*0.3)-_t.def*0.2));
-                            _t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
+                            _t.hp=Math.max(0,_t.hp-Math.floor(_d*getIncomingDamageMult(_t,null,false)));await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         }
                         updatePartyStatus();
 
@@ -15383,7 +15392,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 水晶の衝撃！！`);
                             playCriticalEffect('#aaeeff'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'io',type:'attack',element:'explosion',value:act.actor.atk*1.15,mp:12},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.15*(0.8+Math.random()*0.4)-_m.def*0.08));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.15*(0.8+Math.random()*0.4)-_m.def*0.08));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(Math.random()<0.5){
                             await typeMessage(`${act.actor.displayName}の 結晶化！`);
                             AudioManager.playSE('magic_cast');
@@ -15401,17 +15410,17 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 混沌のブレス！！！`);
                             playCriticalEffect('#8800ff'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*1.4,mp:20},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.4*(0.82+Math.random()*0.36)-_m.def*0.08)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.4*(0.82+Math.random()*0.36)-_m.def*0.08)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(_r<0.75){
                             await typeMessage(`${act.actor.displayName}の 次元断！！（防御無視）`);
                             playCriticalEffect('#660099'); AudioManager.playSE('attack_crit');
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.2*(0.85+Math.random()*0.3)));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！（防御無視）`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.2*(0.85+Math.random()*0.3)));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！（防御無視）`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}の カオスフレア！！`);
                             playCriticalEffect('#ff00ff'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'doru',type:'attack',element:'dark',value:act.actor.atk*1.3,mp:18},_t);
                             if(Math.random()<(hasDeathResist(_t)?0.06:0.20)){_t.hp=0;_t.isPoisoned=false;await typeMessage(`${_t.name}は 消滅した！！`);}
-                            else{const _d=Math.max(1,Math.floor(act.actor.atk*1.3*(0.85+Math.random()*0.3)-_t.def*0.1));_t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
+                            else{const _d=Math.max(1,Math.floor(act.actor.atk*1.3*(0.85+Math.random()*0.3)-_t.def*0.1));_t.hp=Math.max(0,_t.hp-Math.floor(_d*getIncomingDamageMult(_t,null,false)));await typeMessage(`${_t.name}に ${_d}の ダメージ！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}}
                         }
                         updatePartyStatus();
 
@@ -15420,12 +15429,12 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の アルテマ！！！`);
                             playCriticalEffect('#ffffff'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'meran',type:'attack',element:'light',value:act.actor.atk*1.5,mp:25},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.5*(0.82+Math.random()*0.36)-_m.def*0.08));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.5*(0.82+Math.random()*0.36)-_m.def*0.08));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(Math.random()<0.5){
                             await typeMessage(`${act.actor.displayName}の メテオ！！`);
                             playCriticalEffect('#ff8800'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'io',type:'attack',element:'explosion',value:act.actor.atk*1.3,mp:20},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.3*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.3*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}の 魔法封印！`);
                             AudioManager.playSE('magic_cast'); _t.tmpSilence=(_t.tmpSilence||0)+3;
@@ -15439,17 +15448,17 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 魔王の絶対殺！！！`);
                             playCriticalEffect('#880000'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'doru',type:'attack',element:'dark',value:act.actor.atk*1.45,mp:22},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.45*(0.82+Math.random()*0.36)-_m.def*0.08));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.45*(0.82+Math.random()*0.36)-_m.def*0.08));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(_r<0.72){
                             await typeMessage(`${act.actor.displayName}の 地獄の業火！！`);
                             playCriticalEffect('#ff2200'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*1.3,mp:18},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.3*(0.8+Math.random()*0.4)-_m.def*0.1)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.3*(0.8+Math.random()*0.4)-_m.def*0.1)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}の 魂の吸収！！`);
                             playCriticalEffect('#440044'); AudioManager.playSE('magic_cast');
                             let _totalDrain=0;
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*0.9*(0.85+Math.random()*0.3)));_m.hp=Math.max(0,_m.hp-_d);_totalDrain+=_d;await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*0.9*(0.85+Math.random()*0.3)));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));_totalDrain+=_d;await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                             const _rh=Math.floor(_totalDrain*0.4);
                             if(_rh>0){act.actor.hp=Math.min(act.actor.max_hp,act.actor.hp+_rh);AudioManager.playSE('heal');await typeMessage(`${act.actor.displayName}は ${_rh}の HPを きゅうしゅうした！`);}
                         }
@@ -15459,7 +15468,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         if(Math.random()<0.50){
                             await typeMessage(`${act.actor.displayName}の 幻影の刃！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'doru',type:'attack',element:'dark',value:act.actor.atk*1.1,mp:10},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.12));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.12));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(Math.random()<0.5){
                             await typeMessage(`${act.actor.displayName}の 幻の呪縛！`);
                             AudioManager.playSE('magic_cast');
@@ -15477,7 +15486,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             playEnemyAttackEffect(1.3); AudioManager.playSE('damage_hero');
                             const _d=Math.max(1,Math.floor(act.actor.atk*1.2*(0.85+Math.random()*0.3)-_t.def*0.35));
                             if(!_t.isPoisoned)_t.isPoisoned=true;
-                            _t.hp=Math.max(0,_t.hp-_d);await typeMessage(`${_t.name}に ${_d}の ダメージ！ 毒に おかされた！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
+                            _t.hp=Math.max(0,_t.hp-Math.floor(_d*getIncomingDamageMult(_t,null,false)));await typeMessage(`${_t.name}に ${_d}の ダメージ！ 毒に おかされた！`);if(_t.hp<=0){_t.isPoisoned=false;await typeMessage(`${_t.name}は しんでしまった！`);}
                         } else {
                             await typeMessage(`${act.actor.displayName}の 幻惑の砂！`);
                             AudioManager.playSE('magic_cast');
@@ -15491,7 +15500,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 竜の炎ブレス！！`);
                             playCriticalEffect('#ff6600'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'meran',type:'attack',element:'fire',value:act.actor.atk*1.25,mp:14},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.25*(0.8+Math.random()*0.4)-_m.def*0.1)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor((act.actor.atk*1.25*(0.8+Math.random()*0.4)-_m.def*0.1)*getIncomingDamageMult(_m,'fire',false)));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(Math.random()<0.5){
                             await typeMessage(`${act.actor.displayName}の 竜の咆哮！`);
                             AudioManager.playSE('magic_cast');
@@ -15500,7 +15509,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         } else {
                             await typeMessage(`${act.actor.displayName}の 霊炎！！`);
                             AudioManager.playSE('magic_cast'); await playSpellEffect({id:'doru',type:'attack',element:'dark',value:act.actor.atk*1.1,mp:12},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         }
                         updatePartyStatus();
 
@@ -15510,11 +15519,11 @@ ${act.actor.name}の ちからが すいとられた！`); }
                             await typeMessage(`${act.actor.displayName}の 異次元の力！！！`);
                             playCriticalEffect('#00ffff'); AudioManager.playSE('magic_cast');
                             await playSpellEffect({id:'meran',type:'attack',element:'light',value:act.actor.atk*1.6,mp:30},null);
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.6*(0.82+Math.random()*0.36)-_m.def*0.05));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.6*(0.82+Math.random()*0.36)-_m.def*0.05));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(_r<0.65){
                             await typeMessage(`${act.actor.displayName}の 時間断絶！！（防御無視）`);
                             playCriticalEffect('#ffffff'); AudioManager.playSE('attack_crit');
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.4*(0.85+Math.random()*0.3)));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！（防御無視）`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.4*(0.85+Math.random()*0.3)));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！（防御無視）`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}の 完全回復！`);
                             AudioManager.playSE('heal');
@@ -15529,11 +15538,11 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         if(_r<0.45){
                             await typeMessage(`${act.actor.displayName}の 混沌の咆哮！！`);
                             playCriticalEffect('#8800ff'); AudioManager.playSE('magic_cast');
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.3*(0.8+Math.random()*0.4)-_m.def*0.05));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.3*(0.8+Math.random()*0.4)-_m.def*0.05));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else if(_r<0.7){
                             await typeMessage(`${act.actor.displayName}の カオスブレス！！`);
                             playCriticalEffect('brightness(4)'); AudioManager.playSE('magic_cast');
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.85+Math.random()*0.3)));_m.hp=Math.max(0,_m.hp-_d);if(!_m.isPoisoned&&Math.random()<0.35){_m.isPoisoned=true;await typeMessage(`${_m.name}に ${_d}の ダメージ！ どくに おかされた！`);}else{await typeMessage(`${_m.name}に ${_d}の ダメージ！`);} if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.85+Math.random()*0.3)));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));if(!_m.isPoisoned&&Math.random()<0.35){_m.isPoisoned=true;await typeMessage(`${_m.name}に ${_d}の ダメージ！ どくに おかされた！`);}else{await typeMessage(`${_m.name}に ${_d}の ダメージ！`);} if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}が 力を 溜めている……！`);
                             act.actor.tmpPower=(act.actor.tmpPower||0)+1;
@@ -15544,7 +15553,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         if(_r<0.5){
                             await typeMessage(`${act.actor.displayName}の 禁断の魔法陣！！`);
                             playCriticalEffect('#ffaa00'); AudioManager.playSE('magic_cast');
-                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.25*(0.8+Math.random()*0.4)-_m.def*0.08));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の 魔法ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){const _d=Math.max(1,Math.floor(act.actor.atk*1.25*(0.8+Math.random()*0.4)-_m.def*0.08));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の 魔法ダメージ！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}の マジックフォース！`);
                             AudioManager.playSE('magic_cast');
@@ -15559,7 +15568,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         if(_r<0.5){
                             await typeMessage(`${act.actor.displayName}の 魔王の呪縛！！`);
                             playCriticalEffect('#660000'); AudioManager.playSE('magic_cast');
-                            for(const _m of _alive){_m.tmpSilence=(_m.tmpSilence||0)+2;const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-_d);await typeMessage(`${_m.name}に ${_d}の ダメージ！ じゅもんを ふうじられた！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
+                            for(const _m of _alive){_m.tmpSilence=(_m.tmpSilence||0)+2;const _d=Math.max(1,Math.floor(act.actor.atk*1.1*(0.8+Math.random()*0.4)-_m.def*0.1));_m.hp=Math.max(0,_m.hp-Math.floor(_d*getIncomingDamageMult(_m,null,false)));await typeMessage(`${_m.name}に ${_d}の ダメージ！ じゅもんを ふうじられた！`);if(_m.hp<=0){_m.isPoisoned=false;await typeMessage(`${_m.name}は しんでしまった！`);}}
                         } else {
                             await typeMessage(`${act.actor.displayName}の 闇の奔流！！`);
                             playCriticalEffect('#330055'); AudioManager.playSE('magic_cast');
