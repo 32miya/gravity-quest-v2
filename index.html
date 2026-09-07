@@ -7106,8 +7106,17 @@ async function typeMessage(text) {
         }
     }
     msgDiv.innerHTML = _fullHtml + '<span class="blink">▼</span>';
-    // Enterキーを待つ
-    await new Promise(resolve => { inputCallback = (key) => { if(key==='Enter'||key==='Escape') { inputCallback=null; resolve(); } }; });
+    // Enterキーを待つ（オート戦闘中は一定時間で自動的に次へ進む。Enter/Escapeで即座に進めることも可能）
+    if (window._autoBattleActive) {
+        await new Promise(resolve => {
+            let _done = false;
+            const _advance = () => { if (_done) return; _done = true; inputCallback = null; resolve(); };
+            inputCallback = (key) => { if (key === 'Enter' || key === 'Escape') _advance(); };
+            setTimeout(_advance, 650);
+        });
+    } else {
+        await new Promise(resolve => { inputCallback = (key) => { if(key==='Enter'||key==='Escape') { inputCallback=null; resolve(); } }; });
+    }
 }
 async function selectMenu(options, containerId, columns = 1, cancelable = false) { const el = document.getElementById(containerId); el.style.display = 'block'; return new Promise(resolve => { let cursor = 0; const render = () => { let html = `<div style="display:grid; grid-template-columns:repeat(${columns}, 1fr); gap: 5px;">`; options.forEach((opt, i) => { html += `<div>${i === cursor ? '▶' : '&nbsp;&nbsp;'}${opt}</div>`; }); html += `</div>`; el.innerHTML = html; }; render(); inputCallback = (key) => { let moved = false; if(key === 'ArrowUp') { cursor = (cursor - columns + options.length) % options.length; moved = true; } if(key === 'ArrowDown') { cursor = (cursor + columns) % options.length; moved = true; } if(key === 'ArrowLeft') { cursor = (cursor - 1 + options.length) % options.length; moved = true; } if(key === 'ArrowRight') { cursor = (cursor + 1) % options.length; moved = true; } if(moved) AudioManager.playSE('cursor'); render(); if(key === 'Enter') { AudioManager.playSE('decision'); inputCallback = null; el.style.display = 'none'; resolve(cursor); } if(cancelable && key === 'Escape') { AudioManager.playSE('cancel'); inputCallback = null; el.style.display = 'none'; resolve(-1); } }; }); }
 
