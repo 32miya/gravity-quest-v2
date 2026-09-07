@@ -7811,7 +7811,7 @@ function tickNpcWander() {
     const doStep = (curKey, npc, dx, dy) => {
         const [curX, curY] = curKey.split(',').map(Number);
         const nx = curX + dx, ny = curY + dy;
-        const _fd = (dx===1)?3:(dx===-1)?2:(dy===-1)?1:0; npcFacingDir[npc.id] = _fd;
+        const _fd = (dx===1)?3:(dx===-1)?2:(dy===-1)?1:0; npcFacingDir[npc._wk || npc.id] = _fd;
         delete currentMap.npcs[curKey];
         currentMap.npcs[`${nx},${ny}`] = npc;
     };
@@ -10188,11 +10188,11 @@ function drawMap() {
                 else { ctx.fillStyle='rgba(120,0,60,0.3)'; ctx.beginPath(); ctx.arc(px+TILE_SIZE/2,py+TILE_SIZE/2,20,0,Math.PI*2); ctx.fill(); ctx.font='28px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('👿',px+TILE_SIZE/2,py+TILE_SIZE/2+2); }
 
             } else if(npc.id === 'npc_queen_maid' || npc.id.includes('_maid')) {
-                if (!drawAnimatedNpcSprite(ctx, 'maidA', npc.id, px, py, 48)) {
+                if (!drawAnimatedNpcSprite(ctx, 'maidA', (npc._wk || npc.id), px, py, 48)) {
                     if(externalImages['innGirl']) drawSpriteLocal(ctx, externalImages['innGirl'], px, py, 48);
                 }
             } else if(npc.id.includes('gramnia_king') || npc.id === 'npc_gramnia_king') {
-                if (!drawAnimatedNpcSprite(ctx, 'king', npc.id, px, py, 48)) {
+                if (!drawAnimatedNpcSprite(ctx, 'king', (npc._wk || npc.id), px, py, 48)) {
                     if(externalImages['king']) drawSpriteLocal(ctx, externalImages['king'], px, py, 48);
                     else if(externalImages['guard']) { ctx.save(); ctx.filter='hue-rotate(40deg) saturate(2) brightness(1.3)'; drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); ctx.restore(); }
                 }
@@ -10204,24 +10204,24 @@ function drawMap() {
                 }
             } else if(npc.id.includes('advisor_hall') || npc.id === 'npc_estoria_sage' || npc.id.includes('tower_sage') || npc.id.includes('tower_cloud_marker') || npc.id.includes('tower_spring')) {
                 // 天空の塔NPC・宮廷賢者ホール → 宮廷賢者グラフィック
-                if (!drawAnimatedNpcSprite(ctx, 'sage', npc.id, px, py, 48)) {
+                if (!drawAnimatedNpcSprite(ctx, 'sage', (npc._wk || npc.id), px, py, 48)) {
                     if(externalImages['priest']) { ctx.save(); ctx.filter='hue-rotate(280deg) saturate(1.8)'; drawSpriteLocal(ctx, externalImages['priest'], px, py, 48); ctx.restore(); }
                     else if(externalImages['oldMan']) drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48);
                 }
             } else if(npc.id.includes('story_advisor') || npc.id.includes('story_hermit') || npc.id.includes('dc_recovery_sage')) {
-                if (!drawAnimatedNpcSprite(ctx, 'vetSage', npc.id, px, py, 48)) {
+                if (!drawAnimatedNpcSprite(ctx, 'vetSage', (npc._wk || npc.id), px, py, 48)) {
                     if(externalImages['priest']) { ctx.save(); ctx.filter = 'hue-rotate(30deg) brightness(1.1)'; drawSpriteLocal(ctx, externalImages['priest'], px, py, 48); ctx.restore(); }
                     else if(externalImages['oldMan']) drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48);
                 }
             } else if(npc.id.includes('story_citizen') || npc.id.includes('story_veteran') || npc.id.includes('story_wounded')) {
-                if (!drawAnimatedNpcSprite(ctx, 'town', npc.id, px, py, 48)) {
+                if (!drawAnimatedNpcSprite(ctx, 'town', (npc._wk || npc.id), px, py, 48)) {
                     if(externalImages['oldMan']) drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48);
                     else { ctx.fillStyle='#a8d060'; ctx.beginPath(); ctx.arc(px+TILE_SIZE/2,py+TILE_SIZE/2-4,8,0,Math.PI*2); ctx.fill(); ctx.fillRect(px+TILE_SIZE/2-6,py+TILE_SIZE/2+4,12,9); }
                 }
             } else if(npc.id.includes('guide') || npc.id.includes('flavor') || npc.id.includes('elder') || npc.id.includes('ship') || npc.id.includes('sub_smith') || npc.id.includes('sub_richman') || npc.id.includes('sub_rumor') || npc.id.includes('sub_2ndloop')) {
                 const _nn_g = npc.name || '';
-                if(_nn_g.includes('衛兵') || _nn_g.includes('兵士') || _nn_g.includes('近衛')) { if (!drawAnimatedNpcSprite(ctx, 'guard', npc.id, px, py, 48)) { if(externalImages['guard']) drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); } }
-                else if(_nn_g.includes('宿屋') || _nn_g.includes('旅の宿')) { if (!drawAnimatedNpcSprite(ctx, 'innkeeper', npc.id, px, py, 48)) { if(externalImages['innGirl']) drawSpriteLocal(ctx, externalImages['innGirl'], px, py, 48); } }
+                if(_nn_g.includes('衛兵') || _nn_g.includes('兵士') || _nn_g.includes('近衛')) { if (!drawAnimatedNpcSprite(ctx, 'guard', (npc._wk || npc.id), px, py, 48)) { if(externalImages['guard']) drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); } }
+                else if(_nn_g.includes('宿屋') || _nn_g.includes('旅の宿')) { if (!drawAnimatedNpcSprite(ctx, 'innkeeper', (npc._wk || npc.id), px, py, 48)) { if(externalImages['innGirl']) drawSpriteLocal(ctx, externalImages['innGirl'], px, py, 48); } }
                 else if((_nn_g.includes('武器屋') || _nn_g.includes('防具屋')) && externalImages['weaponShop']) { drawLargeSpriteLocal(ctx, externalImages['weaponShop'], px, py, 64); }
                 else if(_nn_g.includes('道具屋') && externalImages['itemShop']) { drawSpriteLocal(ctx, externalImages['itemShop'], px, py, 48); }
                 else if((_nn_g.includes('神父') || _nn_g.includes('神官')) && externalImages['priest']) { drawSpriteLocal(ctx, externalImages['priest'], px, py, 48); }
@@ -10231,16 +10231,16 @@ function drawMap() {
                         const _vrh = getMapRandom(parseInt(nx), parseInt(ny), _rMapId);
                         const _isVillageCtx = _rMapId.includes('village');
                         const _variant = Math.floor(_vrh * 4);
-                        if (_variant === 2 && drawAnimatedNpcSprite(ctx, 'man', npc.id, px, py, 48)) { /* npcMan系で描画済み */ }
-                        else if (_variant === 3 && !_isVillageCtx && drawAnimatedNpcSprite(ctx, 'guard', npc.id, px, py, 48)) { /* 衛兵系で描画済み */ }
-                        else if (!drawAnimatedNpcSprite(ctx, 'elder', npc.id, px, py, 48)) { if(externalImages['oldMan']) drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); }
-                    } else if(!drawAnimatedNpcSprite(ctx, 'elder', npc.id, px, py, 48)) { if(externalImages['oldMan']) drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); }
+                        if (_variant === 2 && drawAnimatedNpcSprite(ctx, 'man', (npc._wk || npc.id), px, py, 48)) { /* npcMan系で描画済み */ }
+                        else if (_variant === 3 && !_isVillageCtx && drawAnimatedNpcSprite(ctx, 'guard', (npc._wk || npc.id), px, py, 48)) { /* 衛兵系で描画済み */ }
+                        else if (!drawAnimatedNpcSprite(ctx, 'elder', (npc._wk || npc.id), px, py, 48)) { if(externalImages['oldMan']) drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); }
+                    } else if(!drawAnimatedNpcSprite(ctx, 'elder', (npc._wk || npc.id), px, py, 48)) { if(externalImages['oldMan']) drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); }
                 }
                 else if(npc.id.includes('sub_2ndloop') && externalImages['priest']) { drawSpriteLocal(ctx, externalImages['priest'], px, py, 48); }
-                else if(!drawAnimatedNpcSprite(ctx, 'guard', npc.id, px, py, 48)) { if(externalImages['guard']) drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); }
-            } else if(npc.id.includes('guard')) { if (!drawAnimatedNpcSprite(ctx, 'guard', npc.id, px, py, 48)) { if(externalImages['guard']) drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); }
+                else if(!drawAnimatedNpcSprite(ctx, 'guard', (npc._wk || npc.id), px, py, 48)) { if(externalImages['guard']) drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); }
+            } else if(npc.id.includes('guard')) { if (!drawAnimatedNpcSprite(ctx, 'guard', (npc._wk || npc.id), px, py, 48)) { if(externalImages['guard']) drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); }
             } else if(npc.id.includes('soldier') || npc.id.includes('throne_guard')) {
-                if (!drawAnimatedNpcSprite(ctx, 'guard', npc.id, px, py, 48)) { if(externalImages['guard']) { ctx.save(); ctx.filter='hue-rotate(200deg) brightness(0.9)'; drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); ctx.restore(); } }
+                if (!drawAnimatedNpcSprite(ctx, 'guard', (npc._wk || npc.id), px, py, 48)) { if(externalImages['guard']) { ctx.save(); ctx.filter='hue-rotate(200deg) brightness(0.9)'; drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); ctx.restore(); } }
             } else if(npc.id === "npc_class_change") { 
                 if (externalImages['priest']) {
                     ctx.save();
@@ -10249,7 +10249,7 @@ function drawMap() {
                     ctx.restore();
                 }
             } else if((npc.id.includes('church') || npc.id.includes('priest') || npc.id.includes('sub_mage')) && externalImages['priest']) { drawSpriteLocal(ctx, externalImages['priest'], px, py, 48); 
-            } else if(npc.id.includes('inn') || npc.id === 'npc_border_inn') { if (!drawAnimatedNpcSprite(ctx, 'innkeeper', npc.id, px, py, 48)) { if(externalImages['innGirl']) drawSpriteLocal(ctx, externalImages['innGirl'], px, py, 48); }
+            } else if(npc.id.includes('inn') || npc.id === 'npc_border_inn') { if (!drawAnimatedNpcSprite(ctx, 'innkeeper', (npc._wk || npc.id), px, py, 48)) { if(externalImages['innGirl']) drawSpriteLocal(ctx, externalImages['innGirl'], px, py, 48); }
             } else if((npc.id.includes('casino') || npc.id.includes('bunny'))) {
                 if(externalImages['bunnyGirl']) drawSpriteLocal(ctx, externalImages['bunnyGirl'], px, py, 48);
                 else if(externalImages['innGirl']) drawSpriteLocal(ctx, externalImages['innGirl'], px, py, 48);
@@ -10276,7 +10276,7 @@ function drawMap() {
                 }
             } else if (npc.id.includes('_woman') || npc.id.includes('_lady') || npc.id.includes('_wife') || npc.id.includes('_girl')) {
                 // 女性キャラ: villagerWoman スプライト（老婆は色補正）
-                if (!drawAnimatedNpcSprite(ctx, 'woman', npc.id, px, py, 48)) {
+                if (!drawAnimatedNpcSprite(ctx, 'woman', (npc._wk || npc.id), px, py, 48)) {
                     const _wSprite = externalImages['innGirl'] || externalImages['oldMan'];
                     if (_wSprite) {
                         ctx.save();
@@ -10287,7 +10287,7 @@ function drawMap() {
                 }
             } else if (npc.id.includes('_child') || npc.id.includes('_kid') || npc.id.includes('_boy')) {
                 // 子供キャラ: childGirl スプライト
-                if (!drawAnimatedNpcSprite(ctx, 'child', npc.id, px, py, 36)) {
+                if (!drawAnimatedNpcSprite(ctx, 'child', (npc._wk || npc.id), px, py, 36)) {
                     const _cSprite = externalImages['oldMan'] || externalImages['guard'];
                     if (_cSprite) {
                         ctx.save(); ctx.translate(px + 6, py + 8); ctx.scale(0.85, 0.85);
@@ -10296,14 +10296,14 @@ function drawMap() {
                 }
             } else if (npc.id.includes('_young') || npc.id.includes('_man_') || npc.id.includes('_lad')) {
                 // 若い男性: villagerMan スプライト
-                if (!drawAnimatedNpcSprite(ctx, 'man', npc.id, px, py, 48)) {
+                if (!drawAnimatedNpcSprite(ctx, 'man', (npc._wk || npc.id), px, py, 48)) {
                     const _ySprite = externalImages['guard'] || externalImages['oldMan'];
                     if (_ySprite) { ctx.save(); ctx.filter = 'hue-rotate(0deg) saturate(1.6) brightness(1.2)'; drawSpriteLocal(ctx, _ySprite, px, py, 48); ctx.restore(); }
                     else { ctx.font='26px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('🧑', px+12, py+10); }
                 }
             } else if (npc.id.includes('_fisherman') || npc.id.includes('_sailor')) {
                 // 漁師・水夫: villagerMan + 青フィルタ
-                if (!drawAnimatedNpcSprite(ctx, 'man', npc.id, px, py, 48)) {
+                if (!drawAnimatedNpcSprite(ctx, 'man', (npc._wk || npc.id), px, py, 48)) {
                     const _fSprite = externalImages['guard'] || externalImages['oldMan'];
                     if (_fSprite) { ctx.save(); ctx.filter = 'hue-rotate(185deg) saturate(1.5) brightness(0.9)'; drawSpriteLocal(ctx, _fSprite, px, py, 48); ctx.restore(); }
                     else { ctx.font='26px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('⛵', px+12, py+10); }
@@ -10483,21 +10483,21 @@ function drawMap() {
                 }
             } else {
                 const _nn_fb = npc.name || '';
-                if(_nn_fb.includes('衛兵') || _nn_fb.includes('兵士') || _nn_fb.includes('近衛')) { if (!drawAnimatedNpcSprite(ctx, 'guard', npc.id, px, py, 48)) { if(externalImages['guard']) drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); } }
+                if(_nn_fb.includes('衛兵') || _nn_fb.includes('兵士') || _nn_fb.includes('近衛')) { if (!drawAnimatedNpcSprite(ctx, 'guard', (npc._wk || npc.id), px, py, 48)) { if(externalImages['guard']) drawSpriteLocal(ctx, externalImages['guard'], px, py, 48); } }
                 else if((_nn_fb.includes('武器屋') || _nn_fb.includes('防具屋')) && externalImages['weaponShop']) { drawLargeSpriteLocal(ctx, externalImages['weaponShop'], px, py, 64); }
                 else if(_nn_fb.includes('道具屋') && externalImages['itemShop']) { drawSpriteLocal(ctx, externalImages['itemShop'], px, py, 48); }
-                else if(_nn_fb.includes('宿屋') || _nn_fb.includes('旅の宿')) { if (!drawAnimatedNpcSprite(ctx, 'innkeeper', npc.id, px, py, 48)) { if(externalImages['innGirl']) drawSpriteLocal(ctx, externalImages['innGirl'], px, py, 48); } }
+                else if(_nn_fb.includes('宿屋') || _nn_fb.includes('旅の宿')) { if (!drawAnimatedNpcSprite(ctx, 'innkeeper', (npc._wk || npc.id), px, py, 48)) { if(externalImages['innGirl']) drawSpriteLocal(ctx, externalImages['innGirl'], px, py, 48); } }
                 else if((_nn_fb.includes('神父') || _nn_fb.includes('神官') || _nn_fb.includes('司教')) && externalImages['priest']) { drawSpriteLocal(ctx, externalImages['priest'], px, py, 48); }
-                else if(_nn_fb.includes('王様') || _nn_fb.includes('国王')) { if (!drawAnimatedNpcSprite(ctx, 'king', npc.id, px, py, 48)) { if(externalImages['king']) drawSpriteLocal(ctx, externalImages['king'], px, py, 48); } }
-                else if(_nn_fb.includes('老商人') || (_nn_fb.includes('老') && (_nn_fb.includes('人') || _nn_fb.includes('職')))) { if (!drawAnimatedNpcSprite(ctx, 'elder', npc.id, px, py, 48)) { if(externalImages['oldMan']) drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); } }
+                else if(_nn_fb.includes('王様') || _nn_fb.includes('国王')) { if (!drawAnimatedNpcSprite(ctx, 'king', (npc._wk || npc.id), px, py, 48)) { if(externalImages['king']) drawSpriteLocal(ctx, externalImages['king'], px, py, 48); } }
+                else if(_nn_fb.includes('老商人') || (_nn_fb.includes('老') && (_nn_fb.includes('人') || _nn_fb.includes('職')))) { if (!drawAnimatedNpcSprite(ctx, 'elder', (npc._wk || npc.id), px, py, 48)) { if(externalImages['oldMan']) drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); } }
                 else if(_nn_fb.includes('露天') || _nn_fb.includes('行商') || _nn_fb.includes('骨董') || _nn_fb.includes('薬草') || _nn_fb.includes('宝石') || _nn_fb.includes('修繕') || _nn_fb.includes('商人')) {
                     // 見た目の多様化: 同じ id/名前系統の商人が並んでも全員同じ顔にならないよう座標ベースで抽選
                     const _vrm = getMapRandom(parseInt(nx), parseInt(ny), _rMapId);
                     const _mType = _vrm < 0.55 ? 'merchant' : (_vrm < 0.78 ? 'man' : (_vrm < 0.92 ? 'elder' : 'townWoman'));
                     if (!drawAnimatedNpcSprite(ctx, _mType, npc.id, px, py, 48)) { if(externalImages['itemShop']) drawSpriteLocal(ctx, externalImages['itemShop'], px, py, 48); }
                 }
-                else if(_nn_fb.includes('踊り子') || _nn_fb.includes('令嬢') || _nn_fb.includes('主婦') || (_nn_fb.includes('女') && !_nn_fb.includes('女神') && !_nn_fb.includes('女性')) || _nn_fb.includes('奥さん') || _nn_fb.includes('娘')) { if (!drawAnimatedNpcSprite(ctx, 'townWoman', npc.id, px, py, 48)) { if(externalImages['innGirl']) drawSpriteLocal(ctx, externalImages['innGirl'], px, py, 48); } }
-                else if (!drawAnimatedNpcSprite(ctx, 'man', npc.id, px, py, 48)) { if(externalImages['oldMan']) { drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); } }
+                else if(_nn_fb.includes('踊り子') || _nn_fb.includes('令嬢') || _nn_fb.includes('主婦') || (_nn_fb.includes('女') && !_nn_fb.includes('女神') && !_nn_fb.includes('女性')) || _nn_fb.includes('奥さん') || _nn_fb.includes('娘')) { if (!drawAnimatedNpcSprite(ctx, 'townWoman', (npc._wk || npc.id), px, py, 48)) { if(externalImages['innGirl']) drawSpriteLocal(ctx, externalImages['innGirl'], px, py, 48); } }
+                else if (!drawAnimatedNpcSprite(ctx, 'man', (npc._wk || npc.id), px, py, 48)) { if(externalImages['oldMan']) { drawSpriteLocal(ctx, externalImages['oldMan'], px, py, 48); } }
             }
             const _scx = _basePx + TILE_SIZE / 2;
             const _nns = npc.name || '';
