@@ -507,7 +507,7 @@ const characterData = [
             mage: { 1: ["メラン"], 4: ["ヒャドン"], 7: ["ギラン"], 10: ["ルカン"], 13: ["メラミィ"], 15: ["トラマナ"], 19: ["バイキル"], 22: ["ヒャダイン"], 26: ["ベギラン"] },
             priest: { 1: ["ホイム"], 4: ["スカラー"], 5: ["キアリー"], 8: ["バギス"], 12: ["ベホイム"], 15: ["マヌーサ"], 20: ["ザオーン"], 21: ["ベホマ"], 24: ["ベホマラ"] },
             grappler: {},
-            sage: { 2: ["ホイム"], 5: ["キアリー", "メラン"], 16: ["ヒャドン"], 18: ["バギス"], 21: ["ベホイム", "ベホマ"], 25: ["ギラン"], 27: ["メラミィ"], 29: ["ヒャダイン"], 31: ["ザオラル"], 33: ["ベギラン"], 35: ["ライデン"], 38: ["ベホマラ"] },
+            sage: { 2: ["ホイム"], 5: ["キアリー", "メラン"], 16: ["ヒャドン"], 18: ["バギス"], 21: ["ベホイム", "ベホマ"], 25: ["ギラン"], 27: ["メラミィ"], 29: ["ヒャダイン"], 31: ["ザオーン"], 33: ["ベギラン"], 35: ["ライデン"], 38: ["ベホマラ"] },
             paladin: { 5: ["スカラー"], 18: ["ホイム"], 28: ["マヌーサ"], 40: ["ザオーン"] },
             jester: { 16: ["トヘロ"], 27: ["ルーラ"], 39: ["レミト"] },
             samurai: {},
@@ -516,17 +516,21 @@ const characterData = [
         };
 
         // --- 成長テーブル生成 (URLと同じカーブ計算) ---
+        // レベル上限を撤廃(どこまでもレベルアップ可能)。
+        // ratioの分母は元のLv99基準(98)のまま据え置くことで、Lv99以降もカーブが
+        // 自然に伸び続け(ratio>1でも指数カーブとして単調増加)、基本能力が上がり続ける。
         function getStat(min, max, level) {
             const ratio = (level - 1) / 98;
             const curve = Math.pow(ratio, 0.95);
             return Math.floor(min + (max - min) * curve);
         }
 
+        const MAX_CHAR_LEVEL = 999;
         characterData.forEach(char => {
             const stats = baseStats[char.id];
             const magic = magicTable[char.id];
-            
-            for (let L = 1; L <= 99; L++) {
+
+            for (let L = 1; L <= MAX_CHAR_LEVEL; L++) {
                 let reqExp = 0;
                 if (L > 1) {
                     const x = L - 1;
@@ -14171,7 +14175,16 @@ async function executeBattle(fixedEnemies = null) {
     if (fixedEnemies) { if (fixedEnemies.some(id => id.includes('_final') || id.includes('final_boss') || (masterData.monsters[id] && masterData.monsters[id].name.includes('最終形態')))) { AudioManager.playBGM('battle_final'); } else { AudioManager.playBGM('battle_boss'); } } 
     else { AudioManager.playBGM('battle_normal'); }
     
-    let diff = (partyData.flags && partyData.flags.flag_2nd_maou_cleared) ? 2 : 1;
+    // 出現する敵の強さは物語の進行度(達成済みフラグ)に応じて段階的に上昇させる。
+    // レベルではなく進行度で決めることで、序盤マップへの後戻りだけを目的とした
+    // 過剰なレベリング狩りを避けつつ、物語を進めるほど手応えが増すようにする。
+    let diff = 1;
+    if (partyData.flags) {
+        if (partyData.flags.flag_2nd_maou_cleared) diff = 2;
+        else if (partyData.flags.flag_weapon_forged) diff = 1.5;
+        else if (partyData.flags.flag_tower_cleared || partyData.flags.flag_mage_trial_cleared) diff = 1.3;
+        else if (partyData.flags.flag_dungeon_cleared) diff = 1.15;
+    }
     let enemies = []; let counts = {};
     let hasGuraKing = false;
 
@@ -14184,7 +14197,7 @@ async function executeBattle(fixedEnemies = null) {
             if(isGK) hasGuraKing = true;
             // 真ボス・ストーリーボスはdiff倍率を適用しない（2x難度増はポストゲーム専用）
             let eDiff = (type === 'boss_gura_final' || type === 'boss_maou' || type === 'boss_maou_final') ? 1 : diff;
-            enemies.push({ ...d, max_hp: d.max_hp * eDiff, hp: d.max_hp * eDiff, atk: d.atk * eDiff, def: d.def * eDiff, exp: d.exp * eDiff, gold: d.gold * eDiff, letter: String.fromCharCode(64+counts[type]), id: type, isGuraKing: isGK, isFinalForm: isFinal, voidBarrierUsed: false, voidBarrierTurns: 0 });
+            enemies.push({ ...d, max_hp: Math.round(d.max_hp * eDiff), hp: Math.round(d.max_hp * eDiff), atk: Math.round(d.atk * eDiff), def: Math.round(d.def * eDiff), exp: Math.round(d.exp * eDiff), gold: Math.round(d.gold * eDiff), letter: String.fromCharCode(64+counts[type]), id: type, isGuraKing: isGK, isFinalForm: isFinal, voidBarrierUsed: false, voidBarrierTurns: 0 });
         });
     } else {
         let eTypes = currentMap.encounters; if (!eTypes || eTypes.length === 0) eTypes = ["m01", "m02"];
@@ -14210,6 +14223,8 @@ async function executeBattle(fixedEnemies = null) {
 
         let maxLv = Math.max(...partyData.members.map(m => m.lv));
         let maxEnemies = 1; if (isCave || maxLv >= 3) maxEnemies = 2; if (isMid || maxLv >= 6) maxEnemies = 3; if (isLate || maxLv >= 10) maxEnemies = 4;
+        // レベル上限撤廃に伴い、高レベルパーティー向けに敵の集団規模もさらに拡大する
+        if (maxLv >= 20) maxEnemies = 5; if (maxLv >= 35) maxEnemies = 6;
         const num = Math.floor(Math.random() * maxEnemies) + 1;
         for(let i=0; i<num; i++) {
             const type = pool[Math.floor(Math.random()*pool.length)]; 
@@ -14218,7 +14233,7 @@ async function executeBattle(fixedEnemies = null) {
             let isGK = (d.name.includes("グラ王") || d.name.includes("大魔王") || type.includes("maou") || type.includes("demon"));
             let isFinal = (d.name.includes("最終形態") || type.includes("final"));
             if(isGK) hasGuraKing = true;
-            enemies.push({ ...d, max_hp: d.max_hp * diff, hp: d.max_hp * diff, atk: d.atk * diff, def: d.def * diff, exp: d.exp * diff, gold: d.gold * diff, letter: String.fromCharCode(64+counts[type]), id: type, isGuraKing: isGK, isFinalForm: isFinal, voidBarrierUsed: false, voidBarrierTurns: 0 });
+            enemies.push({ ...d, max_hp: Math.round(d.max_hp * diff), hp: Math.round(d.max_hp * diff), atk: Math.round(d.atk * diff), def: Math.round(d.def * diff), exp: Math.round(d.exp * diff), gold: Math.round(d.gold * diff), letter: String.fromCharCode(64+counts[type]), id: type, isGuraKing: isGK, isFinalForm: isFinal, voidBarrierUsed: false, voidBarrierTurns: 0 });
         }
     }
     enemies.forEach(e => { e.displayName = counts[e.id]>1 ? e.name+e.letter : e.name; });
