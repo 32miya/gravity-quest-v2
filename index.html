@@ -11100,6 +11100,22 @@ async function checkAction() {
             currentMap.npcs[key] = _extNpc[key];
         }
     }
+    // フィールドでは隣接マップが画面に描画で滲み出て見えるため(3x3グリッド描画)、
+    // マップ端で隣のフィールドマップのNPCに接している場合もここで検出して話しかけられるようにする
+    if (_isField && currentMap && (tx < 0 || ty < 0 || tx >= currentMap.width || ty >= currentMap.height) && !(currentMap.npcs && currentMap.npcs[key])) {
+        const _fm = partyData.pos.map.match(/^map_field_(\d+)_(\d+)$/);
+        if (_fm) {
+            const _ngx = parseInt(_fm[1]) + (tx < 0 ? -1 : tx >= currentMap.width ? 1 : 0);
+            const _ngy = parseInt(_fm[2]) + (ty < 0 ? -1 : ty >= currentMap.height ? 1 : 0);
+            const _nMap = externalMapData && externalMapData[`map_field_${_ngx}_${_ngy}`];
+            if (_nMap) {
+                const _nlx = tx < 0 ? tx + currentMap.width : tx >= currentMap.width ? tx - currentMap.width : tx;
+                const _nly = ty < 0 ? ty + currentMap.height : ty >= currentMap.height ? ty - currentMap.height : ty;
+                const _nNpc = _nMap.npcs && _nMap.npcs[`${_nlx},${_nly}`];
+                if (_nNpc && currentMap.npcs) currentMap.npcs[key] = _nNpc;
+            }
+        }
+    }
 
     if(currentMap.npcs && currentMap.npcs[key]) {
         const npc = currentMap.npcs[key]; const extDef = externalEntitiesData[npc.id];
