@@ -2252,7 +2252,7 @@ function getMapDisplayName(mapId, mapObj) { if (mapObj && mapObj.name) return ma
     if (mapId.includes('dungeon_abyss')) return "深淵の迷宮";
     if (mapId.includes('tower_magic')) return "魔法使いの塔";
     if (mapId.includes('tower_darkspire')) return "闇の尖塔";
-    if (mapId.includes('town_01')) return "城下町エニシア"; if (mapId.includes('castle_01')) return "エニシア城"; if (mapId.includes('frontier_village')) return "ミーラ村"; if (mapId.includes('dungeon_1f')) return "試練の洞窟 1F"; if (mapId.includes('dungeon_b1f')) return "試練の洞窟 B1F"; if (mapId.includes('dungeon_b2f')) return "試練の洞窟 B2F"; if (mapId.includes('dungeon_b3f')) return "試練の洞窟 B3F"; if (mapId.includes('tower_1f')) return "天空の塔 1F"; if (mapId.includes('tower_2f')) return "天空の塔 2F"; if (mapId.includes('tower_3f')) return "天空の塔 3F"; if (mapId.includes('demon_castle_1f')) return "魔王城 1F"; if (mapId.includes('demon_castle_2f')) return "魔王城 2F"; if (mapId.includes('demon_castle_3f')) return "魔王城 3F"; if (mapId.includes('demon_castle_4f')) return "魔王城 4F"; if (mapId === 'map_dharma_temple_north') return "北のダーマ神殿"; if (mapId === 'map_dharma_temple') return "ダーマ神殿"; if (mapId.includes('shrine')) return "ほこら"; if (mapId.includes('town') || mapId.includes('village') || mapId.includes('market')) return "街・村"; if (mapId.includes('dungeon') || mapId.includes('cave')) return "ダンジョン"; if (mapId.includes('field')) return "フィールド"; return "未知の場所"; }
+    if (mapId.includes('town_01')) return "城下町エニシア"; if (mapId.includes('castle_01')) return "エニシア城"; if (mapId.includes('frontier_village')) return "ミーラ村"; if (mapId.includes('dungeon_1f')) return "試練の洞窟 1F"; if (mapId.includes('dungeon_b1f')) return "試練の洞窟 B1F"; if (mapId.includes('dungeon_b2f')) return "試練の洞窟 B2F"; if (mapId.includes('dungeon_b3f')) return "試練の洞窟 B3F"; if (mapId.includes('tower_1f')) return "天空の塔 1F"; if (mapId.includes('tower_2f')) return "天空の塔 2F"; if (mapId.includes('tower_3f')) return "天空の塔 3F"; if (mapId.includes('demon_castle_1f')) return "魔王城 1F"; if (mapId.includes('demon_castle_2f')) return "魔王城 2F"; if (mapId.includes('demon_castle_3f')) return "魔王城 3F"; if (mapId.includes('demon_castle_4f')) return "魔王城 4F"; if (mapId === 'map_dharma_temple_north') return "北のダーマ神殿"; if (mapId === 'map_dharma_temple' || mapId === 'map_dharma_temple_1f') return "ダーマ神殿 参道の間"; if (mapId === 'map_dharma_temple_2f') return "ダーマ神殿 祈りの回廊"; if (mapId === 'map_dharma_temple_3f') return "ダーマ神殿 光の間"; if (mapId === 'map_dharma_temple_4f') return "ダーマ神殿 転職の間"; if (mapId.includes('shrine')) return "ほこら"; if (mapId.includes('town') || mapId.includes('village') || mapId.includes('market')) return "街・村"; if (mapId.includes('dungeon') || mapId.includes('cave')) return "ダンジョン"; if (mapId.includes('field')) return "フィールド"; return "未知の場所"; }
 function getCurrentWorldPos() { let m = partyData.pos.map; if (!m) return {x: 2, y: 2}; let wx = -1, wy = -1; if (m.startsWith('map_field_') && m.split('_').length >= 4) { wx = parseInt(m.split('_')[2]); wy = parseInt(m.split('_')[3]); } else if (m.startsWith('map_ocean_')) { if (partyData.last_field_pos && /^map_field_/.test(partyData.last_field_pos.map)) { const _pts = partyData.last_field_pos.map.split('_'); wx = parseInt(_pts[2]); wy = parseInt(_pts[3]); } else { wx = 2; wy = 2; } } else if (m.includes('castle_north')) { wx = 0; wy = 0; } else if (m.includes('town') || m.includes('castle')) { wx = 2; wy = 2; } else if (m.includes('dungeon') || m.includes('cave')) { wx = 2; wy = 0; } else if (m.includes('shrine')) { wx = 2; wy = 3; } else if (m.includes('nord') || m.includes('north')) { wx = 5; wy = 0; } else if (m.includes('south') || m.includes('south_port') || m.includes('coral')) { wx = 6; wy = 7; } else if (m.includes('east') || m.includes('estoria')) { wx = 7; wy = 4; } else if (m.includes('frost') || m.includes('west')) { wx = 1; wy = 6; } if (wx === -1 || wy === -1) { wx = 2; wy = 2; } return {x: wx, y: wy}; }
 // メインストーリーの進行フラグから「次にすべきこと」を短く要約する。
 // 国王ボルドの案内セリフ(★王様ブロック)と同じフラグ判定順序に揃えており、
@@ -4439,6 +4439,152 @@ function buildNorthDharmaTemple() {
         }
     }
 }
+function buildDharmaTemple() {
+    // ダーマ神殿: 参道の間(1F)→祈りの回廊(2F)→光の間(3F)→転職の間(4F)の
+    // 4フロア構成。各階は「本堂」+「前室」からなり、前室の階段(22)で
+    // 一つ手前の階(1Fのみフィールド)へ、本堂の階段(21)で一つ奥の階へ進む
+    // (試練の洞窟等、既存ダンジョンと同じ階段方式。ワープ等の特殊演出は使わない)。
+    // editorオーバーライド適用後に呼ばれる想定のため、フィールド側の入口も
+    // 既存があれば再利用し、重複生成しないようガードする。
+    const _mkFloor = () => {
+        const W=16, H=14;
+        const t = new Array(W*H).fill(1);
+        const S = (x,y,v) => { if(x>=0&&y>=0&&x<W&&y<H) t[y*W+x]=v; };
+        const R = (x1,y1,x2,y2,v) => { for(let y=y1;y<=y2;y++) for(let x=x1;x<=x2;x++) S(x,y,v); };
+        R(1,1,14,9,0);   // 本堂
+        R(4,10,11,12,0); // 前室
+        for(let y=1;y<10;y++) for(let x=1;x<15;x++) if(t[y*W+x]===0) t[y*W+x]=9; // カーペット化(本堂のみ)
+        return { W, H, t, S, R };
+    };
+
+    // ── 1F: 参道の間 ──────────────────────────────────────────
+    const f1 = _mkFloor();
+    f1.S(13,8,21);       // 奥(2F)への階段
+    f1.S(7,12,22); f1.S(8,12,22); // フィールドへの階段
+    const exits1 = {
+        '7,12':{map:'map_field_2_4',x:6,y:6},
+        '8,12':{map:'map_field_2_4',x:6,y:6},
+        '13,8':{map:'map_dharma_temple_2f',x:7,y:11}
+    };
+    const npcs1 = {
+        '4,5':{id:'npc_dharma_monk_l',name:'修道士'},
+        '10,5':{id:'npc_dharma_monk_r',name:'修道士'},
+        '3,7':{id:'obj_chest_item',name:'宝箱'},
+        '11,7':{id:'obj_chest_item',name:'宝箱'},
+        '5,2':{id:'obj_deco_banner',name:''},
+        '9,2':{id:'obj_deco_banner',name:''},
+        '2,3':{id:'obj_deco_stained_window',name:''},
+        '12,3':{id:'obj_deco_stained_window',name:''},
+        '3,5':{id:'deco_candelabra_gold',name:'金燭台'},
+        '11,5':{id:'deco_candelabra_gold',name:'金燭台'},
+        '7,7':{id:'obj_deco_fountain_s',name:'聖水の泉'},
+        '2,8':{id:'obj_deco_statue_angel',name:'守護天使像'},
+        '6,11':{id:'obj_deco_rug_blue',name:''},
+        '9,11':{id:'obj_deco_rug_blue',name:''}
+    };
+    externalMapData['map_dharma_temple_1f'] = {width:f1.W,height:f1.H,tiles:f1.t,exits:exits1,npcs:npcs1,encounters:[],name:'ダーマ神殿 参道の間'};
+
+    // ── 2F: 祈りの回廊 ────────────────────────────────────────
+    const f2 = _mkFloor();
+    f2.S(13,8,21);       // 奥(3F)への階段
+    f2.S(7,12,22);       // 手前(1F)への階段
+    const exits2 = {
+        '13,7':{map:'map_dharma_temple_1f',x:13,y:7},
+        '7,12':{map:'map_dharma_temple_1f',x:13,y:7},
+        '13,8':{map:'map_dharma_temple_3f',x:7,y:11}
+    };
+    const npcs2 = {
+        '7,4':{id:'npc_dharma_scholar_2f',name:'古参の修道士'},
+        '3,3':{id:'obj_deco_statue_knight',name:'歴代戦士の像'},
+        '11,3':{id:'obj_deco_statue_woman',name:'歴代賢者の像'},
+        '3,7':{id:'obj_deco_statue_knight',name:'歴代戦士の像'},
+        '11,7':{id:'obj_deco_statue_woman',name:'歴代賢者の像'},
+        '2,5':{id:'deco_candelabra_gold',name:'金燭台'},
+        '12,5':{id:'deco_candelabra_gold',name:'金燭台'},
+        '7,2':{id:'obj_deco_stained_window',name:''},
+        '3,8':{id:'obj_bookshelf',name:'職業の伝承'},
+        '11,8':{id:'obj_bookshelf2',name:'古い記録'},
+        '6,11':{id:'obj_deco_rug_red',name:''},
+        '9,11':{id:'obj_deco_rug_red',name:''}
+    };
+    externalMapData['map_dharma_temple_2f'] = {width:f2.W,height:f2.H,tiles:f2.t,exits:exits2,npcs:npcs2,encounters:[],name:'ダーマ神殿 祈りの回廊'};
+
+    // ── 3F: 光の間 ────────────────────────────────────────────
+    const f3 = _mkFloor();
+    f3.S(13,8,21);       // 奥(4F)への階段
+    f3.S(7,12,22);       // 手前(2F)への階段
+    const exits3 = {
+        '13,7':{map:'map_dharma_temple_2f',x:13,y:7},
+        '7,12':{map:'map_dharma_temple_2f',x:13,y:7},
+        '13,8':{map:'map_dharma_temple_4f',x:7,y:11}
+    };
+    const npcs3 = {
+        '7,4':{id:'npc_dharma_guardian_3f',name:'守護の亡霊'},
+        '4,3':{id:'obj_deco_gargoyle',name:'守護のガーゴイル'},
+        '10,3':{id:'obj_deco_gargoyle',name:'守護のガーゴイル'},
+        '2,2':{id:'obj_deco_stained_window',name:''},
+        '12,2':{id:'obj_deco_stained_window',name:''},
+        '3,7':{id:'obj_deco_rune_circle',name:'光の魔法陣'},
+        '11,7':{id:'obj_deco_rune_circle',name:'光の魔法陣'},
+        '2,6':{id:'obj_deco_statue_angel',name:'導きの天使像'},
+        '12,6':{id:'obj_deco_statue_angel',name:'導きの天使像'},
+        '4,8':{id:'deco_candelabra_gold',name:'金燭台'},
+        '10,8':{id:'deco_candelabra_gold',name:'金燭台'},
+        '6,11':{id:'obj_deco_rug_blue',name:''},
+        '9,11':{id:'obj_deco_rug_blue',name:''}
+    };
+    externalMapData['map_dharma_temple_3f'] = {width:f3.W,height:f3.H,tiles:f3.t,exits:exits3,npcs:npcs3,encounters:[],name:'ダーマ神殿 光の間'};
+
+    // ── 4F: 転職の間（最奥の内陣） ────────────────────────────
+    const f4 = _mkFloor();
+    f4.S(7,2,3);          // 神父の前の祭壇
+    f4.S(7,12,22);        // 手前(3F)への階段のみ(行き止まり)
+    const exits4 = {
+        '13,7':{map:'map_dharma_temple_3f',x:13,y:7},
+        '7,12':{map:'map_dharma_temple_3f',x:13,y:7}
+    };
+    const npcs4 = {
+        '7,3':{id:'npc_class_change',name:'転職の神父'},
+        '4,3':{id:'obj_deco_statue_woman',name:'初代賢者の像'},
+        '10,3':{id:'obj_deco_statue_knight',name:'初代戦士の像'},
+        '2,2':{id:'obj_deco_stained_window',name:''},
+        '12,2':{id:'obj_deco_stained_window',name:''},
+        '3,5':{id:'obj_bookshelf',name:'職業の書'},
+        '11,5':{id:'obj_bookshelf2',name:'古の転職記録'},
+        '2,6':{id:'deco_candelabra_gold',name:'金燭台'},
+        '12,6':{id:'deco_candelabra_gold',name:'金燭台'},
+        '7,7':{id:'obj_deco_rune_circle',name:'転職の魔法陣'},
+        '4,8':{id:'obj_deco_rug_red',name:''},
+        '10,8':{id:'obj_deco_rug_red',name:''},
+        '2,9':{id:'obj_deco_statue_angel',name:'見守る天使像'},
+        '12,9':{id:'obj_deco_statue_angel',name:'見守る天使像'}
+    };
+    externalMapData['map_dharma_temple_4f'] = {width:f4.W,height:f4.H,tiles:f4.t,exits:exits4,npcs:npcs4,encounters:[],name:'ダーマ神殿 転職の間'};
+
+    // 旧1マップ構成の名残を除去
+    delete externalMapData['map_dharma_temple'];
+
+    if(!externalEntitiesData['npc_dharma_monk_l']) externalEntitiesData['npc_dharma_monk_l']={id:'npc_dharma_monk_l',name:'修道士',msg:'ダーマ神殿へ ようこそ。\n奥へ 進むほど、より 深い 転職の 儀式に\n近づいて いきます。'};
+    if(!externalEntitiesData['npc_dharma_monk_r']) externalEntitiesData['npc_dharma_monk_r']={id:'npc_dharma_monk_r',name:'修道士',msg:'ここは 転職の 聖地。\nふたたびの たびに でた ゆうしゃのみが\nここで 新たなる 道を えらべます。'};
+    if(!externalEntitiesData['npc_dharma_scholar_2f']) externalEntitiesData['npc_dharma_scholar_2f']={id:'npc_dharma_scholar_2f',name:'古参の修道士',msg:'この 回廊には 歴代の 勇者たちの 姿が\n刻まれております。\n奥へ 進むほど、力の 記憶が 色濃く\n残っておりますよ。'};
+    if(!externalEntitiesData['npc_dharma_guardian_3f']) externalEntitiesData['npc_dharma_guardian_3f']={id:'npc_dharma_guardian_3f',name:'守護の亡霊',msg:'……この 先に 内陣が ある。\n覚悟の ある 者だけが 進むが よい。\n（亡霊は 静かに 道を 譲った）'};
+
+    // フィールド側の入口タイルを確保(既存があれば再利用、なければfindLandで新規配置)
+    const _fm2 = externalMapData['map_field_2_4'];
+    if (_fm2) {
+        const _existing2 = Object.entries(_fm2.exits||{}).find(([k,v]) => v && v.map === 'map_dharma_temple_1f');
+        const _existingOld = Object.entries(_fm2.exits||{}).find(([k,v]) => v && v.map === 'map_dharma_temple');
+        if (_existingOld) { _existingOld[1].map = 'map_dharma_temple_1f'; }
+        else if (!_existing2) {
+            const _dp2 = findLand('map_field_2_4', 6, 7);
+            if (_dp2) {
+                const _f24w = _fm2.width||45;
+                _fm2.tiles[_dp2.y*_f24w+_dp2.x] = 22;
+                _fm2.exits[_dp2.k] = {map:'map_dharma_temple_1f', x:7, y:12};
+            }
+        }
+    }
+}
 function buildEstoriaCastle() {
     const W=20,H=18;
     const t=new Array(W*H).fill(1);
@@ -5729,23 +5875,7 @@ function generateDQStyleMaps() {
         externalMapData['map_demon_castle_4f']=m;
     }
 
-    // ===== ダーマ神殿 (16x16) =====
-    {
-        const m = mkMap(16,16,
-            [[1,1,14,9],[3,11,10,3]],
-            [[7,9,7,11]],
-            [],[[7,13],[8,13]],
-            {'7,13':{map:'map_field_2_4',x:6,y:7},'8,13':{map:'map_field_2_4',x:6,y:7}},
-            {'7,3':{id:'npc_class_change',name:'転職の神父'},'4,5':{id:'npc_dharma_monk_l',name:'修道士'},'10,5':{id:'npc_dharma_monk_r',name:'修道士'},'3,7':{id:'obj_chest_item',name:'宝箱'},'11,7':{id:'obj_chest_item',name:'宝箱'}},
-            [],'ダーマ神殿');
-        for(let y=1;y<10;y++) for(let x=1;x<15;x++) if(m.tiles[y*16+x]===0) m.tiles[y*16+x]=9;
-        m.tiles[2*16+7]=3; m.tiles[14*16+7]=22; m.tiles[14*16+8]=22;
-        externalMapData['map_dharma_temple']=m;
-        if(!externalEntitiesData) externalEntitiesData={};
-        if(!externalEntitiesData['npc_dharma_monk_l']) externalEntitiesData['npc_dharma_monk_l']={id:'npc_dharma_monk_l',name:'修道士',msg:'ダーマ神殿へ ようこそ。\n奥にいる 神父様に お話しください。'};
-        if(!externalEntitiesData['npc_dharma_monk_r']) externalEntitiesData['npc_dharma_monk_r']={id:'npc_dharma_monk_r',name:'修道士',msg:'ここは 転職の 聖地。\nふたたびの たびに でた ゆうしゃのみが\nここで 新たなる 道を えらべます。'};
-    }
-
+    // ダーマ神殿(4階層構成)も生成タイミングの都合上buildDharmaTemple()に切り出し、
     // 北のダーマ神殿は生成タイミングの都合上buildNorthDharmaTemple()に切り出し、
     // 強制上書きブロック(editorオーバーライド適用後の最終段階)から呼び出す。
 
@@ -16443,6 +16573,7 @@ async function showTitleScreen() {
         externalMapData['map_castle_north']   = buildNorthAbandonedCastle();
         externalMapData['map_castle_north_b1'] = buildNorthCastleCrypt();
         buildNorthDharmaTemple();
+        buildDharmaTemple();
         externalMapData['map_castle_kagane']  = buildKaganeCastle();
         externalMapData['map_shrine_warp']    = buildShrineWarp();
         externalMapData['map_shrine_backroom'] = buildShrineBackRoom();
