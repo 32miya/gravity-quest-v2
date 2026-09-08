@@ -270,7 +270,17 @@
                 // --- 後半追加盾 ---
                 { id: "s_2nd_01", name: "イージスの盾", defense: 150, price: 80000, effect: "status_immune", description: "【勇者/戦士用】決して砕けない神話の盾。あらゆる状態異常と痛恨の一撃を防ぐ。" },
                 { id: "s_2nd_02", name: "聖霊の盾", defense: 120, price: 65000, effect: "resist_fire_ice", description: "【僧侶用】四大精霊が宿り、全てのブレス攻撃を完全に無効化する。" },
-                { id: "s_2nd_03", name: "幻影の盾", defense: 100, price: 58000, effect: "evasion_half", description: "【魔法使い用】腕力がなくても扱える魔法盾。物理攻撃を50%の確率で回避する。" }
+                { id: "s_2nd_03", name: "幻影の盾", defense: 100, price: 58000, effect: "evasion_half", description: "【魔法使い用】腕力がなくても扱える魔法盾。物理攻撃を50%の確率で回避する。" },
+
+                // --- 追加盾8種 ---
+                { id: "s17", name: "業火の盾", defense: 30, price: 2800, effect: "resist_fire", description: "炎属性のダメージを和らげる盾。" },
+                { id: "s18", name: "氷華の盾", defense: 30, price: 2800, effect: "resist_ice", description: "氷属性のダメージを和らげる盾。" },
+                { id: "s19", name: "堅牢の大盾", defense: 55, price: 20000, effect: "physical_resist_heavy", description: "物理ダメージを大きく抑える重厚な大盾。" },
+                { id: "s20", name: "破邪の盾", defense: 42, price: 28000, effect: "status_immune", description: "あらゆる状態異常を防ぐ聖なる盾。" },
+                { id: "s21", name: "見切りの盾", defense: 15, price: 4200, effect: "evasion_up", description: "軽量で扱いやすく、攻撃を見切りやすくなる盾。" },
+                { id: "s22", name: "詠唱の盾", defense: 20, price: 6500, effect: "spell_power_up", description: "【魔法使い/賢者用】呪文の威力を高める魔法の盾。" },
+                { id: "s23", name: "反射の小盾", defense: 12, price: 5000, effect: "spell_reflect_low", description: "呪文を稀に跳ね返す小さな盾。" },
+                { id: "s24", name: "闘魂の盾", defense: 8, price: 3800, effect: "mp_cost_reduce", description: "扱う魔法の消費MPを抑える不思議な盾。" }
             ],
             helmets: [
                 { id: "h01", name: "皮のぼうし", defense: 2, price: 65 },
@@ -297,17 +307,27 @@
                 // --- 軽量頭部防具（全職業装備可）追加13種 ---
                 { id: "h_l01", name: "ターバン", defense: 3, price: 55, description: "頭に巻く布製のターバン。軽くて動きやすい旅人の定番。" },
                 { id: "h_l02", name: "旅人の帽子", defense: 7, price: 150, description: "一般的な旅人がかぶる防風帽子。長旅の必需品。" },
-                { id: "h_l03", name: "三角帽子", defense: 12, price: 420, description: "魔法使いらしい尖った帽子。集中力が高まり呪文が少しだけ強くなる。" },
-                { id: "h_l04", name: "踊り子のカチューシャ", defense: 8, price: 280, description: "踊り子が舞台で使う花飾り付きのカチューシャ。魅了耐性がある。" },
+                { id: "h_l03", name: "三角帽子", defense: 12, price: 420, effect: "spell_power_up", description: "魔法使いらしい尖った帽子。集中力が高まり呪文が少しだけ強くなる。" },
+                { id: "h_l04", name: "踊り子のカチューシャ", defense: 8, price: 280, effect: "status_resist", description: "踊り子が舞台で使う花飾り付きのカチューシャ。魅了耐性がある。" },
                 { id: "h_l05", name: "ベレー帽", defense: 10, price: 350, description: "おしゃれな円形の帽子。頭部を守りながら動きを妨げない。" },
                 { id: "h_l06", name: "羽根飾りの帽子", defense: 15, price: 680, description: "鳥の羽根が飾られた帽子。身に着けると士気が上がる。" },
-                { id: "h_l07", name: "絹の頭巾", defense: 18, price: 900, description: "絹製の柔らかい頭巾。状態異常にかかりにくくなる。" },
+                { id: "h_l07", name: "絹の頭巾", defense: 18, price: 900, effect: "status_resist", description: "絹製の柔らかい頭巾。状態異常にかかりにくくなる。" },
                 { id: "h_l08", name: "知恵の帽子", defense: 20, price: 1400, effect: "walk_mp_regen", description: "賢者の知恵が宿る帽子。装備するとMPが少しずつ回復しやすくなる。" },
                 { id: "h_l09", name: "銀の冠", defense: 25, price: 2500, effect: "spell_power_up", description: "銀細工で作られた美しい冠。呪文の威力が少し上がる。" },
                 { id: "h_l10", name: "曲者の頭巾", defense: 22, price: 1800, effect: "spd_up_small", description: "忍者が使う特殊な頭巾。装備するとすばやさが上がる。" },
                 { id: "h_l11", name: "風雲の鉢巻", defense: 28, price: 3200, effect: "spd_up_small", description: "嵐の力を宿した鉢巻。戦闘開始時にすばやさが増す。" },
                 { id: "h_l12", name: "月の冠", defense: 32, price: 5000, effect: "walk_mp_regen", description: "月の力で満ちた神秘的な冠。MPが少し回復しやすくなる。" },
-                { id: "h_l13", name: "炎の鉢巻", defense: 35, price: 6500, effect: "crit_up_small", description: "炎の精霊を宿した鉢巻。会心の一撃が出やすくなる。" }
+                { id: "h_l13", name: "炎の鉢巻", defense: 35, price: 6500, effect: "crit_up_small", description: "炎の精霊を宿した鉢巻。会心の一撃が出やすくなる。" },
+
+                // --- 追加軽量頭部防具8種 ---
+                { id: "h_l14", name: "見切りの頭巾", defense: 18, price: 2000, effect: "evasion_up", description: "被った者の勘を研ぎ澄ませる頭巾。攻撃を見切りやすくなる。" },
+                { id: "h_l15", name: "耐炎の頭巾", defense: 20, price: 1800, effect: "resist_fire", description: "炎属性のダメージを和らげる頭巾。" },
+                { id: "h_l16", name: "耐寒の頭巾", defense: 20, price: 1800, effect: "resist_ice", description: "氷属性のダメージを和らげる頭巾。" },
+                { id: "h_l17", name: "静寂の帽子", defense: 16, price: 1600, effect: "mp_cost_reduce", description: "呪文の消費MPを少し抑える、物静かな帽子。" },
+                { id: "h_l18", name: "魔導の眼帯", defense: 24, price: 2600, effect: "magic_resist", description: "呪文のダメージを和らげる、魔導師の眼帯。" },
+                { id: "h_l19", name: "反射のヘアピン", defense: 14, price: 3500, effect: "spell_reflect_low", description: "呪文を稀に跳ね返す、小さな魔法のヘアピン。" },
+                { id: "h_l20", name: "剛毅の鉢巻", defense: 30, price: 4000, effect: "physical_resist_heavy", description: "物理ダメージを大きく抑える、闘志を宿した鉢巻。" },
+                { id: "h_l21", name: "深智の頭巾", defense: 26, price: 2200, effect: "status_resist", description: "深い知恵が宿り、状態異常にかかりにくくなる頭巾。" }
             ],
             accessories: [
                 { id: "x01", name: "星降る腕輪", effect: "speed_double", price: 0, description: "素早さが2倍になる伝説の装飾品。" },
@@ -8030,12 +8050,14 @@ function canEquip(char, item) {
 
     // ─── 盾 ──────────────────────────────────────────────────
     if (type === 'shield') {
-        if (['魔法使い','踊り子','パンダ'].includes(job)) return false;
+        // 職業専用の例外(魔法使い用の盾)は、後段の一律除外より先に判定する
         if (['s03','s15'].includes(id)) return job === '勇者'; // 天空のたて
         if (id === 's_grav_01') return ['勇者','パラディン'].includes(job);
         if (id === 's_2nd_01')  return ['勇者','戦士'].includes(job);
         if (id === 's_2nd_02')  return job === '僧侶';
         if (id === 's_2nd_03')  return ['魔法使い','賢者'].includes(job); // 魔法盾は例外
+        if (id === 's22')       return ['魔法使い','賢者'].includes(job); // 詠唱の盾も例外
+        if (['魔法使い','踊り子','パンダ'].includes(job)) return false;
         return true;
     }
 
