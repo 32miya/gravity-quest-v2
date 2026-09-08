@@ -9710,9 +9710,14 @@ function drawMap() {
                 if (_epx3 < -TILE_SIZE*8 || _epx3 > cWidth+TILE_SIZE*8) continue;
                 if (_epy3 < -TILE_SIZE*10 || _epy3 > cHeight+TILE_SIZE*8) continue;
                 const _exitTile3 = _rMap2b.tiles[_ey3 * _rMap2b.width + _ex3];
+                // 表示名に「村」を含む場所は、地名(マップID)の傾向に関わらず
+                // すべて南西の村ガルドと同じ画像(town2)で統一する
+                const _dmObj3 = externalMapData && (externalMapData[_dm3] || externalMapData['map_' + _dm3]);
+                const _dmName3 = (_dmObj3 && _dmObj3.name) || '';
                 let _bt3 = null;
                 if (_exitTile3 === 23) _bt3 = 'shrine';
                 else if (_dm3 === 'map_town_01') _bt3 = 'town';
+                else if (_dmName3.includes('村')) _bt3 = 'town2';
                 else if (_dm3 === 'map_town_02') _bt3 = 'town2';
                 else if (_dm3.includes('town') || _dm3.includes('market') || _dm3.includes('eden') || _dm3.includes('fishing') || _dm3.includes('waypoint')) _bt3 = 'village';
                 else if (_dm3.includes('village')) _bt3 = 'village';
