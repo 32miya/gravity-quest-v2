@@ -1118,8 +1118,9 @@ function packSaveData(pData) {
     fields.push([Math.min((pData.pos||{}).x||0,63), 6]);
     fields.push([Math.min((pData.pos||{}).y||0,63), 6]);
     for (const k of _GQ_FLAGS) fields.push([f[k]?1:0, 1]);
-    // SQ進行度10個 (各4bit: 0=未着手, 1-14=10-140%, 15=完了(99), 計40bit)
-    for (let _sqE=1; _sqE<=10; _sqE++) { const _sqK=_sqE<10?'sq_0'+_sqE:'sq_10'; const _sv=f[_sqK]||0; fields.push([_sv>=99?15:Math.min(Math.floor(_sv/10),14), 4]); }
+    // SQ進行度10個 (各4bit: 0=未着手, 1-14=ステップ番号そのまま, 15=完了(99), 計40bit)
+    // ※advanceSQ()はステップ番号(1〜5程度)をそのまま保存するため、10%刻みではなく生の値を保持する
+    for (let _sqE=1; _sqE<=10; _sqE++) { const _sqK=_sqE<10?'sq_0'+_sqE:'sq_10'; const _sv=f[_sqK]||0; fields.push([_sv>=99?15:Math.min(_sv,14), 4]); }
     // 座標宝箱フラグ (各1bit, 計104bit)
     for (const _ck of _GQ_CHESTS) fields.push([f['chest_'+_ck]?1:0, 1]);
     // メンバー×4: 名前(32=8×4)+職業(4)+Lv(6)+EXP(14)+装備5本(8×5=40)+所持8個(8×8=64) = 160ビット×4=640ビット
@@ -1198,7 +1199,7 @@ function unpackSaveData(pwd) {
             for (const k of _GQ_FLAGS) { if(read(1)) flags[k]=true; }
             // SQフラグ: 新形式=4bit×10(進行度), 旧形式=1bit×10(完了のみ)
             if (_hasFullSQ) {
-                for (let _sqD=1; _sqD<=10; _sqD++) { const _sqK=_sqD<10?'sq_0'+_sqD:'sq_10'; const _sv=read(4); if(_sv===15) flags[_sqK]=99; else if(_sv>0) flags[_sqK]=_sv*10; }
+                for (let _sqD=1; _sqD<=10; _sqD++) { const _sqK=_sqD<10?'sq_0'+_sqD:'sq_10'; const _sv=read(4); if(_sv===15) flags[_sqK]=99; else if(_sv>0) flags[_sqK]=_sv; }
                 // 座標宝箱フラグ
                 for (const _ck of _GQ_CHESTS) { if(read(1)) flags['chest_'+_ck]=true; }
             } else if (_hasSQ) { for (let _sqD=1; _sqD<=10; _sqD++) { const _sqK=_sqD<10?'sq_0'+_sqD:'sq_10'; if(read(1)) flags[_sqK]=99; } }
@@ -7704,6 +7705,7 @@ function handleInput(key) { AudioManager.init(); if (key === 'Escape' && window.
 function onStep() {
     if (partyData.tramana_steps && partyData.tramana_steps > 0) partyData.tramana_steps--;
     if (partyData.tohero_steps && partyData.tohero_steps > 0) partyData.tohero_steps--;
+    if (partyData.encounter_up_steps && partyData.encounter_up_steps > 0) partyData.encounter_up_steps--;
     // 命の指輪(regen_hp/hp_regen_walk): 装備中は歩くたびにHPが少し回復する
     // しあわせのぼうし/幸せの帽子(walk_mp_regen): 装備中は歩くたびにMPが少し回復する
     if (partyData.members) {
@@ -7895,6 +7897,7 @@ function getIncomingDamageMult(defender, element, isMagic) {
             case 'resist_fire': if (element === 'fire') mult = Math.min(mult, 0.5); break;
             case 'resist_ice': if (element === 'ice') mult = Math.min(mult, 0.5); break;
             case 'resist_fire_ice': if (element === 'fire' || element === 'ice') mult = Math.min(mult, 0.5); break;
+            case 'water_resist': if (element === 'water' || element === 'ice') mult = Math.min(mult, 0.3); break;
         }
     }
     return mult;
@@ -11581,7 +11584,7 @@ async function moveParty(dx, dy) {
     }
     if(currentMap.encounters && currentMap.encounters.length > 0 && (!partyData.flags || !partyData.flags.last_boss_defeated)) {
         if (partyData.tohero_steps && partyData.tohero_steps > 0) { } 
-        else { partyData.steps_to_encounter--; if(partyData.steps_to_encounter <= 0) { partyData.steps_to_encounter = Math.floor(Math.random()*10) + 10; executeBattle().catch(err => { console.error('[Battle] 例外発生:', err); const _bs=document.getElementById('battle-screen'); if(_bs)_bs.style.display='none'; const _sc=document.getElementById('screen'); if(_sc)_sc.style.display='block'; hideAllWindows(); inputCallback=null; state='FIELD'; drawMap(); startFieldLoop(); }); } }
+        else { partyData.steps_to_encounter--; if(partyData.steps_to_encounter <= 0) { const _encUp = partyData.encounter_up_steps && partyData.encounter_up_steps > 0; partyData.steps_to_encounter = _encUp ? (Math.floor(Math.random()*3) + 2) : (Math.floor(Math.random()*10) + 10); executeBattle().catch(err => { console.error('[Battle] 例外発生:', err); const _bs=document.getElementById('battle-screen'); if(_bs)_bs.style.display='none'; const _sc=document.getElementById('screen'); if(_sc)_sc.style.display='block'; hideAllWindows(); inputCallback=null; state='FIELD'; drawMap(); startFieldLoop(); }); } }
     }
 }
 
@@ -14910,6 +14913,8 @@ async function openMainMenu() {
                 if(itemData.type === 'tool') {
                     if(itemData.id === 'i_star_frag' || itemData.id === 'acc_star_bracelet' || itemData.id === 'w_star_sword') { await typeMessage("しかし なにも おこらなかった。"); continue; }
                     if(itemData.effect === 'warp_town' || itemData.id === 'i04') { char.inventory.splice(itemIdx, 1); AudioManager.playSE('magic_cast'); await typeMessage(`${char.name}は キメラのつばさを つかった！`); await typeMessage(`まぶしい ひかりに つつまれ\nセーブポイントへ もどってきた！`); const _lsp2 = partyData.last_save_pos || { map: "map_town_01", x: 10, y: 18 }; partyData.pos.map = _lsp2.map; partyData.pos.x = _lsp2.x; partyData.pos.y = _lsp2.y; currentMap = await loadExternalData('map-' + _lsp2.map); hideAllWindows(); state = 'FIELD'; drawMap(); updateBGM(); break; }
+                    if(itemData.effect === 'enc_down') { char.inventory.splice(itemIdx, 1); AudioManager.playSE('magic_cast'); partyData.tohero_steps = 100; await typeMessage(`${char.name}は ${itemData.name}を つかった！\nまものが ちかづかなくなった！`); continue; }
+                    if(itemData.effect === 'enc_up') { char.inventory.splice(itemIdx, 1); AudioManager.playSE('magic_cast'); partyData.encounter_up_steps = 100; await typeMessage(`${char.name}は ${itemData.name}を つかった！\nまものが よってきやすくなった……`); continue; }
                     if(char.hp <= 0) { await typeMessage(`${char.name}は しんでいる！`); continue; }
                     await typeMessage("だれに つかう？"); let tIdx = await selectMenu(partyData.members.map(m=>m.name), 'cmd-window', 1, true);
                     if(tIdx !== -1) { 
@@ -14924,6 +14929,9 @@ async function openMainMenu() {
                             if(itemData.id.includes('antidote') || itemData.effect === 'cure_poison') {
                                 target.isPoisoned = false;
                                 await typeMessage(`${target.name}の どくが きえた！`);
+                            } else if(itemData.effect === 'cure_paralyze') {
+                                target.isParalyzed = false;
+                                await typeMessage(`${target.name}の マヒが なおった！`);
                             } else if(itemData.effect === 'mp_recovery') {
                                 let mv = parseInt(itemData.value||15); target.mp = Math.min(target.max_mp, target.mp + mv);
                                 await typeMessage(`${target.name}の MPが ${mv} かいふくした！`);
@@ -16491,6 +16499,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                 else {
                     if(act.itemIndex >= 0 && act.itemIndex < act.actor.inventory.length) act.actor.inventory.splice(act.itemIndex, 1); AudioManager.playSE('heal');
                     if(act.item.id.includes('antidote') || act.item.effect === 'cure_poison') { t.isPoisoned = false; await typeMessage(`${t.name}の どくが きえた！`); }
+                    else if(act.item.effect === 'cure_paralyze') { t.isParalyzed = false; await typeMessage(`${t.name}の マヒが なおった！`); }
                     else if(act.item.effect === 'mp_recovery') { let mv = parseInt(act.item.value||15); t.mp = Math.min(t.max_mp, t.mp + mv); await typeMessage(`${t.name}の MPが ${mv} かいふくした！`); }
                     else { let val = act.item.value; if(val === 'max' || act.item.effect === 'full_heal' || isNaN(parseInt(val))) { t.hp = t.max_hp; } else { t.hp = Math.min(t.max_hp, t.hp + parseInt(val || 30)); } await typeMessage(`${t.name}の HPが かいふくした！`); }
                 }
