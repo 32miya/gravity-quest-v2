@@ -15045,10 +15045,11 @@ async function executeBattle(fixedEnemies = null) {
                 backEndX = backOffX + Math.max(0, backList.length * step - gap);
                 totalW = Math.max(frontTotalW, backEndX);
             }
-            // 後列(高さbH)は上端0に配置し、前列は後列の高さの45%ぶんだけ下にずらす。
-            // → 後列は上側45%(頭・肩)だけ前列の上に見え、下側55%(下半身)は前列の絵に隠れて
-            //   グループとして重なって見えるようにする
-            const frontTopOff = Math.round(bH * 0.45);
+            // 後列(高さbH)は少し下げて配置し、前列は後列の高さの45%ぶんだけさらに下にずらす。
+            // → カタログ的に後列だけ浮いて見える印象を減らしつつ、後列の頭・肩は
+            //   前列の上に見え、下半身は前列の絵に隠れてグループとして重なって見えるようにする
+            const backTopOff = Math.round(bH * 0.18);
+            const frontTopOff = backTopOff + Math.round(bH * 0.45);
             const boxH       = frontTopOff + fH + 20; // 名前ラベル含む高さ
 
             let html = `<div style="position:relative;width:${totalW}px;height:${boxH}px;">`;
@@ -15057,7 +15058,7 @@ async function executeBattle(fixedEnemies = null) {
             backList.forEach((e, i) => {
                 const lx = backOffX + i * step;
                 const deadOp = e.hp <= 0 ? 'opacity:0.35;' : '';
-                html += `<div class="enemy-container" style="position:absolute;left:${lx}px;top:0;width:${bW}px;z-index:1;text-align:center;">
+                html += `<div class="enemy-container" style="position:absolute;left:${lx}px;top:${backTopOff}px;width:${bW}px;z-index:1;text-align:center;">
                     <div class="enemy-img-box" style="width:${bW}px;height:${bH}px;${deadOp}">${getEnemyImageHtml(e.id)}</div>
                 </div>`;
             });
@@ -15075,7 +15076,7 @@ async function executeBattle(fixedEnemies = null) {
             backList.forEach((e, i) => {
                 const lx = backOffX + i * step;
                 const nameC = e.voidBarrierTurns > 0 ? '#f0f' : (e.hp <= 0 ? '#666' : '#fff');
-                html += `<div style="position:absolute;left:${lx}px;top:${bH + 2}px;width:${bW}px;z-index:3;text-align:center;font-size:${S(10)}px;text-shadow:1px 1px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:${nameC};">${e.displayName}</div>`;
+                html += `<div style="position:absolute;left:${lx}px;top:${backTopOff + bH + 2}px;width:${bW}px;z-index:3;text-align:center;font-size:${S(10)}px;text-shadow:1px 1px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:${nameC};">${e.displayName}</div>`;
             });
             frontList.forEach((e, i) => {
                 const lx = i * step;
