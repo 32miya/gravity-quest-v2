@@ -14724,24 +14724,44 @@ async function openMainMenu() {
                 let eqAc= m.equipment.accessory ? (masterData.items[m.equipment.accessory]?.name || "なぞの指輪") : "なし";
                 let hpCol = '#fff'; if(m.hp <= m.max_hp/3 || m.hp===0) hpCol = '#f55'; else if(m.hp <= m.max_hp/2) hpCol = '#fa0';
                 let mpCol = '#fff'; if(m.max_mp>0 && m.mp <= m.max_mp/3) mpCol = '#f55'; else if(m.max_mp>0 && m.mp <= m.max_mp/2) mpCol = '#fa0';
-                const _eqRow = (lbl, name) => { const isEmpty = name==='なし'; return `<div style="display:flex;gap:6px;line-height:1.7;"><span style="color:#888;flex-shrink:0;width:1.2em;">${lbl}</span><span style="color:${isEmpty?'#555':'#e8e8e8'};">${_sn(name)}</span></div>`; };
-                let html = `<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #888;padding-bottom:5px;margin-bottom:6px;"><span style="font-size:16px;font-weight:bold;">${m.name}</span><span style="font-size:12px;color:#aef;">LV.${m.lv}　${m.job}</span></div>`;
-                html += `<div style="display:grid;grid-template-columns:1fr 1fr;column-gap:10px;font-size:13px;line-height:1.75;margin-bottom:7px;">`;
-                html += `<div>HP <span style="color:${hpCol};float:right;">${Math.max(0,m.hp)}&thinsp;/&thinsp;${m.max_hp}</span></div>`;
-                html += `<div>MP <span style="color:${mpCol};float:right;">${m.mp}&thinsp;/&thinsp;${m.max_mp}</span></div>`;
-                html += `<div>攻 <span style="float:right;">${getAtk(m)}</span></div>`;
-                html += `<div>守 <span style="float:right;">${getDef(m)}</span></div>`;
-                html += `<div>速 <span style="float:right;">${getSpd(m)}</span></div>`;
-                html += `<div style="color:#999;font-size:11px;">EXP<span style="float:right;">${m.exp}</span></div>`;
+                // 次のレベルまでの必要EXPをジョブの成長テーブルから算出(データが無い/最大レベルなら "─")
+                let _nextExpStr = '─';
+                if (masterData.growth && masterData.growth[m.job]) {
+                    const _nlv = masterData.growth[m.job].find(g => g.level === m.lv + 1);
+                    if (_nlv) _nextExpStr = String(Math.max(0, _nlv.reqExp - m.exp));
+                }
+                // 見やすいステータス2カラム: 左=HP/MP/次のレベルまで、右=攻/守/速
+                const _statRow = (lbl, val, col) => `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding:3px 0;white-space:nowrap;"><span style="color:#9ab;flex-shrink:0;">${lbl}</span><span style="font-weight:bold;color:${col||'#fff'};font-variant-numeric:tabular-nums;">${val}</span></div>`;
+                const _eqRow = (lbl, name) => { const isEmpty = name==='なし'; return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.08);"><span style="flex-shrink:0;width:56px;font-size:11px;color:#889;background:rgba(255,255,255,0.06);border-radius:3px;padding:2px 5px;text-align:center;">${lbl}</span><span style="color:${isEmpty?'#555':'#e8e8e8'};font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_sn(name)}</span></div>`; };
+                // #status-windowはshowWindow()でdisplay:flex(既定row方向)になるため、
+                // 内容全体を1個のcolumn方向ラッパーで包んで縦積みを保証する
+                let html = `<div style="display:flex;flex-direction:column;width:100%;">`;
+                html += `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-bottom:2px solid #678;padding-bottom:6px;margin-bottom:8px;white-space:nowrap;">`;
+                html += `<span style="font-size:18px;font-weight:bold;">${m.name}</span>`;
+                html += `<span style="font-size:13px;color:#aef;flex-shrink:0;">Lv.${m.lv}　${m.job}</span>`;
                 html += `</div>`;
-                html += `<div style="border-top:1px solid #444;padding-top:5px;font-size:12px;">${_eqRow('武', eqW)}${_eqRow('体', eqA)}${_eqRow('盾', eqS)}${_eqRow('頭', eqH)}${_eqRow('指', eqAc)}</div>`;
+                html += `<div style="display:grid;grid-template-columns:1fr 1fr;column-gap:14px;font-size:14px;margin-bottom:10px;">`;
+                html += `<div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:6px 10px;">`;
+                html += _statRow('HP', `${Math.max(0,m.hp)} / ${m.max_hp}`, hpCol);
+                html += _statRow('MP', `${m.mp} / ${m.max_mp}`, mpCol);
+                html += _statRow('つぎのLvまで', _nextExpStr, '#cf8');
+                html += `</div>`;
+                html += `<div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:6px 10px;">`;
+                html += _statRow('こうげき力', getAtk(m));
+                html += _statRow('しゅび力', getDef(m));
+                html += _statRow('すばやさ', getSpd(m));
+                html += `</div>`;
+                html += `</div>`;
+                html += `<div style="margin-bottom:6px;">${_eqRow('武器', eqW)}${_eqRow('よろい', eqA)}${_eqRow('たて', eqS)}${_eqRow('かぶと', eqH)}${_eqRow('アクセ', eqAc)}</div>`;
+                html += `<div style="text-align:right;font-size:11px;color:#999;margin-bottom:4px;">EXP ${m.exp}</div>`;
                 const _hasPrev = _stIdx > 0, _hasNext = _stIdx < partyData.members.length - 1;
-                html += `<div style="border-top:1px solid #555;margin-top:8px;padding-top:6px;font-size:12px;display:flex;justify-content:space-between;align-items:center;">`;
+                html += `<div style="border-top:1px solid #555;margin-top:4px;padding-top:6px;font-size:12px;display:flex;justify-content:space-between;align-items:center;">`;
                 html += `<span id="_st_prev" style="padding:2px 6px;background:${_hasPrev?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.04)'};border-radius:3px;color:${_hasPrev?'#fff':'#444'};cursor:pointer;">◀前へ</span>`;
                 html += `<span class="blink">▼とじる</span>`;
                 html += `<span id="_st_next" style="padding:2px 6px;background:${_hasNext?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.04)'};border-radius:3px;color:${_hasNext?'#fff':'#444'};cursor:pointer;">次へ▶</span>`;
                 html += `</div>`;
                 html += `<div style="font-size:10px;color:#888;text-align:center;margin-top:3px;">${_stIdx+1}/${partyData.members.length}人目　◀▶で切り替え</div>`;
+                html += `</div>`;
                 document.getElementById('status-window').innerHTML = html;
                 showWindow('status-window'); showGoldWindow();
                 const _stDir = await new Promise(resolve => {
