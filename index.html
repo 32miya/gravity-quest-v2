@@ -9954,6 +9954,27 @@ function drawMap() {
                 _sg.addColorStop(0, `rgba(150,220,255,${0.5+Math.sin(_sw/400)*0.3})`);
                 _sg.addColorStop(1, 'rgba(100,180,255,0)');
                 ctx.fillStyle = _sg; ctx.beginPath(); ctx.arc(px+TILE_SIZE/2, py-4+_swBob, 10, 0, Math.PI*2); ctx.fill();
+            } else if(npc.id === 'obj_eden_entrance') {
+                // かくし扉: 人型キャラではなく、草むらに埋もれた古い石段の痕跡として描画
+                const _T = TILE_SIZE;
+                ctx.save();
+                ctx.fillStyle = '#5c5038';
+                ctx.fillRect(px+_T*0.16, py+_T*0.58, _T*0.28, _T*0.22);
+                ctx.fillRect(px+_T*0.54, py+_T*0.68, _T*0.30, _T*0.20);
+                ctx.fillStyle = '#8a7a56';
+                ctx.fillRect(px+_T*0.16, py+_T*0.58, _T*0.28, _T*0.07);
+                ctx.fillRect(px+_T*0.54, py+_T*0.68, _T*0.30, _T*0.07);
+                ctx.strokeStyle = 'rgba(40,30,10,0.35)'; ctx.lineWidth = 0.6;
+                ctx.strokeRect(px+_T*0.16, py+_T*0.58, _T*0.28, _T*0.22);
+                ctx.strokeRect(px+_T*0.54, py+_T*0.68, _T*0.30, _T*0.20);
+                // 石の隙間から覗く淡い光（開放済みなら「かくし扉」として少し目立たせる）
+                if (partyData.flags.flag_tower_cleared || partyData.flags.flag_2nd_maou_cleared || partyData.flags.last_boss_defeated) {
+                    const _et = Date.now() / 500;
+                    ctx.globalAlpha = 0.35 + Math.sin(_et) * 0.15;
+                    ctx.fillStyle = '#ffe8a0';
+                    ctx.fillRect(px+_T*0.42, py+_T*0.60, _T*0.16, _T*0.10);
+                }
+                ctx.restore();
             } else if(npc.id.startsWith('obj_seed_')) {
                 const _st = Date.now() / 600 + parseInt(nx) * 1.7 + parseInt(ny) * 2.3;
                 ctx.save(); ctx.globalAlpha = 0.7 + Math.sin(_st) * 0.3;
