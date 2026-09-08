@@ -11003,12 +11003,35 @@ function drawMap() {
     }
     }
 
-    let _shipDrawPos=null,_shipDrawDir=partyData.dir;if((_isFieldMap||/^map_ocean_/.test(partyData.pos.map))&&partyData.flags&&partyData.flags.has_ship&&currentMap.tiles){const _sn=Math.min(4,(partyData.members||[]).length);for(let _si=_sn-1;_si>=0;_si--){const _smp=_si===0?{x:partyData.pos.x,y:partyData.pos.y,dir:partyData.dir}:(moveHistory[_si-1]||null);if(!_smp||_smp.x<0||_smp.y<0||_smp.x>=currentMap.width||_smp.y>=currentMap.height)continue;if(currentMap.tiles[_smp.y*currentMap.width+_smp.x]===5){_shipDrawPos={x:_smp.x,y:_smp.y};_shipDrawDir=_smp.dir||partyData.dir;break;}}}let displayOrder = []; partyData.members.forEach(m => { if(m.hp > 0) displayOrder.push(m); }); partyData.members.forEach(m => { if(m.hp <= 0) displayOrder.push(m); });
+    let _shipDrawPos=null,_shipDrawDir=partyData.dir;if((_isFieldMap||/^map_ocean_/.test(partyData.pos.map))&&partyData.flags&&partyData.flags.has_ship&&currentMap.tiles){
+        const _sn=Math.min(4,(partyData.members||[]).length);
+        for(let _si=_sn-1;_si>=0;_si--){
+            const _smp=_si===0?{x:partyData.pos.x,y:partyData.pos.y,dir:partyData.dir,map:partyData.pos.map}:(moveHistory[_si-1]||null);
+            if(!_smp)continue;
+            // 履歴が記録された時点のマップ自身のタイルで水上判定(境界越え直後は現在マップと異なる場合がある)
+            const _smpMap=(_smp.map&&externalMapData[_smp.map])||currentMap;
+            if(_smp.x<0||_smp.y<0||_smp.x>=_smpMap.width||_smp.y>=_smpMap.height)continue;
+            if(_smpMap.tiles[_smp.y*_smpMap.width+_smp.x]!==5)continue;
+            // 画面描画用座標は現在マップ基準にオフセット変換
+            let _dx=_smp.x,_dy=_smp.y;
+            if(_isFieldMap&&_smp.map&&_smp.map!==_mapId){
+                const _hmf=_smp.map.match(/map_field_(\d+)_(\d+)/);
+                if(_hmf){_dx+=(parseInt(_hmf[1])-_fgx)*(currentMap.width||45);_dy+=(parseInt(_hmf[2])-_fgy)*(currentMap.height||45);}
+            }
+            _shipDrawPos={x:_dx,y:_dy};_shipDrawDir=_smp.dir||partyData.dir;break;
+        }
+    }
+    let displayOrder = []; partyData.members.forEach(m => { if(m.hp > 0) displayOrder.push(m); }); partyData.members.forEach(m => { if(m.hp <= 0) displayOrder.push(m); });
     const _wNow = Date.now(); const _isWalking = (_wNow - _lastMoveTime) < 350;
     for(let i = displayOrder.length - 1; i >= 0; i--) {
         let member = displayOrder[i]; let px = partyData.pos.x, py = partyData.pos.y, pDir = partyData.dir;
+        // 水上判定は「見た目のオフセット後座標」ではなく、実際にその履歴が記録された
+        // マップ自身のタイル配列・ローカル座標で行う(境界越え直後は_wcMapがcurrentMapと異なる)
+        let _wcMap = currentMap, _wcX = px, _wcY = py;
         if(i > 0 && moveHistory[i-1]) {
             px = moveHistory[i-1].x; py = moveHistory[i-1].y; pDir = moveHistory[i-1].dir || partyData.dir;
+            _wcX = px; _wcY = py;
+            _wcMap = (moveHistory[i-1].map && externalMapData[moveHistory[i-1].map]) || currentMap;
             // フィールドマップ境界越え: 別マップの履歴座標をオフセット変換
             if (_isFieldMap && moveHistory[i-1].map && moveHistory[i-1].map !== _mapId) {
                 const _hmf = moveHistory[i-1].map.match(/map_field_(\d+)_(\d+)/);
@@ -11019,7 +11042,7 @@ function drawMap() {
         const _bobY = _isWalking ? [0,-2,0,-4,0,-2,0,-4][_mPhase] : Math.round(Math.sin(_wNow / 1200 + i * 1.5) * 1);
         if(member.hp <= 0) { ctx.font = "24px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("⚰️", px*TILE_SIZE - camX + TILE_SIZE/2, py*TILE_SIZE - camY + TILE_SIZE/2); }
         else {
-            const _memberOnWater = (_isFieldMap || /^map_ocean_/.test(partyData.pos.map)) && partyData.flags && partyData.flags.has_ship && currentMap.tiles && px >= 0 && py >= 0 && px < currentMap.width && py < currentMap.height && currentMap.tiles[py * currentMap.width + px] === 5;
+            const _memberOnWater = (_isFieldMap || /^map_ocean_/.test(partyData.pos.map)) && partyData.flags && partyData.flags.has_ship && _wcMap && _wcMap.tiles && _wcX >= 0 && _wcY >= 0 && _wcX < _wcMap.width && _wcY < _wcMap.height && _wcMap.tiles[_wcY * _wcMap.width + _wcX] === 5;
             if (_memberOnWater) continue;
             if (_isWalking) {
                 const _sfx = px*TILE_SIZE - camX + TILE_SIZE/2;
