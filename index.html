@@ -2254,6 +2254,23 @@ function getMapDisplayName(mapId, mapObj) { if (mapObj && mapObj.name) return ma
     if (mapId.includes('tower_darkspire')) return "闇の尖塔";
     if (mapId.includes('town_01')) return "城下町エニシア"; if (mapId.includes('castle_01')) return "エニシア城"; if (mapId.includes('frontier_village')) return "ミーラ村"; if (mapId.includes('dungeon_1f')) return "試練の洞窟 1F"; if (mapId.includes('dungeon_b1f')) return "試練の洞窟 B1F"; if (mapId.includes('dungeon_b2f')) return "試練の洞窟 B2F"; if (mapId.includes('dungeon_b3f')) return "試練の洞窟 B3F"; if (mapId.includes('tower_1f')) return "天空の塔 1F"; if (mapId.includes('tower_2f')) return "天空の塔 2F"; if (mapId.includes('tower_3f')) return "天空の塔 3F"; if (mapId.includes('demon_castle_1f')) return "魔王城 1F"; if (mapId.includes('demon_castle_2f')) return "魔王城 2F"; if (mapId.includes('demon_castle_3f')) return "魔王城 3F"; if (mapId.includes('demon_castle_4f')) return "魔王城 4F"; if (mapId === 'map_dharma_temple_north') return "北のダーマ神殿"; if (mapId === 'map_dharma_temple') return "ダーマ神殿"; if (mapId.includes('shrine')) return "ほこら"; if (mapId.includes('town') || mapId.includes('village') || mapId.includes('market')) return "街・村"; if (mapId.includes('dungeon') || mapId.includes('cave')) return "ダンジョン"; if (mapId.includes('field')) return "フィールド"; return "未知の場所"; }
 function getCurrentWorldPos() { let m = partyData.pos.map; if (!m) return {x: 2, y: 2}; let wx = -1, wy = -1; if (m.startsWith('map_field_') && m.split('_').length >= 4) { wx = parseInt(m.split('_')[2]); wy = parseInt(m.split('_')[3]); } else if (m.startsWith('map_ocean_')) { if (partyData.last_field_pos && /^map_field_/.test(partyData.last_field_pos.map)) { const _pts = partyData.last_field_pos.map.split('_'); wx = parseInt(_pts[2]); wy = parseInt(_pts[3]); } else { wx = 2; wy = 2; } } else if (m.includes('castle_north')) { wx = 0; wy = 0; } else if (m.includes('town') || m.includes('castle')) { wx = 2; wy = 2; } else if (m.includes('dungeon') || m.includes('cave')) { wx = 2; wy = 0; } else if (m.includes('shrine')) { wx = 2; wy = 3; } else if (m.includes('nord') || m.includes('north')) { wx = 5; wy = 0; } else if (m.includes('south') || m.includes('south_port') || m.includes('coral')) { wx = 6; wy = 7; } else if (m.includes('east') || m.includes('estoria')) { wx = 7; wy = 4; } else if (m.includes('frost') || m.includes('west')) { wx = 1; wy = 6; } if (wx === -1 || wy === -1) { wx = 2; wy = 2; } return {x: wx, y: wy}; }
+// メインストーリーの進行フラグから「次にすべきこと」を短く要約する。
+// 国王ボルドの案内セリフ(★王様ブロック)と同じフラグ判定順序に揃えており、
+// 「どこに進むべきか分からない」という声に応えるため、ちず画面の先頭に表示する。
+function getCurrentObjectiveText() {
+    const f = partyData.flags || {};
+    if (f.last_boss_defeated) {
+        if (f.flag_2nd_maou_cleared) return 'すべての 旅は 終わった。\n自由に 世界を 旅しよう。';
+        return 'エニシア城の 宮廷賢者バルダックに\n話しかけよう。';
+    }
+    if (f.flag_mage_trial_cleared) return '準備は 整った。東の 魔王城へ 挑もう。';
+    if (f.flag_weapon_forged) return '東の 極果ての 島の 大魔導士\nラムダスを 訪ねよう。';
+    if (f.flag_tower_cleared) return '西の 大森林の 奥の 伝説の 鍛冶屋を\n訪ねよう。';
+    if (f.flag_dharma_north_visited && f.flag_dungeon_cleared) return '東の「天空の 塔」、または 船で 西の 海へ\n向かおう。';
+    if (f.flag_dungeon_cleared) return '主大陸 北西の「北のダーマ神殿」で\n転職を 済ませよう。';
+    if (f.flag_king_met) return '南西の「試練の 洞窟」を 目指そう。\n(途中の ミーラ村で 休憩できる)';
+    return 'まずは 城の 国王に 会いに 行こう。';
+}
 async function showWorldMap() {
     if (!partyData.flags.visited_maps) partyData.flags.visited_maps = {};
     partyData.flags.visited_maps['map_field_2_2'] = true;
@@ -2407,10 +2424,15 @@ async function showWorldMap() {
     ];
     const lgHtml=lgItems.map(l=>`<span style="display:inline-flex;align-items:center;gap:2px;margin:1px 3px;font-size:10px;"><span style="width:9px;height:9px;background:${l.c};border:1px solid rgba(255,255,255,0.3);display:inline-block;border-radius:1px;"></span>${l.t}</span>`).join('');
 
-    let html=`<div style="font-size:14px;border-bottom:1px solid #446;margin-bottom:6px;padding-bottom:3px;text-align:center;letter-spacing:3px;color:#d0e8ff;font-weight:bold;">せ か い ち ず</div>`;
+    // #status-windowはshowWindow()でdisplay:flex(既定row方向)になるため、
+    // 内容全体を1個のcolumn方向ラッパーで包んで縦積みを保証する
+    let html=`<div style="display:flex;flex-direction:column;width:100%;">`;
+    html+=`<div style="font-size:14px;border-bottom:1px solid #446;margin-bottom:6px;padding-bottom:3px;text-align:center;letter-spacing:3px;color:#d0e8ff;font-weight:bold;">せ か い ち ず</div>`;
+    html+=`<div style="background:rgba(255,220,120,0.12);border:1px solid rgba(255,220,120,0.4);border-radius:5px;padding:6px 8px;margin-bottom:8px;font-size:12px;line-height:1.6;color:#ffe8a8;white-space:pre-line;"><span style="color:#ffd060;font-weight:bold;">▶ つぎに すべきこと</span><br>${getCurrentObjectiveText().replace(/\n/g,'<br>')}</div>`;
     html+=`<div style="text-align:center;"><div style="position:relative;width:270px;height:270px;margin:0 auto;border:2px solid #446;box-shadow:0 0 12px rgba(0,80,200,0.5);"><img src="${imgSrc}" style="image-rendering:pixelated;image-rendering:crisp-edges;width:270px;height:270px;display:block;"/>${markerHtml}</div></div>`;
     html+=`<div style="margin-top:5px;text-align:center;line-height:1.7;">${lgHtml}</div>`;
     html+=`<div style="margin-top:6px;text-align:right;font-size:12px;" class="blink">▼とじる</div>`;
+    html+=`</div>`;
     document.getElementById('status-window').innerHTML=html;
     showWindow('status-window');
     await new Promise(resolve=>{ inputCallback=(key)=>{ if(key==='Enter'||key==='Escape'||key===' '){ AudioManager.playSE('decision'); inputCallback=null; resolve(); } }; });
@@ -14519,7 +14541,11 @@ async function eventShop(npcId) {
 }
 
 async function openSubstoryLedger() {
-    let html = `<div style="font-size:13px;border-bottom:1px solid #446;margin-bottom:7px;padding-bottom:3px;text-align:center;letter-spacing:3px;color:#d0e8ff;font-weight:bold;">ふ し ぎ な 台 帳</div>`;
+    // #status-windowはshowWindow()でdisplay:flex(既定row方向)になるため、
+    // 内容全体を1個のcolumn方向ラッパーで包んで縦積みを保証する
+    let html = `<div style="display:flex;flex-direction:column;width:100%;">`;
+    html += `<div style="font-size:13px;border-bottom:1px solid #446;margin-bottom:7px;padding-bottom:3px;text-align:center;letter-spacing:3px;color:#d0e8ff;font-weight:bold;">ふ し ぎ な 台 帳</div>`;
+    html+=`<div style="background:rgba(255,220,120,0.12);border:1px solid rgba(255,220,120,0.4);border-radius:5px;padding:6px 8px;margin-bottom:8px;font-size:12px;line-height:1.6;color:#ffe8a8;white-space:pre-line;"><span style="color:#ffd060;font-weight:bold;">▶ つぎに すべきこと</span><br>${getCurrentObjectiveText().replace(/\n/g,'<br>')}</div>`;
     SUBSTORIES.forEach(sq => {
         const lv = getSQ(sq.id);
         const done = lv >= 99;
@@ -14538,6 +14564,7 @@ async function openSubstoryLedger() {
     const activeCount = SUBSTORIES.filter(s => getSQ(s.id) > 0 && !isSQDone(s.id)).length;
     html += `<div style="margin-top:7px;border-top:1px solid #446;padding-top:4px;font-size:11px;color:#a0c0ff;text-align:center;">クリア ${doneCount}/${SUBSTORIES.length}　進行中 ${activeCount}</div>`;
     html += `<div style="margin-top:4px;text-align:right;font-size:11px;color:#888;" class="blink">▼とじる</div>`;
+    html += `</div>`;
     document.getElementById('status-window').innerHTML = html;
     showWindow('status-window');
     await new Promise(resolve => {
