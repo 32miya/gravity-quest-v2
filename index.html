@@ -942,6 +942,39 @@ const _GQ_CHESTS = [
     'map_village_elfheim_3_17'
 ];
 
+// ルーラの行き先(神父のいる町・城・祠)。'map_'接頭辞は正規化して比較するため
+// 未付与の正規名で統一している。パスワードには町ごとに1ビットの訪問フラグを
+// 追加符号化し、ふっかつのじゅもんでも行き先情報を復元できるようにする。
+const _GQ_RULA_TOWNS = [
+    'castle_1f','town_01','town_port','market_east','shrine_warp','village_border',
+    'zenithia_castle','castle_kagane','castle_01','waypoint_village','frontier_village',
+    'fishing_village_nw','castle_zarmo','castle_estoria','castle_deserta','town_02','town_03',
+    'town_nord','town_rosalia','town_coral','town_bazaar','town_estoria_city','town_oasis',
+    'town_south_port','town_frost','village_elfheim','town_salmon'
+];
+// マップ内の歩行可能な着地点を探す(上り階段タイルを優先、なければ中心からBFS)
+function _findRulaLandingSpot(map) {
+    if (!map || !map.tiles || !map.width) return {x:5,y:8};
+    const solid = [1,2,4,5,15,16,17,18,19,20,25];
+    let wx = Math.floor(map.width/2), wy = Math.floor(map.height/2);
+    for (let y = map.height-1; y >= 0; y--) {
+        for (let x = 0; x < map.width; x++) {
+            if (map.tiles[y*map.width+x] === 22) return {x, y: Math.max(1,y-1)};
+        }
+    }
+    for (let r = 0; r <= 10; r++) {
+        for (let dy = -r; dy <= r; dy++) {
+            for (let dx = -r; dx <= r; dx++) {
+                if (Math.abs(dx)!==r && Math.abs(dy)!==r) continue;
+                const tx = wx+dx, ty = wy+dy;
+                if (tx<1||ty<1||tx>=map.width-1||ty>=map.height-1) continue;
+                if (!solid.includes(map.tiles[ty*map.width+tx]) && !(map.npcs && map.npcs[`${tx},${ty}`])) return {x:tx,y:ty};
+            }
+        }
+    }
+    return {x:wx,y:wy};
+}
+
 // ビット書き込み: 6ビット単位でbytes配列に積む
 function _gqBitPack(fields) {
     const bits = [];
@@ -1073,9 +1106,13 @@ function packSaveData(pData) {
         // 所持品8スロット 各8ビット
         for (let s=0;s<8;s++) fields.push([_slot((m.inventory||[])[s]),8]);
     }
+    // ルーラ行き先フラグ (町ごとに1bit, 計27bit) — 874+27=901ビット→ceil(901/6)=151文字+チェックサム1文字=152文字
+    const _rd = f.rura_destinations || {};
+    const _rdNorm = new Set(Object.keys(_rd).map(k => k.startsWith('map_') ? k.slice(4) : k));
+    for (const _rt of _GQ_RULA_TOWNS) fields.push([_rdNorm.has(_rt) ? 1 : 0, 1]);
     const payload = _gqBitPack(fields);
     const cs = payload.reduce((a,b)=>a+b,0)%64;
-    const bytes = [cs, ...payload.slice(0,146)]; // 1+146=147文字
+    const bytes = [cs, ...payload.slice(0,151)]; // 1+151=152文字
     return bytes.map(b=>_GQ_KANA64[b%64]).join('');
 }
 
@@ -1084,11 +1121,9 @@ function _restoreRuraDestinations(pData) {
     // externalMapData全件から機械的にルーラ行き先へ登録していたため、
     // ふっかつのじゅもんで復元した直後、実際には訪れていない場所まで
     // すべてルーラの行き先リストに表示されてしまうバグがあった。
-    // パスワード(ふっかつのじゅもん)には訪問履歴までは符号化されていないため、
-    // 復元直後は「行ったことがある場所」の情報を正しく持たない。
-    // ここでは箱(オブジェクト)の存在保証のみ行い、実際の行き先は
-    // じゅもん詠唱時点の首都フォールバック(下記)と、以後の再訪問で
-    // 自然に登録されていく既存の仕組みに委ねる。
+    // 現在はunpackSaveData()側でパスワードに符号化された町ごとの訪問
+    // フラグ(_GQ_RULA_TOWNS)からrura_destinationsを正しく復元しているため、
+    // ここでは(旧形式パスワード等で未設定だった場合の)箱の存在保証のみ行う。
     if (!pData.flags) pData.flags = {};
     if (!pData.flags.rura_destinations) pData.flags.rura_destinations = {};
 }
@@ -1115,6 +1150,7 @@ function unpackSaveData(pwd) {
         const _jb = pwd.length >= 115 ? 4 : 3;  // 職業ビット数
         const _hasSQ = pwd.length >= 120; // SQ旧形式(1bit)有無
         const _hasFullSQ = pwd.length >= 147; // SQ新形式(4bit)+宝箱フラグ有無
+        const _hasRulaTowns = pwd.length >= 152; // ルーラ行き先フラグ(町ごとに1bit)有無
         const _minLen = _eb === 8 ? 109 : 100;
         if ([...pwd].every(c => _GQ_KANA64.includes(c)) && pwd.length >= _minLen) {
             const bytes = [...pwd].map(c => _GQ_KANA64.indexOf(c));
@@ -1159,6 +1195,23 @@ function unpackSaveData(pwd) {
                     for(let lvl=1;lvl<=lv;lvl++){const gd=masterData.growth[job].find(r=>r.level===lvl);if(gd&&gd.learnMagic)gd.learnMagic.forEach(n=>{const fd=Object.values(masterData.spells||{}).find(s=>s.name===n);if(fd&&!spells.includes(fd.id))spells.push(fd.id);});}
                 }
                 members.push({id:'p'+Math.random(),name,job,lv,exp,...bs,equipment:{weapon,armor,shield,helmet,accessory},inventory,spells});
+            }
+            // ルーラ行き先フラグ: 訪問済みとして符号化された町を、現在のマップ定義から
+            // 着地座標・表示名を解決して復元する(訪問履歴そのものは保存せず、
+            // 各町の入口/中央付近の歩行可能タイルを毎回探索するため常に安全な位置になる)
+            if (_hasRulaTowns) {
+                const _rd = {};
+                for (const _rt of _GQ_RULA_TOWNS) {
+                    const _bit = read(1);
+                    if (!_bit) continue;
+                    const _rk = externalMapData && externalMapData['map_'+_rt] ? 'map_'+_rt
+                              : (externalMapData && externalMapData[_rt] ? _rt : null);
+                    if (!_rk) continue;
+                    const _rm = externalMapData[_rk];
+                    const _pos = _findRulaLandingSpot(_rm);
+                    _rd[_rk] = { x:_pos.x, y:_pos.y, name: _rm.name || getMapDisplayName(_rk) };
+                }
+                flags.rura_destinations = _rd;
             }
             const data={gold,steps_to_encounter:15,tohero_steps:0,tramana_steps:0,members,flags,pos:{map:mapId,x:px,y:py},dir:2};
             return {type: isClr?'clear':'normal', data};
@@ -14347,7 +14400,7 @@ async function eventPriest() {
             localStorage.setItem('gravity_quest_save', JSON.stringify(partyData)); await typeMessage("スマホに データーを きろくしました。\n（※ブラウザ履歴を消すと消える場合があります）");
             let encoded = packSaveData(partyData);
             const _hasKanji=partyData.members.some(m=>_hasUnsupportedNameChars(m.name));
-            const _pwdNote="念のため「ふっかつのじゅもん」も\nコピーしておくことを お勧めします。\n（5文字区切り・147文字）"+(_hasKanji?"\n\n※名前に漢字が含まれています。\n漢字は呪文では継承されないため\nひらがな・カタカナ・英数字に\n変更することをお勧めします。":"");
+            const _pwdNote="念のため「ふっかつのじゅもん」も\nコピーしておくことを お勧めします。\n（5文字区切り・152文字）"+(_hasKanji?"\n\n※名前に漢字が含まれています。\n漢字は呪文では継承されないため\nひらがな・カタカナ・英数字に\n変更することをお勧めします。":"");
             await showCustomDialog('copy', _pwdNote, _gqFormatPwd(encoded));
             if (partyData.flags && partyData.flags.flag_2nd_maou_cleared) { await typeMessage("しかし まだ せかいのどこかに\nふおんな けはいが のこっております...\nきをつけて おすすみください。"); }
         } else if (choice === 1) {
@@ -14356,7 +14409,7 @@ async function eventPriest() {
             const _hasK2=partyData.members.some(m=>_hasUnsupportedNameChars(m.name));
             await typeMessage("あなたの これまでの ぼうけんを\nひらがなの じゅもんに して おしえましょう。");
             if(_hasK2) await typeMessage("【注意】名前に漢字が含まれています。\n漢字は「ふっかつのじゅもん」では\n引き継がれません。\nひらがな・カタカナ・英数字（A-Z・0-9）\nをお使いください。");
-            await showCustomDialog('copy', "ふっかつのじゅもん\n（5文字区切り・147文字）\n枠内を長押しでコピーできます", _gqFormatPwd(encoded)); await typeMessage("じゅもんを ともだちに おしえれば\nおなじ ところから ぼうけんできますよ。");
+            await showCustomDialog('copy', "ふっかつのじゅもん\n（5文字区切り・152文字）\n枠内を長押しでコピーできます", _gqFormatPwd(encoded)); await typeMessage("じゅもんを ともだちに おしえれば\nおなじ ところから ぼうけんできますよ。");
         } else if (choice === 2) {
             let deadMembers = partyData.members.filter(m => m.hp <= 0);
             if(deadMembers.length === 0) await typeMessage("しんでいる なかまは いませんよ。");
