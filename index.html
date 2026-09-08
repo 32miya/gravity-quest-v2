@@ -320,7 +320,19 @@
                 { id: "x08", name: "命の指輪", effect: "hp_regen_walk", price: 0, description: "歩くたびにHPが1ずつ回復する。癒しの指輪。" },
                 { id: "x09", name: "祈りの指輪", effect: "mp_recovery_use", price: 2500, description: "使うとMPが回復する。稀に壊れてしまう。" },
                 { id: "x10", name: "星降る腕輪", effect: "agi_double", price: 0, description: "素早さが2倍になる、誰もが欲しがる腕輪。" },
-                { id: "x11", name: "魔神の指輪", effect: "atk_up_crit", price: 0, description: "【呪】守備力が0になるが、会心の一撃が出やすくなる。" }
+                { id: "x11", name: "魔神の指輪", effect: "atk_up_crit", price: 0, description: "【呪】守備力が0になるが、会心の一撃が出やすくなる。" },
+
+                // --- 追加アクセサリー10種 ---
+                { id: "x12", name: "鉄壁の指輪", defense: 25, price: 2000, description: "守りを大きく高める、頑丈な鉄の指輪。" },
+                { id: "x13", name: "精霊の耳飾り", effect: "spell_power_up", price: 4000, description: "呪文の威力を高める、精霊の力が宿った耳飾り。" },
+                { id: "x14", name: "すり抜けの指輪", effect: "evasion_up", price: 2800, description: "敵の攻撃をわずかにすり抜けやすくなる指輪。" },
+                { id: "x15", name: "不屈のお守り", effect: "status_resist", price: 2200, description: "状態異常にかかりにくくなる、旅の安全を願うお守り。" },
+                { id: "x16", name: "四大の護符", effect: "resist_fire_ice", price: 6000, description: "炎と氷、両方のダメージを和らげる護符。" },
+                { id: "x17", name: "紅蓮の耳飾り", effect: "resist_fire", price: 2000, description: "炎属性のダメージを和らげる真紅の耳飾り。" },
+                { id: "x18", name: "氷結の耳飾り", effect: "resist_ice", price: 2000, description: "氷属性のダメージを和らげる蒼い耳飾り。" },
+                { id: "x19", name: "知恵の書のペンダント", effect: "exp_up", price: 8000, description: "戦いで得られる経験値が増える、賢者の知恵が宿ったペンダント。" },
+                { id: "x20", name: "黄金のブローチ", effect: "gold_up", price: 8000, description: "戦いで手に入るゴールドが増える、商人垂涎のブローチ。" },
+                { id: "x21", name: "会心の爪飾り", effect: "crit_up", price: 5000, description: "会心の一撃が出やすくなる、猛獣の爪を模した飾り。" }
             ],
             items: [
                 { id: "i01", name: "やくそう（草）", effect: "hp_recovery", value: 30, price: 8, description: "傷口に塗るとHPが30回復する。" },
@@ -8085,6 +8097,7 @@ function calculateDamage(attacker, defender) {
     if (attacker.equipment && attacker.equipment.weapon === 'w_dagger_02') criticalRate = Math.max(criticalRate, 0.3); // 夜刀の短剣
     if (attacker.equipment && attacker.equipment.helmet && masterData.items[attacker.equipment.helmet] && masterData.items[attacker.equipment.helmet].effect === 'crit_up_small') criticalRate += 0.08; // 炎の鉢巻
     if (attacker.equipment && attacker.equipment.accessory && masterData.items[attacker.equipment.accessory]?.effect === 'atk_up_crit') criticalRate = Math.min(0.8, criticalRate + 0.3);
+    if (attacker.equipment && attacker.equipment.accessory && masterData.items[attacker.equipment.accessory]?.effect === 'crit_up') criticalRate = Math.min(0.8, criticalRate + 0.12);
 
     const isCritical = Math.random() < criticalRate && attacker.job;
 
@@ -16484,7 +16497,12 @@ ${act.actor.name}の ちからが すいとられた！`); }
     }
     
     if(!escaped && partyData.members.some(m=>m.hp>0)) {
-        AudioManager.playBGM('victory'); await typeMessage(`まものたちを やっつけた！`); partyData.gold += totalGold; await typeMessage(`${totalExp}の けいけんちを かくとく！\n${totalGold}G をてにいれた！`);
+        AudioManager.playBGM('victory');
+        // アクセサリのexp_up/gold_up効果(誰か1人が装備していればパーティ全体に適用)
+        const _hasAccEffect = (eff) => partyData.members.some(m => m.equipment && m.equipment.accessory && masterData.items[m.equipment.accessory] && masterData.items[m.equipment.accessory].effect === eff);
+        if (_hasAccEffect('exp_up')) totalExp = Math.floor(totalExp * 1.5);
+        if (_hasAccEffect('gold_up')) totalGold = Math.floor(totalGold * 1.5);
+        await typeMessage(`まものたちを やっつけた！`); partyData.gold += totalGold; await typeMessage(`${totalExp}の けいけんちを かくとく！\n${totalGold}G をてにいれた！`);
 
         // sq_05: はぐれグラちゃん撃破 → いんせきのかけら入手
         if (killedEnemyIds.includes('hagure_gura') && getSQ('sq_05') === 1 && !partyData.members.some(m => m.inventory.includes('meteorite_fragment'))) {
