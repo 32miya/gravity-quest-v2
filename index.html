@@ -4342,61 +4342,28 @@ function buildNorthCastleCrypt() {
     return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:"氷結城ノルド 地下納骨堂"};
 }
 function buildNorthDharmaTemple() {
-    // 北のダーマ神殿: 参道の間(1F) + 転職の間(奥の内陣)の2マップ構成。
+    // 北のダーマ神殿: 参道の間と転職の間(奥の内陣)を1枚のマップ内で
+    // 通路で直接つないだ構成(お城と同じ「ワープ/階段を使わない」接続方式)。
     // editorオーバーライド適用後に呼ばれる想定のため、フィールド側の入口も
     // 既存があれば再利用し、重複生成しないようガードする。
-    const W1=16, H1=16;
-    const t1 = new Array(W1*H1).fill(1);
-    const S1 = (x,y,v) => { if(x>=0&&y>=0&&x<W1&&y<H1) t1[y*W1+x]=v; };
-    const R1 = (x1,y1,x2,y2,v) => { for(let y=y1;y<=y2;y++) for(let x=x1;x<=x2;x++) S1(x,y,v); };
-    R1(1,1,14,9,0);    // 本堂
-    R1(3,11,12,13,0);  // 前室
-    R1(7,9,7,11,0);    // 本堂←→前室 廊下
-    for(let y=1;y<10;y++) for(let x=1;x<15;x++) if(t1[y*W1+x]===0) t1[y*W1+x]=9; // カーペット化
-    S1(7,2,3);          // 祭壇跡の紋章(装飾)
-    S1(7,13,22); S1(8,13,22); // フィールドへの出口
-    S1(7,0,23); S1(8,0,23);   // 転職の間へ続く扉(旅の扉タイル)
-    const exits1 = {
-        '7,13':{map:'map_field_1_1',x:22,y:19},
-        '8,13':{map:'map_field_1_1',x:22,y:19},
-        '7,0':{map:'map_dharma_temple_north_inner',x:7,y:12},
-        '8,0':{map:'map_dharma_temple_north_inner',x:7,y:12}
+    const W=16, H=26;
+    const t = new Array(W*H).fill(1);
+    const S = (x,y,v) => { if(x>=0&&y>=0&&x<W&&y<H) t[y*W+x]=v; };
+    const R = (x1,y1,x2,y2,v) => { for(let y=y1;y<=y2;y++) for(let x=x1;x<=x2;x++) S(x,y,v); };
+    R(1,1,14,9,0);    // 転職の間（奥の内陣、最も奥＝上部）
+    R(6,9,9,13,0);    // 内陣←→本堂 通路
+    R(1,13,14,21,0);  // 本堂（参道の間）
+    R(6,21,9,23,0);   // 本堂←→前室 通路
+    R(3,23,12,25,0);  // 前室（フィールドへの出口側）
+    for(let y=1;y<21;y++) for(let x=1;x<15;x++) if(t[y*W+x]===0) t[y*W+x]=9; // カーペット化(内陣+本堂)
+    S(7,2,3);           // 転職の神父の前の祭壇
+    S(7,25,22); S(8,25,22); // フィールドへの出口
+    const exits = {
+        '7,25':{map:'map_field_1_1',x:22,y:19},
+        '8,25':{map:'map_field_1_1',x:22,y:19}
     };
-    const npcs1 = {
-        '4,5':{id:'npc_dharma_monk_north_l',name:'修道士'},
-        '10,5':{id:'npc_dharma_monk_north_r',name:'修道士'},
-        '3,7':{id:'obj_chest_item',name:'宝箱'},
-        '11,7':{id:'obj_chest_item',name:'宝箱'},
-        // 参道の間の装飾（青と金の神殿らしい荘厳さを補う）
-        '5,2':{id:'obj_deco_banner',name:''},
-        '9,2':{id:'obj_deco_banner',name:''},
-        '2,3':{id:'obj_deco_stained_window',name:''},
-        '12,3':{id:'obj_deco_stained_window',name:''},
-        '3,5':{id:'deco_candelabra_gold',name:'金燭台'},
-        '11,5':{id:'deco_candelabra_gold',name:'金燭台'},
-        '7,7':{id:'obj_deco_fountain_s',name:'聖水の泉'},
-        '2,8':{id:'obj_deco_statue_angel',name:'守護天使像'},
-        '12,8':{id:'obj_deco_statue_angel',name:'守護天使像'},
-        '5,12':{id:'obj_deco_rug_blue',name:''},
-        '9,12':{id:'obj_deco_rug_blue',name:''}
-    };
-    externalMapData['map_dharma_temple_north'] = {width:W1,height:H1,tiles:t1,exits:exits1,npcs:npcs1,encounters:[],name:'北のダーマ神殿 参道の間'};
-
-    // 転職の間（奥の内陣）: 実際に転職を行う神父はこちらへ
-    const W2=16, H2=14;
-    const t2 = new Array(W2*H2).fill(1);
-    const S2 = (x,y,v) => { if(x>=0&&y>=0&&x<W2&&y<H2) t2[y*W2+x]=v; };
-    const R2 = (x1,y1,x2,y2,v) => { for(let y=y1;y<=y2;y++) for(let x=x1;x<=x2;x++) S2(x,y,v); };
-    R2(1,1,14,9,0);
-    R2(6,10,8,12,0);
-    for(let y=1;y<10;y++) for(let x=1;x<15;x++) if(t2[y*W2+x]===0) t2[y*W2+x]=9;
-    S2(7,2,3);
-    S2(7,12,22); S2(8,12,22);
-    const exits2 = {
-        '7,12':{map:'map_dharma_temple_north',x:7,y:1},
-        '8,12':{map:'map_dharma_temple_north',x:7,y:1}
-    };
-    const npcs2 = {
+    const npcs = {
+        // 転職の間（奥の内陣）: 実際に転職を行う神父はこちら
         '7,3':{id:'npc_class_change',name:'転職の神父'},
         '4,3':{id:'obj_deco_statue_woman',name:'初代賢者の像'},
         '10,3':{id:'obj_deco_statue_knight',name:'初代戦士の像'},
@@ -4410,11 +4377,29 @@ function buildNorthDharmaTemple() {
         '4,8':{id:'obj_deco_rug_red',name:''},
         '10,8':{id:'obj_deco_rug_red',name:''},
         '2,9':{id:'obj_deco_statue_angel',name:'見守る天使像'},
-        '12,9':{id:'obj_deco_statue_angel',name:'見守る天使像'}
+        '12,9':{id:'obj_deco_statue_angel',name:'見守る天使像'},
+        // 参道の間（本堂）: 案内の修道士と装飾
+        '4,17':{id:'npc_dharma_monk_north_l',name:'修道士'},
+        '10,17':{id:'npc_dharma_monk_north_r',name:'修道士'},
+        '3,19':{id:'obj_chest_item',name:'宝箱'},
+        '11,19':{id:'obj_chest_item',name:'宝箱'},
+        '5,14':{id:'obj_deco_banner',name:''},
+        '9,14':{id:'obj_deco_banner',name:''},
+        '2,15':{id:'obj_deco_stained_window',name:''},
+        '12,15':{id:'obj_deco_stained_window',name:''},
+        '3,17':{id:'deco_candelabra_gold',name:'金燭台'},
+        '11,17':{id:'deco_candelabra_gold',name:'金燭台'},
+        '7,19':{id:'obj_deco_fountain_s',name:'聖水の泉'},
+        '2,20':{id:'obj_deco_statue_angel',name:'守護天使像'},
+        '12,20':{id:'obj_deco_statue_angel',name:'守護天使像'},
+        // 前室
+        '5,24':{id:'obj_deco_rug_blue',name:''},
+        '9,24':{id:'obj_deco_rug_blue',name:''}
     };
-    externalMapData['map_dharma_temple_north_inner'] = {width:W2,height:H2,tiles:t2,exits:exits2,npcs:npcs2,encounters:[],name:'北のダーマ神殿 転職の間'};
+    externalMapData['map_dharma_temple_north'] = {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:'北のダーマ神殿'};
+    delete externalMapData['map_dharma_temple_north_inner']; // 旧2マップ構成の名残を除去
 
-    if(!externalEntitiesData['npc_dharma_monk_north_l']) externalEntitiesData['npc_dharma_monk_north_l']={id:'npc_dharma_monk_north_l',name:'修道士',msg:'北のダーマ神殿へ ようこそ。\n主大陸に古くから伝わる 転職の聖地です。\n奥の 扉を 抜けた 先の「転職の間」に\n神父様が いらっしゃいます。'};
+    if(!externalEntitiesData['npc_dharma_monk_north_l']) externalEntitiesData['npc_dharma_monk_north_l']={id:'npc_dharma_monk_north_l',name:'修道士',msg:'北のダーマ神殿へ ようこそ。\n主大陸に古くから伝わる 転職の聖地です。\n奥の 内陣に 神父様が いらっしゃいます。'};
     if(!externalEntitiesData['npc_dharma_monk_north_r']) externalEntitiesData['npc_dharma_monk_north_r']={id:'npc_dharma_monk_north_r',name:'修道士',msg:'魔王が現れてからも\nこの神殿だけは 守り続けてきました。\n旅人よ……どうか 世界を 救ってください。'};
 
     // フィールド側の入口タイルを確保(既存があれば再利用、なければfindLandで新規配置)
@@ -4426,7 +4411,7 @@ function buildNorthDharmaTemple() {
             if (_dnp) {
                 const _f11w = _fm.width||45;
                 _fm.tiles[_dnp.y*_f11w+_dnp.x] = 22;
-                _fm.exits[_dnp.k] = {map:'map_dharma_temple_north', x:7, y:12};
+                _fm.exits[_dnp.k] = {map:'map_dharma_temple_north', x:7, y:24};
             }
         }
     }
@@ -9600,7 +9585,8 @@ function drawMap() {
             }
             for(let k of floorKeys) { if(externalImages[k] && externalImages[k].complete && externalImages[k].naturalHeight > 0) { bgImg = externalImages[k]; break; } }
             if (tile === 1 || tile === 4) {
-               let wallKeys = _tileIsCastle ? ['castleWall', 'wall'] : (_tileIsTown ? (_isSmallTown ? ['smallTownWallGQ', 'townWall', 'wall', 'brickWall'] : (_isCapitalTown ? ['capitalTownWallGQ', 'townWall', 'wall', 'brickWall'] : ['townWall', 'wall', 'brickWall'])) : (isCave ? (_caveElement ? [] : ['caveWallGQ2', 'caveWall', 'rockWall', 'wall']) : ['plainRock', 'rock', 'mountainWall'])); if(isMountain) wallKeys = ['northMountainWall', 'mountainWall', 'plainRock', 'rock'];
+               const _isDharmaTemple = _mapId.includes('dharma');
+               let wallKeys = (_tileIsCastle || _isDharmaTemple) ? ['castleWall', 'wall'] : (_tileIsTown ? (_isSmallTown ? ['smallTownWallGQ', 'townWall', 'wall', 'brickWall'] : (_isCapitalTown ? ['capitalTownWallGQ', 'townWall', 'wall', 'brickWall'] : ['townWall', 'wall', 'brickWall'])) : (isCave ? (_caveElement ? [] : ['caveWallGQ2', 'caveWall', 'rockWall', 'wall']) : ['plainRock', 'rock', 'mountainWall'])); if(isMountain) wallKeys = ['northMountainWall', 'mountainWall', 'plainRock', 'rock'];
                // 白鋼城カガネは白銀の石壁に差し替え(お城ごとの個性化)
                if (_tileIsCastle && _mapId.includes('castle_kagane')) wallKeys = ['castleWallSteel'].concat(wallKeys);
                // 魔王城はひび割れた廃墟の石壁に差し替え(最後のボスの城らしい荒廃感)
