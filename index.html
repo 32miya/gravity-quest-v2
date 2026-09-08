@@ -4195,13 +4195,16 @@ function buildNorthAbandonedCastle() {
     // 退出通路
     R(0, 26, W-1, 26, 1); R(14, 26, 21, 26, 0);
     R(14, 27, 21, 29, 10);
+    // 地下納骨堂への階段（中央通路の奥）
+    S(18, 24, 21);
     const exits = {
         "15,29":{"map":"map_field_0_0","x":36,"y":43},
         "16,29":{"map":"map_field_0_0","x":36,"y":43},
         "17,29":{"map":"map_field_0_0","x":36,"y":43},
         "18,29":{"map":"map_field_0_0","x":36,"y":43},
         "19,29":{"map":"map_field_0_0","x":36,"y":43},
-        "20,29":{"map":"map_field_0_0","x":36,"y":43}
+        "20,29":{"map":"map_field_0_0","x":36,"y":43},
+        "18,24":{"map":"map_castle_north_b1","x":9,"y":13}
     };
     const npcs = {
         "17,4":  {"id":"npc_north_ghost_1",      "name":"古城の亡霊"},
@@ -4215,9 +4218,165 @@ function buildNorthAbandonedCastle() {
         "32,3":  {"id":"obj_deco_statue_knight", "name":"崩れかけた石像"},
         "32,4":  {"id":"obj_statue_foot",        "name":""},
         "4,15":  {"id":"obj_deco_banner",        "name":""},
-        "26,15": {"id":"obj_deco_banner",        "name":""}
+        "26,15": {"id":"obj_deco_banner",        "name":""},
+        // ここから追加装飾：廃城らしい重厚さを補うため玉座の間・両翼・中央通路に配置
+        "14,3":  {"id":"obj_deco_banner",        "name":""},
+        "21,3":  {"id":"obj_deco_banner",        "name":""},
+        "10,2":  {"id":"obj_deco_stained_window","name":""},
+        "25,2":  {"id":"obj_deco_stained_window","name":""},
+        "6,3":   {"id":"deco_candelabra_gold",   "name":"金燭台"},
+        "29,3":  {"id":"deco_candelabra_gold",   "name":"金燭台"},
+        "8,9":   {"id":"obj_deco_statue_woman",  "name":"崩れかけた女神像"},
+        "27,9":  {"id":"obj_deco_statue_angel",  "name":"崩れかけた天使像"},
+        "5,7":   {"id":"obj_deco_fireplace",     "name":"消えた暖炉"},
+        "30,7":  {"id":"obj_deco_gargoyle",      "name":"風化したガーゴイル"},
+        "17,9":  {"id":"obj_deco_rune_circle",   "name":"古い魔法陣の跡"},
+        "7,15":  {"id":"obj_deco_rug_blue",      "name":""},
+        "4,20":  {"id":"obj_deco_bones",         "name":""},
+        "9,22":  {"id":"obj_deco_bones",         "name":""},
+        "10,14": {"id":"obj_deco_crate",         "name":""},
+        "3,23":  {"id":"obj_deco_barrel",        "name":""},
+        "8,24":  {"id":"obj_deco_stone_lantern", "name":""},
+        "25,15": {"id":"obj_deco_rug_red",       "name":""},
+        "26,20": {"id":"obj_deco_bones",         "name":""},
+        "30,22": {"id":"obj_deco_bones",         "name":""},
+        "25,14": {"id":"obj_deco_crate",         "name":""},
+        "32,23": {"id":"obj_deco_barrel",        "name":""},
+        "27,24": {"id":"obj_deco_stone_lantern", "name":""},
+        "15,14": {"id":"deco_candelabra_gold",   "name":"金燭台"},
+        "20,14": {"id":"deco_candelabra_gold",   "name":"金燭台"},
+        "17,22": {"id":"obj_deco_fountain_s",    "name":"涸れた噴水"}
     };
     return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:"氷結城ノルド（廃都）"};
+}
+function buildNorthCastleCrypt() {
+    // 氷結城ノルド 地下納骨堂：かつての兵士たちが眠る場所。アークとラムダスに
+    // 仕えた兵士たちの墓標が並び、地上の亡霊たちの由来を静かに物語る。
+    const W = 20, H = 16;
+    const t = new Array(W * H).fill(1);
+    const S = (x, y, v) => { if (x >= 0 && y >= 0 && x < W && y < H) t[y * W + x] = v; };
+    const R = (x1, y1, x2, y2, v) => { for (let y = y1; y <= y2; y++) for (let x = x1; x <= x2; x++) S(x, y, v); };
+    // 納骨の間（メイン）
+    R(2, 2, 17, 9, 0);
+    // 入口通路
+    R(7, 10, 12, 13, 0);
+    // 墓標列（柱状の石碑を等間隔に）
+    [4,7,10,13,16].forEach(x => { S(x, 3, 16); });
+    const exits = {
+        "9,13":{"map":"map_castle_north","x":18,"y":23},
+        "10,13":{"map":"map_castle_north","x":18,"y":23}
+    };
+    const npcs = {
+        "9,4":   {"id":"obj_deco_statue_knight",  "name":"兵士の墓標"},
+        "13,4":  {"id":"obj_deco_statue_knight",  "name":"兵士の墓標"},
+        "4,6":   {"id":"obj_deco_bones",          "name":""},
+        "16,6":  {"id":"obj_deco_bones",          "name":""},
+        "9,7":   {"id":"obj_deco_bones",          "name":""},
+        "13,7":  {"id":"obj_deco_bones",          "name":""},
+        "3,3":   {"id":"deco_candelabra_gold",    "name":"金燭台"},
+        "16,3":  {"id":"deco_candelabra_gold",    "name":"金燭台"},
+        "3,8":   {"id":"obj_deco_stone_lantern",  "name":""},
+        "16,8":  {"id":"obj_deco_stone_lantern",  "name":""},
+        "6,8":   {"id":"obj_deco_gargoyle",       "name":"墓守のガーゴイル"},
+        "13,8":  {"id":"obj_deco_gargoyle",       "name":"墓守のガーゴイル"},
+        "11,4":  {"id":"npc_north_crypt_inscription", "name":"古い墓碑銘"},
+        "5,4":   {"id":"obj_chest_weapon",        "name":"兵士の遺した武具"}
+    };
+    if (!externalEntitiesData['npc_north_crypt_inscription']) externalEntitiesData['npc_north_crypt_inscription'] = {
+        id:'npc_north_crypt_inscription', name:'古い墓碑銘',
+        msg:'「ここに眠るは、アーク様とラムダス様に\n仕えし兵士たちなり。\n二人の 絆が引き裂かれた 日、\n我らもまた、剣を 交える 定めと なった。\n\n……されど、憎しみだけが\n最後まで 残るものでは ないと、\nどうか 信じたい。」'
+    };
+    return {width:W,height:H,tiles:t,exits,npcs,encounters:[],name:"氷結城ノルド 地下納骨堂"};
+}
+function buildNorthDharmaTemple() {
+    // 北のダーマ神殿: 参道の間(1F) + 転職の間(奥の内陣)の2マップ構成。
+    // editorオーバーライド適用後に呼ばれる想定のため、フィールド側の入口も
+    // 既存があれば再利用し、重複生成しないようガードする。
+    const W1=16, H1=16;
+    const t1 = new Array(W1*H1).fill(1);
+    const S1 = (x,y,v) => { if(x>=0&&y>=0&&x<W1&&y<H1) t1[y*W1+x]=v; };
+    const R1 = (x1,y1,x2,y2,v) => { for(let y=y1;y<=y2;y++) for(let x=x1;x<=x2;x++) S1(x,y,v); };
+    R1(1,1,14,9,0);    // 本堂
+    R1(3,11,12,13,0);  // 前室
+    R1(7,9,7,11,0);    // 本堂←→前室 廊下
+    for(let y=1;y<10;y++) for(let x=1;x<15;x++) if(t1[y*W1+x]===0) t1[y*W1+x]=9; // カーペット化
+    S1(7,2,3);          // 祭壇跡の紋章(装飾)
+    S1(7,13,22); S1(8,13,22); // フィールドへの出口
+    S1(7,0,23); S1(8,0,23);   // 転職の間へ続く扉(旅の扉タイル)
+    const exits1 = {
+        '7,13':{map:'map_field_1_1',x:22,y:19},
+        '8,13':{map:'map_field_1_1',x:22,y:19},
+        '7,0':{map:'map_dharma_temple_north_inner',x:7,y:12},
+        '8,0':{map:'map_dharma_temple_north_inner',x:7,y:12}
+    };
+    const npcs1 = {
+        '4,5':{id:'npc_dharma_monk_north_l',name:'修道士'},
+        '10,5':{id:'npc_dharma_monk_north_r',name:'修道士'},
+        '3,7':{id:'obj_chest_item',name:'宝箱'},
+        '11,7':{id:'obj_chest_item',name:'宝箱'},
+        // 参道の間の装飾（青と金の神殿らしい荘厳さを補う）
+        '5,2':{id:'obj_deco_banner',name:''},
+        '9,2':{id:'obj_deco_banner',name:''},
+        '2,3':{id:'obj_deco_stained_window',name:''},
+        '12,3':{id:'obj_deco_stained_window',name:''},
+        '3,5':{id:'deco_candelabra_gold',name:'金燭台'},
+        '11,5':{id:'deco_candelabra_gold',name:'金燭台'},
+        '7,7':{id:'obj_deco_fountain_s',name:'聖水の泉'},
+        '2,8':{id:'obj_deco_statue_angel',name:'守護天使像'},
+        '12,8':{id:'obj_deco_statue_angel',name:'守護天使像'},
+        '5,12':{id:'obj_deco_rug_blue',name:''},
+        '9,12':{id:'obj_deco_rug_blue',name:''}
+    };
+    externalMapData['map_dharma_temple_north'] = {width:W1,height:H1,tiles:t1,exits:exits1,npcs:npcs1,encounters:[],name:'北のダーマ神殿 参道の間'};
+
+    // 転職の間（奥の内陣）: 実際に転職を行う神父はこちらへ
+    const W2=16, H2=14;
+    const t2 = new Array(W2*H2).fill(1);
+    const S2 = (x,y,v) => { if(x>=0&&y>=0&&x<W2&&y<H2) t2[y*W2+x]=v; };
+    const R2 = (x1,y1,x2,y2,v) => { for(let y=y1;y<=y2;y++) for(let x=x1;x<=x2;x++) S2(x,y,v); };
+    R2(1,1,14,9,0);
+    R2(6,10,8,12,0);
+    for(let y=1;y<10;y++) for(let x=1;x<15;x++) if(t2[y*W2+x]===0) t2[y*W2+x]=9;
+    S2(7,2,3);
+    S2(7,12,22); S2(8,12,22);
+    const exits2 = {
+        '7,12':{map:'map_dharma_temple_north',x:7,y:1},
+        '8,12':{map:'map_dharma_temple_north',x:7,y:1}
+    };
+    const npcs2 = {
+        '7,3':{id:'npc_class_change',name:'転職の神父'},
+        '4,3':{id:'obj_deco_statue_woman',name:'初代賢者の像'},
+        '10,3':{id:'obj_deco_statue_knight',name:'初代戦士の像'},
+        '2,2':{id:'obj_deco_stained_window',name:''},
+        '12,2':{id:'obj_deco_stained_window',name:''},
+        '3,5':{id:'obj_bookshelf',name:'職業の書'},
+        '11,5':{id:'obj_bookshelf2',name:'古の転職記録'},
+        '2,6':{id:'deco_candelabra_gold',name:'金燭台'},
+        '12,6':{id:'deco_candelabra_gold',name:'金燭台'},
+        '7,7':{id:'obj_deco_rune_circle',name:'転職の魔法陣'},
+        '4,8':{id:'obj_deco_rug_red',name:''},
+        '10,8':{id:'obj_deco_rug_red',name:''},
+        '2,9':{id:'obj_deco_statue_angel',name:'見守る天使像'},
+        '12,9':{id:'obj_deco_statue_angel',name:'見守る天使像'}
+    };
+    externalMapData['map_dharma_temple_north_inner'] = {width:W2,height:H2,tiles:t2,exits:exits2,npcs:npcs2,encounters:[],name:'北のダーマ神殿 転職の間'};
+
+    if(!externalEntitiesData['npc_dharma_monk_north_l']) externalEntitiesData['npc_dharma_monk_north_l']={id:'npc_dharma_monk_north_l',name:'修道士',msg:'北のダーマ神殿へ ようこそ。\n主大陸に古くから伝わる 転職の聖地です。\n奥の 扉を 抜けた 先の「転職の間」に\n神父様が いらっしゃいます。'};
+    if(!externalEntitiesData['npc_dharma_monk_north_r']) externalEntitiesData['npc_dharma_monk_north_r']={id:'npc_dharma_monk_north_r',name:'修道士',msg:'魔王が現れてからも\nこの神殿だけは 守り続けてきました。\n旅人よ……どうか 世界を 救ってください。'};
+
+    // フィールド側の入口タイルを確保(既存があれば再利用、なければfindLandで新規配置)
+    const _fm = externalMapData['map_field_1_1'];
+    if (_fm) {
+        const _existing = Object.entries(_fm.exits||{}).find(([k,v]) => v && v.map === 'map_dharma_temple_north');
+        if (!_existing) {
+            const _dnp = findLand('map_field_1_1', 22, 18);
+            if (_dnp) {
+                const _f11w = _fm.width||45;
+                _fm.tiles[_dnp.y*_f11w+_dnp.x] = 22;
+                _fm.exits[_dnp.k] = {map:'map_dharma_temple_north', x:7, y:12};
+            }
+        }
+    }
 }
 function buildEstoriaCastle() {
     const W=20,H=18;
@@ -5526,33 +5685,8 @@ function generateDQStyleMaps() {
         if(!externalEntitiesData['npc_dharma_monk_r']) externalEntitiesData['npc_dharma_monk_r']={id:'npc_dharma_monk_r',name:'修道士',msg:'ここは 転職の 聖地。\nふたたびの たびに でた ゆうしゃのみが\nここで 新たなる 道を えらべます。'};
     }
 
-    // ===== 北のダーマ神殿 (16x16) — 主大陸北西 / 最序盤の転職聖地 =====
-    if(!externalMapData['map_dharma_temple_north']){
-        // フィールド入口位置を先に確定してから出口座標に使う
-        const _dnp = findLand('map_field_1_1', 22, 18);
-        const _dnRet = _dnp ? {x:_dnp.x, y:_dnp.y} : {x:22,y:19};
-        const mn = mkMap(16,16,
-            [[1,1,14,9],[3,11,10,3]],
-            [[7,9,7,11]],
-            [],[[7,13],[8,13]],
-            {'7,13':{map:'map_field_1_1',x:_dnRet.x,y:_dnRet.y},'8,13':{map:'map_field_1_1',x:_dnRet.x,y:_dnRet.y}},
-            {'7,3':{id:'npc_class_change',name:'転職の神父'},
-             '4,5':{id:'npc_dharma_monk_north_l',name:'修道士'},
-             '10,5':{id:'npc_dharma_monk_north_r',name:'修道士'},
-             '3,7':{id:'obj_chest_item',name:'宝箱'},
-             '11,7':{id:'obj_chest_item',name:'宝箱'}},
-            [],'北のダーマ神殿');
-        for(let y=1;y<10;y++) for(let x=1;x<15;x++) if(mn.tiles[y*16+x]===0) mn.tiles[y*16+x]=9;
-        mn.tiles[2*16+7]=3; mn.tiles[14*16+7]=22; mn.tiles[14*16+8]=22;
-        externalMapData['map_dharma_temple_north']=mn;
-        if(!externalEntitiesData['npc_dharma_monk_north_l']) externalEntitiesData['npc_dharma_monk_north_l']={id:'npc_dharma_monk_north_l',name:'修道士',msg:'北のダーマ神殿へ ようこそ。\n主大陸に古くから伝わる 転職の聖地です。\n奥の 神父様に お話しください。'};
-        if(!externalEntitiesData['npc_dharma_monk_north_r']) externalEntitiesData['npc_dharma_monk_north_r']={id:'npc_dharma_monk_north_r',name:'修道士',msg:'魔王が現れてからも\nこの神殿だけは 守り続けてきました。\n旅人よ……どうか 世界を 救ってください。'};
-        if(_dnp && externalMapData['map_field_1_1']){
-            const _f11w = externalMapData['map_field_1_1'].width||45;
-            externalMapData['map_field_1_1'].tiles[_dnp.y*_f11w+_dnp.x]=22;
-            externalMapData['map_field_1_1'].exits[_dnp.k]={map:'map_dharma_temple_north',x:7,y:12};
-        }
-    }
+    // 北のダーマ神殿は生成タイミングの都合上buildNorthDharmaTemple()に切り出し、
+    // 強制上書きブロック(editorオーバーライド適用後の最終段階)から呼び出す。
 
     // ===== ほこら (22x12, 2部屋) =====
     externalMapData['map_shrine_warp'] = buildShrineWarp();
@@ -16214,6 +16348,8 @@ async function showTitleScreen() {
         externalMapData['map_castle_estoria'] = buildEstoriaCastle();
         externalMapData['map_castle_deserta'] = buildDesertaCastle();
         externalMapData['map_castle_north']   = buildNorthAbandonedCastle();
+        externalMapData['map_castle_north_b1'] = buildNorthCastleCrypt();
+        buildNorthDharmaTemple();
         externalMapData['map_castle_kagane']  = buildKaganeCastle();
         externalMapData['map_shrine_warp']    = buildShrineWarp();
         externalMapData['map_shrine_backroom'] = buildShrineBackRoom();
