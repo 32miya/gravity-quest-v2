@@ -1384,11 +1384,13 @@ function injectSubStoryData() {
     masterData.monsters["boss_chaos_dragon"]    = { name: "混沌竜カオスドレイク",max_hp: 3000, atk: 250, def: 170, spd: 150, exp: 50000, gold: 25000,traits: ["boss","two_actions","status_immunity"] };
     masterData.monsters["boss_archmage"]        = { name: "魔法王アルカノス",    max_hp: 2200, atk: 215, def: 130, spd: 170, exp: 32000, gold: 15000,traits: ["boss","two_actions","magic_immunity"] };
     masterData.monsters["boss_demon_avatar"]    = { name: "魔王の化身",          max_hp: 2600, atk: 235, def: 160, spd: 145, exp: 38000, gold: 18000,traits: ["boss","dark_element","status_immunity","two_actions"] };
-    // 魔王城 四天王
+    // 死の城 3F「四つの魂の間」を守る4体の守護者
     masterData.monsters["boss_dc_warden_left"]    = { name:"暗黒剣士カイン",  max_hp:1800, atk:220, def:155, spd:95,  exp:9000,  gold:5500, traits:["boss","dark_element","two_actions","weak_light"] };
     masterData.monsters["boss_dc_warden_right"]   = { name:"妖術師リリス",    max_hp:1600, atk:200, def:140, spd:115, exp:9000,  gold:5500, traits:["boss","magic_attack","two_actions","weak_light"] };
     masterData.monsters["boss_dc_warden_upper_l"] = { name:"煉獄将サルガス", max_hp:2000, atk:240, def:170, spd:100, exp:12000, gold:7000, traits:["boss","fire_element","two_actions","weak_ice"] };
     masterData.monsters["boss_dc_warden_upper_r"] = { name:"死霊王ネクロル", max_hp:1900, atk:230, def:160, spd:108, exp:12000, gold:7000, traits:["boss","dark_element","undead","two_actions","weak_light"] };
+    // 死の城 4F、4体の守護者の先に待つ隠しダンジョンの主
+    masterData.monsters["boss_death_castle_king"] = { name:"死城の魔王",     max_hp:2600, atk:245, def:175, spd:120, exp:20000, gold:12000,traits:["boss","dark_element","undead","two_actions","status_immunity"] };
     // アイテム
     masterData.items["acc_zarmo_crown"]  = { id:"acc_zarmo_crown",  name:"ザーモの王冠",     type:"accessory", price:0, power:0, effect:"all_stats_up",  desc:"古城ザーモに眠っていた古王の冠。全ステータスが大きく上昇する。" };
     masterData.items["w_estoria_blade"]  = { id:"w_estoria_blade",  name:"エストリアの剣（剣）", type:"weapon", price:0, power:140, element:"light", desc:"木の国エストリアが心から信頼する者にのみ授ける伝説の剣。光属性で闇の敵に絶大な威力を発揮。" };
@@ -7702,6 +7704,19 @@ async function loadExternalData(id) {
                         mapCopy.exits['12,2']={map:'map_demon_castle_3f',x:11,y:14};
                     }
                 }
+                // ── 死の城 3F「四つの魂の間」動的解除（守護者撃破フラグ連動）──
+                if(rawId.includes('death_castle_3f')){
+                    if(partyData.flags.flag_dc_warden_left_cleared){let _bk=Object.keys(mapCopy.npcs).find(k=>mapCopy.npcs[k]?.id==='boss_dc_warden_left');if(_bk)delete mapCopy.npcs[_bk];}
+                    if(partyData.flags.flag_dc_warden_right_cleared){let _bk=Object.keys(mapCopy.npcs).find(k=>mapCopy.npcs[k]?.id==='boss_dc_warden_right');if(_bk)delete mapCopy.npcs[_bk];}
+                    if(partyData.flags.flag_dc_warden_ul_cleared){let _bk=Object.keys(mapCopy.npcs).find(k=>mapCopy.npcs[k]?.id==='boss_dc_warden_upper_l');if(_bk)delete mapCopy.npcs[_bk];}
+                    if(partyData.flags.flag_dc_warden_ur_cleared){let _bk=Object.keys(mapCopy.npcs).find(k=>mapCopy.npcs[k]?.id==='boss_dc_warden_upper_r');if(_bk)delete mapCopy.npcs[_bk];}
+                    if(partyData.flags.flag_dc_warden_left_cleared&&partyData.flags.flag_dc_warden_right_cleared&&partyData.flags.flag_dc_warden_ul_cleared&&partyData.flags.flag_dc_warden_ur_cleared){
+                        let _gk=Object.keys(mapCopy.npcs).find(k=>mapCopy.npcs[k]?.id==='npc_death_warden_barrier');if(_gk)delete mapCopy.npcs[_gk];
+                    }
+                }
+                if(rawId.includes('death_castle_4f') && partyData.flags.flag_dc_king_cleared){
+                    let _dk=Object.keys(mapCopy.npcs).find(k=>mapCopy.npcs[k]?.id==='npc_demon_king');if(_dk)delete mapCopy.npcs[_dk];
+                }
                 // 洞窟クリア後: 試練の洞窟最寄りの西海岸 (map_field_0_4) に船NPCを配置
                 if (rawId === 'map_field_0_4' && partyData.flags.flag_dungeon_cleared && !partyData.flags.has_ship) {
                     const _mW4 = mapCopy.width || 45;
@@ -13287,6 +13302,64 @@ async function checkAction() {
                 if (_yn===1) { state='FIELD'; hideAllWindows(); drawMap(); return; }
                 hideGoldWindow(); let _w=await executeBattle(["boss_crystal_golem"]); showGoldWindow(); updateGoldWindow();
                 if (_w) { partyData.flags.flag_crystal_golem_cleared=true; AudioManager.playBGM('victory'); await typeMessage("水晶ゴーレムを 倒した！\n美しい 水晶が 光を 放っている……"); delete currentMap.npcs[key]; } else return;
+                state='FIELD'; hideAllWindows(); drawMap(); return;
+            }
+            // ===== 死の城 3F「四つの魂の間」四守護者 & 結界 & 4F「死城の魔王」=====
+            if (npc.id === "npc_death_warden_barrier") {
+                const _dwCnt=[partyData.flags.flag_dc_warden_left_cleared,partyData.flags.flag_dc_warden_right_cleared,partyData.flags.flag_dc_warden_ul_cleared,partyData.flags.flag_dc_warden_ur_cleared].filter(Boolean).length;
+                await typeMessage(`【四つの魂の結界】\nウウゥゥ……この 先には 進ませぬ……\n四人の 守護者、皆な 消え去るまでは……\n（解かれた 封印: ${_dwCnt}/4）\n暗黒剣士カイン・妖術師リリス・\n煉獄将サルガス・死霊王ネクロルを\n全員 打ち倒せ！！`);
+                state='FIELD'; hideAllWindows(); drawMap(); return;
+            }
+            if (npc.id === "boss_dc_warden_left") {
+                if (partyData.flags.flag_dc_warden_left_cleared) { await typeMessage("（暗黒剣士カインは 既に 倒された）"); state='FIELD'; hideAllWindows(); drawMap(); return; }
+                await typeMessage("【暗黒剣士カイン】\nここは 死者の 眠る城……\n我は カイン、闇に 魂を 捧げし 剣士。\n貴様らを 冥府へ 送ってやろう！！");
+                const _yn=await selectMenu(["戦う！","逃げる"],'cmd-window',0,true);
+                if (_yn===1) { state='FIELD'; hideAllWindows(); drawMap(); return; }
+                hideGoldWindow(); let _w=await executeBattle(["boss_dc_warden_left"]); showGoldWindow(); updateGoldWindow();
+                if (_w) { partyData.flags.flag_dc_warden_left_cleared=true; AudioManager.playBGM('victory'); await typeMessage("暗黒剣士カインを 倒した！\n（四つの魂の間に わずかな 光が 差し込んだ……）"); delete currentMap.npcs[key]; } else return;
+                state='FIELD'; hideAllWindows(); drawMap(); return;
+            }
+            if (npc.id === "boss_dc_warden_right") {
+                if (partyData.flags.flag_dc_warden_right_cleared) { await typeMessage("（妖術師リリスは 既に 倒された）"); state='FIELD'; hideAllWindows(); drawMap(); return; }
+                await typeMessage("【妖術師リリス】\nふふ……迷い込んだ 哀れな 子羊たちね。\nこの 城に 足を 踏み入れた 代償……\n魂で 支払って もらうわ！");
+                const _yn=await selectMenu(["戦う！","逃げる"],'cmd-window',0,true);
+                if (_yn===1) { state='FIELD'; hideAllWindows(); drawMap(); return; }
+                hideGoldWindow(); let _w=await executeBattle(["boss_dc_warden_right"]); showGoldWindow(); updateGoldWindow();
+                if (_w) { partyData.flags.flag_dc_warden_right_cleared=true; AudioManager.playBGM('victory'); await typeMessage("妖術師リリスを 倒した！\n（四つの魂の間に わずかな 光が 差し込んだ……）"); delete currentMap.npcs[key]; } else return;
+                state='FIELD'; hideAllWindows(); drawMap(); return;
+            }
+            if (npc.id === "boss_dc_warden_upper_l") {
+                if (partyData.flags.flag_dc_warden_ul_cleared) { await typeMessage("（煉獄将サルガスは 既に 倒された）"); state='FIELD'; hideAllWindows(); drawMap(); return; }
+                await typeMessage("【煉獄将サルガス】\n灼熱の 業火が 貴様らを 待っている……\n我が 名は サルガス、煉獄の 将なり！\n塵と 化すが良い！！");
+                const _yn=await selectMenu(["戦う！","逃げる"],'cmd-window',0,true);
+                if (_yn===1) { state='FIELD'; hideAllWindows(); drawMap(); return; }
+                hideGoldWindow(); let _w=await executeBattle(["boss_dc_warden_upper_l"]); showGoldWindow(); updateGoldWindow();
+                if (_w) { partyData.flags.flag_dc_warden_ul_cleared=true; AudioManager.playBGM('victory'); await typeMessage("煉獄将サルガスを 倒した！\n（四つの魂の間に わずかな 光が 差し込んだ……）"); delete currentMap.npcs[key]; } else return;
+                state='FIELD'; hideAllWindows(); drawMap(); return;
+            }
+            if (npc.id === "boss_dc_warden_upper_r") {
+                if (partyData.flags.flag_dc_warden_ur_cleared) { await typeMessage("（死霊王ネクロルは 既に 倒された）"); state='FIELD'; hideAllWindows(); drawMap(); return; }
+                await typeMessage("【死霊王ネクロル】\nククク……新鮮な 生者の 匂いが する……\n我は ネクロル、死霊を 統べる 王……\nその 命、余の 糧と させてもらおう！");
+                const _yn=await selectMenu(["戦う！","逃げる"],'cmd-window',0,true);
+                if (_yn===1) { state='FIELD'; hideAllWindows(); drawMap(); return; }
+                hideGoldWindow(); let _w=await executeBattle(["boss_dc_warden_upper_r"]); showGoldWindow(); updateGoldWindow();
+                if (_w) { partyData.flags.flag_dc_warden_ur_cleared=true; AudioManager.playBGM('victory'); await typeMessage("死霊王ネクロルを 倒した！\n（四つの魂の間に わずかな 光が 差し込んだ……）"); delete currentMap.npcs[key]; } else return;
+                state='FIELD'; hideAllWindows(); drawMap(); return;
+            }
+            if (npc.id === "npc_demon_king") {
+                if (partyData.flags.flag_dc_king_cleared) { await typeMessage("（死城の魔王は 既に 倒された。\n城には 静寂だけが 残っている……）"); state='FIELD'; hideAllWindows(); drawMap(); return; }
+                await typeMessage("【死城の魔王】\nようこそ……我が 城へ……\n生ける者よ、なぜ ここまで 辿り着いた……");
+                await typeMessage("【死城の魔王】\n黄金と 力に 溺れた 果てに\n我は この 姿と 化した……\n貴様らも……欲に 飲まれるが良い……！");
+                const _yn=await selectMenu(["戦う！","逃げる"],'cmd-window',0,true);
+                if (_yn===1) { await typeMessage("（重苦しい 気配……逃げた）"); state='FIELD'; hideAllWindows(); drawMap(); return; }
+                hideGoldWindow(); let _w=await executeBattle(["boss_death_castle_king"]); showGoldWindow(); updateGoldWindow();
+                if (_w) {
+                    partyData.flags.flag_dc_king_cleared=true; AudioManager.playBGM('victory');
+                    await typeMessage("死城の魔王を 打ち倒した！\n積み上げられた 金貨の 山が\n静かに 崩れ落ちていく……");
+                    partyData.gold+=20000; updateGoldWindow(); AudioManager.playSE('item_get');
+                    await typeMessage("玉座の 下から 20000G を てにいれた！\n（死の城に 平穏が 戻った……）");
+                    delete currentMap.npcs[key];
+                } else return;
                 state='FIELD'; hideAllWindows(); drawMap(); return;
             }
             // 深淵の迷宮ボス
