@@ -4912,6 +4912,48 @@ function generateFieldMapsForGravityQuest() {
     fillEll( 48, 380, 20, 14, 11); // 南端
     fillEllCond( 62, 332, 10,  7, 20); // 雪山
 
+    // ==================================================================
+    // ★ 世界地図イラストとの細部整合（未到達バグの是正 + 地形の見た目調整）
+    // ==================================================================
+    // 商都バザール(6,3)・南海の港サンゴ礁(6,7)・遺跡のほとりサルモン(2,8)は
+    // 該当フィールドに陸地が皆無で入口自体が生成されない致命的バグだったため、
+    // 世界地図イラストの該当位置に描かれた通りの島を新設する
+    fillEll(292, 157, 22, 18, 11); // バザール島
+    fillEll(292, 337, 20, 16, 11); // サンゴ礁島（深緑の森の島として描かれている）
+    fillEll(112, 382, 20, 16, 11); // サルモン島（暗い遺跡の森として描かれている）
+    // 魔法使いの塔(5,3)・雪原の村フロスト(1,6)・海峡の街コーラル(8,2)・
+    // エストリア城下町(7,5)も陸地が極端に少なく、入口が離れた僻地に
+    // 飛ばされていたため拡張する
+    fillEll(260, 157, 16, 15, 11); // 魔法使いの塔の島（世界地図では深い森に囲まれている）
+    fillEll( 67, 292, 26, 20, 11); // フロスト村の陸地拡張（世界地図では険しい雪山地帯）
+    fillEll(382, 112, 20, 17, 11); // コーラルの陸地拡張
+    fillEll(337, 247, 18, 15, 11); // エストリア城下町の陸地拡張
+    // 森（世界地図イラストで緑豊かに描かれている場所を反映）
+    fillEllCond(292, 337, 14, 11, 19); // サンゴ礁島の森
+    fillEllCond(112, 382, 14, 11, 19); // サルモン島の暗い森
+    fillEllCond(258, 157, 12, 10, 19); // 魔法使いの塔を囲む深い森
+    fillEllCond(337, 247, 10,  8, 19); // エストリア城下町周辺の森
+    fillEllCond( 20, 335, 12, 10, 19); // 森の隠れ里エルフヘイム（世界地図では緑の森として描かれている）
+    fillEllCond(157, 292, 12,  9, 19); // 砂漠の遺跡（世界地図では緑の森・白い神殿として描かれている）
+    // 雪山（世界地図で雪原の村フロスト・西の水晶洞窟の背景に描かれた険しい雪山）
+    fillEllCond( 67, 285, 16, 13, 20);
+    fillEllCond( 62, 280,  8,  6, 25);
+    fillEll( 20, 290, 16, 13, 11); // 西の水晶洞窟の陸地を拡張（山を描く土台を確保）
+    fillEllCond( 22, 288, 14, 11, 20); // 西の水晶洞窟の背景の雪山
+    fillEllCond( 18, 283,  7,  5, 25);
+    // 北部の雪山連峰（世界地図の中央上部に描かれた巨大な雪山脈）
+    fillEll(157,  18, 16, 13, 11); // 陸地が薄すぎたため拡張（山を描く土台を確保）
+    fillEllCond(155,  16, 13, 10, 20);
+    fillEllCond(150,  12,  7,  5, 25);
+    fillEllCond(198,  18, 15, 12, 20);
+    fillEllCond(198,  14,  8,  6, 25);
+    fillEllCond(337,  16, 15, 12, 20); // 氷結城ザーモを取り巻く険しい山
+    fillEllCond(337,  13,  8,  6, 25);
+    // 闇の尖塔(2,6)の足元に描かれた溶岩の照り返し（入口からは十分離した位置）
+    fillEllCond( 95, 305,  4,  3, 26);
+    // 深南の闇の要塞(1,8)は荒涼とした岩地として描写されている
+    fillEllCond( 67, 382, 10,  8, 20);
+
     // 外周水域強制（拡張分も）
     for(let _j=0;_j<2;_j++) for(let _i=0;_i<GW;_i++){
         if(world[_j*GW+_i]!==5) world[_j*GW+_i]=5;
@@ -4930,15 +4972,15 @@ function generateFieldMapsForGravityQuest() {
         // 山以外の通行可能タイルで最大連結成分を特定
         for(let ty=0;ty<45;ty++) for(let tx=0;tx<45;tx++){
             const wx=x0+tx, wy=y0+ty, k=`${wx},${wy}`;
-            if(world[wy*GW+wx]===5||world[wy*GW+wx]===25||seen.has(k)) continue;
+            if(world[wy*GW+wx]===5||world[wy*GW+wx]===25||world[wy*GW+wx]===26||seen.has(k)) continue;
             const comp=new Set([k]); const bq=[[wx,wy]]; seen.add(k);
-            while(bq.length){const[cx,cy]=bq.shift();for(const[dx,dy]of[[0,1],[0,-1],[1,0],[-1,0]]){const nx=cx+dx,ny=cy+dy,nk=`${nx},${ny}`;if(seen.has(nk)||nx<x0||ny<y0||nx>=x0+45||ny>=y0+45||world[ny*GW+nx]===5||world[ny*GW+nx]===25)continue;seen.add(nk);comp.add(nk);bq.push([nx,ny]);}}
+            while(bq.length){const[cx,cy]=bq.shift();for(const[dx,dy]of[[0,1],[0,-1],[1,0],[-1,0]]){const nx=cx+dx,ny=cy+dy,nk=`${nx},${ny}`;if(seen.has(nk)||nx<x0||ny<y0||nx>=x0+45||ny>=y0+45||world[ny*GW+nx]===5||world[ny*GW+nx]===25||world[ny*GW+nx]===26)continue;seen.add(nk);comp.add(nk);bq.push([nx,ny]);}}
             if(comp.size>bestSz){bestSz=comp.size;mainComp=comp;}
         }
         if(!mainComp) continue;
         for(let ty=0;ty<45;ty++) for(let tx=0;tx<45;tx++){
             const wx=x0+tx, wy=y0+ty, k=`${wx},${wy}`;
-            if(world[wy*GW+wx]===5||world[wy*GW+wx]===25||mainComp.has(k)) continue;
+            if(world[wy*GW+wx]===5||world[wy*GW+wx]===25||world[wy*GW+wx]===26||mainComp.has(k)) continue;
             const par=new Map([[k,null]]); const pq=[[wx,wy]]; let tgt=null;
             pfl:while(pq.length&&par.size<900){const[cx,cy]=pq.shift();for(const[dx,dy]of[[0,1],[0,-1],[1,0],[-1,0]]){const nx=cx+dx,ny=cy+dy,nk=`${nx},${ny}`;if(par.has(nk)||nx<x0||ny<y0||nx>=x0+45||ny>=y0+45)continue;par.set(nk,`${cx},${cy}`);if(mainComp.has(nk)){tgt=nk;break pfl;}pq.push([nx,ny]);}}
             if(tgt){let c=par.get(tgt);while(c){const[_bpx,_bpy]=c.split(',').map(Number);if(world[_bpy*GW+_bpx]===5){world[_bpy*GW+_bpx]=12;mainComp.add(`${_bpx},${_bpy}`);// 両隣も埋めて3タイル幅にする（一本道を防ぐ）
@@ -9665,10 +9707,13 @@ function drawMap() {
     const _mapId = partyData.pos.map;
     const isCastle = _mapId.includes('castle') || _mapId.includes('gramani') || _mapId.includes('grakue') || _mapId.includes('palace'); const isTown = _mapId.includes('town') || _mapId.includes('market') || _mapId.includes('village'); const isCave = _mapId.includes('dungeon') || _mapId.includes('cave') || _mapId.includes('ruin') || _mapId.includes('fortress') || _mapId.includes('abyss'); const isMountain = _mapId === 'map_field_north_2';
     const _isDesertMap = _mapId.includes('desert') || _mapId.includes('oasis') || _mapId.includes('sand');
-    // 雪原の村フロスト(map_field_1_6)周辺、および世界地図で氷雪地帯とした北部
-    // (氷結城ノルド・ザーモの氷墓・白鋼城カガネ・冒険者の港ノルド周辺)は雪原として地域差を出す
-    const _isSnowMap = ['field_0_5','field_0_6','field_0_7','field_0_8','field_1_5','field_1_6','field_1_7','field_1_8','field_2_5','field_2_6','field_2_7','field_2_8',
-        'field_0_0','field_0_1','field_1_0','field_5_0','field_6_0','field_6_1','field_7_0','field_7_1','field_8_0','field_8_1'].some(s => _mapId.includes(s));
+    // 雪原の村フロスト(map_field_1_6)・西の水晶洞窟(map_field_0_6)周辺、および世界地図で
+    // 氷雪地帯とした北部(氷結城ノルド・ザーモの氷墓・白鋼城カガネ・冒険者の港ノルド周辺・
+    // 中央上部の大雪山脈)は雪原として地域差を出す。
+    // 森の隠れ里エルフヘイム(0_7)・闇の尖塔(2_6,溶岩)・遺跡のほとりサルモン(2_8)は
+    // 世界地図では森/溶岩として描かれているため雪原対象から除外
+    const _isSnowMap = ['field_0_5','field_0_6','field_0_8','field_1_5','field_1_6','field_1_7','field_1_8','field_2_5',
+        'field_0_0','field_0_1','field_1_0','field_2_0','field_3_0','field_4_0','field_5_0','field_6_0','field_6_1','field_7_0','field_7_1','field_8_0','field_8_1'].some(s => _mapId.includes(s));
     // 都市規模による壁材の違い: 小規模集落は木の柵、首都(城下町エニシア)は最も重厚な石壁、
     // それ以外の町は中間の煉瓦壁(既存)のまま。
     const _SMALL_TOWN_IDS = ['map_fishing_village_nw','map_fishing_village_harbor','map_town_port','map_market_east','map_village_border','map_waypoint_village','map_frontier_village','map_abandoned_house'];
