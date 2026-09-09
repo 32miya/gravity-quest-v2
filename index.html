@@ -2385,6 +2385,18 @@ function getCurrentObjectiveText() {
         if (f.flag_2nd_maou_cleared) return 'すべての 旅は 終わった。\n自由に 世界を 旅しよう。';
         return 'エニシア城の 宮廷賢者バルダックに\n話しかけよう。';
     }
+    // 偽王討伐編（逆回りの記憶回復編）: 魔王城→南の祠→南西の村→
+    // 天空の塔→試練の洞窟→城下町 の順で記憶を取り戻す
+    if (f.flag_2nd_maou_cleared) {
+        if (!f.has_ship) return '南西の「試練の 洞窟」で\n船を 手に入れよう。';
+        if (!f['2nd_mem_maou']) return '南東の 海の 果ての 魔王城へ\n向かおう。';
+        if (!f['2nd_mem_shrine']) return '南の「祠島」へ 向かおう。';
+        if (!f['2nd_mem_village']) return '南西の 村島へ 向かおう。';
+        if (!f['2nd_mem_tower']) return '東の「天空の 塔」へ 向かおう。';
+        if (!f['2nd_mem_dungeon']) return '南西の「試練の 洞窟」へ\n再び 向かおう。';
+        if (!f['2nd_mem_town']) return '城下町エニシアへ 向かおう。\nすべての 始まりの 場所だ。';
+        return 'エニシア城で 王と 向き合おう。';
+    }
     if (f.flag_mage_trial_cleared) return '準備は 整った。東の 魔王城へ 挑もう。';
     if (f.flag_weapon_forged) return '東の 極果ての 島の 大魔導士\nラムダスを 訪ねよう。';
     if (f.flag_tower_cleared) return '西の 大森林の 奥の 伝説の 鍛冶屋を\n訪ねよう。';
@@ -11689,7 +11701,15 @@ const _2ND_MEMORY_MAP = {
         hint:null },
 };
 
-async function _check2ndMemory() { return; }
+async function _check2ndMemory() {
+    const entry = _2ND_MEMORY_MAP[partyData.pos.map];
+    if (!entry || partyData.flags[entry.flag]) return;
+    partyData.flags[entry.flag] = true;
+    AudioManager.playSE('church');
+    await typeMessage(entry.flash);
+    if (entry.hint) await typeMessage(entry.hint);
+    state = 'FIELD'; hideAllWindows(); drawMap();
+}
 
 // 偽王討伐編: 兵士フラグのマップIDを正規化（map_プレフィックスを除去して統一）
 function _stripMapPfx(id){ return (id||'').replace(/^map_/,''); }
