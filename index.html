@@ -6246,7 +6246,7 @@ function generateDQStyleMaps() {
     if (!externalMapData['map_town_south_port']) {
         externalMapData['map_town_south_port']=buildTown('南海の港 サンゴ礁',
             {'13,21':{map:'map_field_6_7',x:22,y:23},'12,21':{map:'map_field_6_7',x:22,y:23}},
-            {'4,3':{id:'npc_priest',name:'神父'},'21,3':{id:'npc_inn_south',name:'宿屋'},'4,10':{id:'npc_weapon_shop_south',name:'武器屋'},'21,10':{id:'npc_item_shop_south',name:'道具屋'},'13,5':{id:'npc_south_captain',name:'南海の船長'},'5,16':{id:'npc_south_diver',name:'珊瑚の潜水士'},'21,16':{id:'npc_south_merchant',name:'南の商人'},'10,11':{id:'obj_flower_large',name:'大花壇'},'11,11':{id:'obj_fill',name:''},'12,11':{id:'obj_fill',name:''},'13,11':{id:'obj_fill',name:''},'8,4':{id:'obj_chest_item',name:'宝箱（海底の宝）'}},
+            {'4,3':{id:'npc_priest',name:'神父'},'21,3':{id:'npc_inn_south',name:'宿屋'},'4,10':{id:'npc_weapon_shop_south',name:'武器屋'},'21,10':{id:'npc_item_shop_south',name:'道具屋'},'13,5':{id:'npc_south_captain',name:'南海の船長'},'5,16':{id:'npc_south_diver',name:'珊瑚の潜水士'},'21,16':{id:'npc_south_merchant',name:'南の商人'},'13,16':{id:'npc_blackjack_dealer',name:'ブラックジャック卓の案内人'},'10,11':{id:'obj_flower_large',name:'大花壇'},'11,11':{id:'obj_fill',name:''},'12,11':{id:'obj_fill',name:''},'13,11':{id:'obj_fill',name:''},'8,4':{id:'obj_chest_item',name:'宝箱（海底の宝）'}},
             []);
     }
     // フロストの雪の町
@@ -10870,7 +10870,7 @@ function drawMap() {
                 const _pSprite = externalImages['guard'] || externalImages['oldMan'];
                 if (_pSprite) { ctx.save(); ctx.filter = 'hue-rotate(200deg) saturate(1.8) brightness(0.85)'; drawSpriteLocal(ctx, _pSprite, px, py, 48); ctx.restore(); }
                 else { ctx.font = '28px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🏴‍☠️', px+12, py+12); }
-            } else if (npc.id.includes('poker') || npc.id.includes('dealer')) {
+            } else if (npc.id.includes('poker') || npc.id.includes('blackjack') || npc.id.includes('dealer')) {
                 const _pkSprite = externalImages['oldMan'] || externalImages['guard'];
                 if (_pkSprite) { ctx.save(); ctx.filter = 'hue-rotate(270deg) saturate(1.7) brightness(1.0)'; drawSpriteLocal(ctx, _pkSprite, px, py, 48); ctx.restore(); }
                 else { ctx.font = '26px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🃏', px+12, py+10); }
@@ -14309,6 +14309,7 @@ ${_sns[_ri(_sns.length)]}
                 else if (extDef.type === "inn" || npc.id.includes('inn') || (npc.name && npc.name.includes('宿屋'))) { await eventInn(npc.id); }
                 else if (extDef.type === "casino" || npc.id.includes('casino') || npc.id.includes('bunny')) { await eventCasino(); }
                 else if (npc.id.includes('poker')) { await eventPoker(); }
+                else if (npc.id.includes('blackjack')) { await eventBlackjack(); }
                 else {
                     if (extDef.dialogues && extDef.dialogues.length > 0) {
                         let activeDialogue = null; for (let i = 0; i < extDef.dialogues.length; i++) { let d = extDef.dialogues[i]; if (d.requires_flag === "none" || partyData.flags[d.requires_flag]) { activeDialogue = d; break; } }
@@ -14593,6 +14594,7 @@ ${_sns[_ri(_sns.length)]}
                 else if(npc.id.includes('inn') || (npc.name && (npc.name.includes('宿屋') || npc.name.includes('旅の宿')))) await eventInn(npc.id);
                 else if(npc.id.includes('casino') || npc.id.includes('bunny')) await eventCasino();
                 else if(npc.id.includes('poker')) await eventPoker();
+                else if(npc.id.includes('blackjack')) await eventBlackjack();
                 else {
                     let _nName = npc.name || npc.id;
                     // 偽王討伐編: 魔王城クリア後・偽王未討伐 → 「平和が来たのに何か不安」の個別ニュアンス
@@ -14816,6 +14818,88 @@ async function eventPoker() {
             AudioManager.playSE('cancel');
             await typeMessage(`${handText}\n残念、役なし……\n${bet}G を 失った。`);
         }
+    }
+}
+
+// ===== 賭けブラックジャック(21) =====
+function _bjCardValue(c) { if (c.r >= 11 && c.r <= 13) return 10; if (c.r === 14) return 11; return c.r; }
+function _bjHandTotal(cards) {
+    let total = cards.reduce((s, c) => s + _bjCardValue(c), 0);
+    let aces = cards.filter(c => c.r === 14).length;
+    while (total > 21 && aces > 0) { total -= 10; aces--; }
+    return total;
+}
+function _bjHandStr(cards) { return cards.map(_pokerCardStr).join(' '); }
+async function eventBlackjack() {
+    await typeMessage("【賭場の 案内人】\nようこそ、ブラックジャック卓へ。\n21を こえない 範囲で\nディーラーより 大きい 数を 出せば 勝ちです！\n(2枚で ぴったり21なら 大当たり)");
+    while (true) {
+        let yn = await selectMenu(["あそぶ", "やめる"], 'cmd-window', 1, true);
+        if (yn !== 0) { await typeMessage("【賭場の 案内人】\nまたの お越しを。"); break; }
+        const betOptions = [10, 50, 200, 1000];
+        const betLabels = betOptions.map(b => `${b}G 賭ける`).concat(['やめる']);
+        let bi = await selectMenu(betLabels, 'cmd-window', 1, true);
+        if (bi === -1 || bi === betOptions.length) continue;
+        let bet = betOptions[bi];
+        if (partyData.gold < bet) { await typeMessage("【賭場の 案内人】\nおや、おかねが 足りないようですね。"); continue; }
+        partyData.gold -= bet; updateGoldWindow();
+        AudioManager.playSE('decision');
+
+        const deck = _pokerNewDeck();
+        let player = [deck.shift(), deck.shift()];
+        let dealer = [deck.shift(), deck.shift()];
+        let playerTotal = _bjHandTotal(player);
+        const playerBlackjack = (playerTotal === 21);
+        let bust = false;
+
+        if (!playerBlackjack) {
+            let firstTurn = true;
+            while (true) {
+                const opts = ['ヒット', 'スタンド'];
+                if (firstTurn && partyData.gold >= bet) opts.push('ダブルダウン');
+                await typeMessage(`ディーラー: ${_pokerCardStr(dealer[0])} ??\nあなた: ${_bjHandStr(player)} (${playerTotal})\nどうする？`);
+                let act = await selectMenu(opts, 'cmd-window', 1, false);
+                const choice = opts[act];
+                firstTurn = false;
+                if (choice === 'ヒット') {
+                    player.push(deck.shift());
+                    playerTotal = _bjHandTotal(player);
+                    if (playerTotal > 21) { bust = true; break; }
+                } else if (choice === 'ダブルダウン') {
+                    partyData.gold -= bet; updateGoldWindow(); bet *= 2;
+                    player.push(deck.shift());
+                    playerTotal = _bjHandTotal(player);
+                    if (playerTotal > 21) bust = true;
+                    break;
+                } else { break; }
+            }
+        }
+
+        let dealerTotal = _bjHandTotal(dealer);
+        const dealerBlackjack = (dealerTotal === 21);
+        if (!bust) {
+            await typeMessage(`ディーラー: ${_bjHandStr(dealer)} (${dealerTotal})\nあなた: ${_bjHandStr(player)} (${playerTotal})\nディーラーの 番です……`);
+            while (!dealerBlackjack && dealerTotal < 17) {
+                dealer.push(deck.shift());
+                dealerTotal = _bjHandTotal(dealer);
+            }
+        }
+
+        let resultLabel, payout;
+        if (bust) { resultLabel = 'バースト……'; payout = 0; }
+        else if (playerBlackjack && !dealerBlackjack) { resultLabel = 'ブラックジャック！！'; payout = Math.floor(bet * 2.5); }
+        else if (dealerTotal > 21) { resultLabel = 'ディーラーが バースト！ 勝ち！'; payout = bet * 2; }
+        else if (playerTotal > dealerTotal) { resultLabel = '勝ち！'; payout = bet * 2; }
+        else if (playerTotal === dealerTotal) { resultLabel = '引き分け……'; payout = bet; }
+        else { resultLabel = '負け……'; payout = 0; }
+
+        if (payout > 0) { partyData.gold += payout; updateGoldWindow(); }
+        AudioManager.playSE(payout > bet ? 'level_up' : (payout === bet ? 'cursor' : 'cancel'));
+        const net = payout - bet;
+        let netLine;
+        if (net > 0) netLine = `${net}G を 獲得した！`;
+        else if (net === 0) netLine = `掛け金の ${bet}G が 戻ってきました。`;
+        else netLine = `${bet}G を 失った。`;
+        await typeMessage(`ディーラー: ${_bjHandStr(dealer)} (${dealerTotal})\nあなた: ${_bjHandStr(player)} (${playerTotal})\n${resultLabel}\n${netLine}`);
     }
 }
 
