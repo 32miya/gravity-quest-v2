@@ -17,8 +17,8 @@ const ONLY_MAPS = process.argv.slice(2);
 
 // index.html:9301 のリテラルと同一（フィールドは船あり=最も緩い判定を使う。
 // 船が必要な到達は「意図的なゲート」であってバグではないため）
-const INDOOR_SOLID = new Set([1, 2, 4, 5, 15, 16, 17, 18, 19, 20, 25]);
-const FIELD_SOLID_WITH_SHIP = new Set([1, 2, 4, 15, 16, 17, 18, 25]);
+const INDOOR_SOLID = new Set([1, 2, 4, 5, 15, 16, 17, 18, 19, 20, 25, 26]);
+const FIELD_SOLID_WITH_SHIP = new Set([1, 2, 4, 15, 16, 17, 18, 25, 26]);
 // index.html:9303 の装飾ラグ(通行可)以外のnpcはタイルを塞ぐ
 const PASSABLE_NPC_IDS = new Set(['obj_deco_rug_red', 'obj_deco_rug_blue', 'deco_rug_gold', 'obj_deco_rug_yellow']);
 
