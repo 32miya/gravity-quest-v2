@@ -893,21 +893,25 @@ const _GQ_JOBS = ['勇者','戦士','魔法使い','僧侶','賢者','パンダ'
 // 各ダンジョン固有の宝箱ID → そのダンジョンでしか手に入らないレアアイテムID の対応表。
 // これらのアイテムはショップで売っておらず(price:0)、通常の宝箱抽選プールにも入らないため、
 // 各ダンジョンの特定の宝箱に固定で割り当てることで確実に入手できるようにする。
+// 各隠しダンジョンのボス強さ(EXP)順: 砂漠の遺跡(10000)<氷窟(12000)<影の洞窟(12500)<
+// 東の地下迷宮(13000)<溶岩洞窟/海底神殿(16000)<闇の要塞/水晶洞窟(17000)<古代遺跡(20000)<
+// 魔法使いの塔(32000)<闇の尖塔(38000)<深淵の迷宮(50000) の順に、宝箱の中身の強さも
+// 一致するよう再配分(以前は最弱の砂漠の遺跡が全体最強の武器を持つ等、逆転していた)
 const _GQ_RARE_CHEST_TABLE = {
-    'obj_chest_ice_a': 'w12', 'obj_chest_ice_b': 'h07', 'obj_chest_ice_deep': 's16',
-    'obj_chest_lava_a': 'w25', 'obj_chest_lava_b': 'a23', 'obj_chest_lava_deep': 'w_staff_14',
-    'obj_chest_ancient_a': 'w22', 'obj_chest_ancient_b': 'h13',
-    'obj_chest_east_a': 'w_spear_12', 'obj_chest_east_b': 'a20',
-    'obj_chest_shadow_a': 'w31', 'obj_chest_shadow_b': 's_grav_01',
-    'obj_chest_ruin_a': 'w_spear_16', 'obj_chest_ruin_b': 'a22',
-    'obj_chest_sea_a': 'w_fan_05', 'obj_chest_sea_b': 'x07',
-    'obj_chest_dark_a': 'w_staff_09', 'obj_chest_dark_b': 'h15',
-    'obj_chest_crystal_a': 'w14', 'obj_chest_crystal_b': 'x11',
-    'obj_chest_abyss_a': 'w35', 'obj_chest_abyss_b': 's15',
-    'obj_chest_magic_1f': 'h10', 'obj_chest_magic_2f': 's12', 'obj_chest_magic_2f_b': 'x06',
-    'obj_chest_magic_3f': 'h14', 'obj_chest_magic_3f_b': 'x10',
+    'obj_chest_ice_a': 'w25', 'obj_chest_ice_b': 'h07', 'obj_chest_ice_deep': 'h14',
+    'obj_chest_lava_a': 'w_fan_05', 'obj_chest_lava_b': 's15', 'obj_chest_lava_deep': 'a22',
+    'obj_chest_ancient_a': 'w_staff_14', 'obj_chest_ancient_b': 's16',
+    'obj_chest_east_a': 'w_staff_09', 'obj_chest_east_b': 'h13',
+    'obj_chest_shadow_a': 'w31', 'obj_chest_shadow_b': 'x08',
+    'obj_chest_ruin_a': 'w22', 'obj_chest_ruin_b': 'h10',
+    'obj_chest_sea_a': 'w12', 'obj_chest_sea_b': 'x06',
+    'obj_chest_dark_a': 'w14', 'obj_chest_dark_b': 'a23',
+    'obj_chest_crystal_a': 'w35', 'obj_chest_crystal_b': 'a20',
+    'obj_chest_abyss_a': 'w_spear_16', 'obj_chest_abyss_b': 'x10',
+    'obj_chest_magic_1f': 'w_spear_12', 'obj_chest_magic_2f': 's12', 'obj_chest_magic_2f_b': 'h15',
+    'obj_chest_magic_3f': 'x07', 'obj_chest_magic_3f_b': 'x11',
     'obj_chest_darkspire_1f': 'w_grav_01', 'obj_chest_darkspire_2f': 'a_grav_01',
-    'obj_chest_darkspire_3f': 'h_grav_01', 'obj_chest_darkspire_3f_b': 'x08',
+    'obj_chest_darkspire_3f': 'h_grav_01', 'obj_chest_darkspire_3f_b': 's_grav_01',
 };
 
 // ── 一枚絵の世界地図(ちず画面)用: グリッド座標(gx,gy) → 画像上の位置(%) の対応表 ──
@@ -5459,6 +5463,8 @@ function generateDQStyleMaps() {
     const encT2 = ['chimera','dullahan','flame_elemental','gargoyle'].filter(_ef);
     const encM1 = ['death_knight','vampire_lord','cyclops','archdemon'].filter(_ef);
     const encM2 = ['ancient_dragon','lich','behemoth','archdemon'].filter(_ef);
+    // 隠しダンジョン群の最高難度2つ（闇の尖塔・深淵の迷宮）専用の最強クラス
+    const encX1 = ['behemoth','bahamut','archdemon','lich'].filter(_ef);
     const fb = ['m02'];
 
 
@@ -6033,8 +6039,8 @@ function generateDQStyleMaps() {
         externalMapData[mapId2]=d2;
     }
 
-    mkDungeon2F('map_cave_ice_1f','map_cave_ice_b1f','boss_ice_dragon','氷竜アイスフロスト','obj_chest_ice_a','obj_chest_ice_b','obj_chest_ice_deep',encD2,encD2,'北の氷窟1F','北の氷窟B1F','map_field_5_1',8,37);
-    mkDungeon2F('map_cave_lava_1f','map_cave_lava_b1f','boss_lava_titan','溶岩大魔神','obj_chest_lava_a','obj_chest_lava_b','obj_chest_lava_deep',encD3,encD3,'東の溶岩洞窟1F','東の溶岩洞窟B1F','map_field_7_2',8,37);
+    mkDungeon2F('map_cave_ice_1f','map_cave_ice_b1f','boss_ice_dragon','氷竜アイスフロスト','obj_chest_ice_a','obj_chest_ice_b','obj_chest_ice_deep',encT1,encT1,'北の氷窟1F','北の氷窟B1F','map_field_5_1',8,37);
+    mkDungeon2F('map_cave_lava_1f','map_cave_lava_b1f','boss_lava_titan','溶岩大魔神','obj_chest_lava_a','obj_chest_lava_b','obj_chest_lava_deep',encT2,encT2,'東の溶岩洞窟1F','東の溶岩洞窟B1F','map_field_7_2',8,37);
 
     // 遺跡・1F単体系ダンジョン
     function mkDungeon1F(mapId,bossId,bossName,chestA,chestB,enc,dungName,fieldMapId,fdx,fdy) {
@@ -6061,14 +6067,14 @@ function generateDQStyleMaps() {
         }
     }
 
-    if(!externalMapData['map_ruin_ancient_1f']) mkDungeon1F('map_ruin_ancient_1f','boss_ancient_guardian','古代の守護者','obj_chest_ancient_a','obj_chest_ancient_b',encD2,'北海の古代遺跡','map_field_8_0',8,22);
-    if(!externalMapData['map_dungeon_east_1f'])  mkDungeon1F('map_dungeon_east_1f','boss_dungeon_lord','迷宮の覇者','obj_chest_east_a','obj_chest_east_b',encD3,'東の地下迷宮','map_field_8_3',8,22);
-    if(!externalMapData['map_cave_shadow_1f'])   mkDungeon1F('map_cave_shadow_1f','boss_shadow_knight','影の騎士','obj_chest_shadow_a','obj_chest_shadow_b',encM1,'南の影の洞窟','map_field_5_5',8,22);
+    if(!externalMapData['map_ruin_ancient_1f']) mkDungeon1F('map_ruin_ancient_1f','boss_ancient_guardian','古代の守護者','obj_chest_ancient_a','obj_chest_ancient_b',encM2,'北海の古代遺跡','map_field_8_0',8,22);
+    if(!externalMapData['map_dungeon_east_1f'])  mkDungeon1F('map_dungeon_east_1f','boss_dungeon_lord','迷宮の覇者','obj_chest_east_a','obj_chest_east_b',encT2,'東の地下迷宮','map_field_8_3',8,22);
+    if(!externalMapData['map_cave_shadow_1f'])   mkDungeon1F('map_cave_shadow_1f','boss_shadow_knight','影の騎士','obj_chest_shadow_a','obj_chest_shadow_b',encT1,'南の影の洞窟','map_field_5_5',8,22);
     if(!externalMapData['map_ruin_desert_1f'])   mkDungeon1F('map_ruin_desert_1f','boss_desert_mummy','砂漠のミイラ王','obj_chest_ruin_a','obj_chest_ruin_b',encD3,'砂漠の遺跡','map_field_3_6',8,22);
     if(!externalMapData['map_temple_sea_1f'])    mkDungeon1F('map_temple_sea_1f','boss_sea_god_statue','海神像','obj_chest_sea_a','obj_chest_sea_b',encM1,'海底神殿','map_field_5_7',8,22);
-    if(!externalMapData['map_fortress_dark_1f']) mkDungeon1F('map_fortress_dark_1f','boss_dark_disciple','魔将の使徒','obj_chest_dark_a','obj_chest_dark_b',encM2,'深南の闇の要塞','map_field_1_8',8,22);
+    if(!externalMapData['map_fortress_dark_1f']) mkDungeon1F('map_fortress_dark_1f','boss_dark_disciple','魔将の使徒','obj_chest_dark_a','obj_chest_dark_b',encM1,'深南の闇の要塞','map_field_1_8',8,22);
     if(!externalMapData['map_cave_crystal_1f'])  mkDungeon1F('map_cave_crystal_1f','boss_crystal_golem','水晶ゴーレム','obj_chest_crystal_a','obj_chest_crystal_b',encM1,'西の水晶洞窟','map_field_0_6',8,22);
-    if(!externalMapData['map_dungeon_abyss_1f']) mkDungeon1F('map_dungeon_abyss_1f','boss_chaos_dragon','混沌竜カオスドレイク','obj_chest_abyss_a','obj_chest_abyss_b',encM2,'深淵の迷宮','map_field_8_8',8,22);
+    if(!externalMapData['map_dungeon_abyss_1f']) mkDungeon1F('map_dungeon_abyss_1f','boss_chaos_dragon','混沌竜カオスドレイク','obj_chest_abyss_a','obj_chest_abyss_b',encX1,'深淵の迷宮','map_field_8_8',8,22);
 
     // ===== 新塔 2箇所 (mkMap 3F) =====
 
@@ -6117,9 +6123,9 @@ function generateDQStyleMaps() {
     }
 
     if(!externalMapData['map_tower_magic_1f'])
-        mkTower3F('map_tower_magic','map_field_5_3',7,22,'boss_archmage','魔法王アルカノス',[],[],  '魔法使いの塔1F','魔法使いの塔2F','魔法使いの塔3F');
+        mkTower3F('map_tower_magic','map_field_5_3',7,22,'boss_archmage','魔法王アルカノス',encM1,encM2,  '魔法使いの塔1F','魔法使いの塔2F','魔法使いの塔3F');
     if(!externalMapData['map_tower_darkspire_1f'])
-        mkTower3F('map_tower_darkspire','map_field_2_6',7,22,'boss_demon_avatar','魔王の化身',encM1,encM2,'闇の尖塔1F','闇の尖塔2F','闇の尖塔3F');
+        mkTower3F('map_tower_darkspire','map_field_2_6',7,22,'boss_demon_avatar','魔王の化身',encM2,encX1,'闇の尖塔1F','闇の尖塔2F','闇の尖塔3F');
 
     // 塔NPCの上書き（闇の尖塔用）
     // ※mkTower3F()はprefixに関わらずNPC/宝箱IDを'magic'系で固定生成するため、
