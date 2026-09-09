@@ -6225,7 +6225,7 @@ function generateDQStyleMaps() {
     if (!externalMapData['map_town_bazaar']) {
         externalMapData['map_town_bazaar']=buildTown('商都バザール',
             {'13,21':{map:'map_field_6_3',x:22,y:23},'12,21':{map:'map_field_6_3',x:22,y:23},'14,21':{map:'map_field_6_3',x:22,y:23}},
-            {'4,3':{id:'npc_priest',name:'神父'},'21,3':{id:'npc_inn_baz',name:'宿屋'},'4,10':{id:'npc_weapon_shop_baz',name:'武器屋'},'21,10':{id:'npc_item_shop_baz',name:'道具屋'},'13,5':{id:'npc_bazaar_chief',name:'商会長'},'7,5':{id:'npc_bazaar_merchant_a',name:'行商人A'},'19,5':{id:'npc_bazaar_merchant_b',name:'行商人B'},'5,16':{id:'npc_bazaar_thief',name:'怪しい商人'},'21,16':{id:'npc_bazaar_info',name:'情報屋'},'9,11':{id:'obj_statue',name:'バザールの石像'},'9,12':{id:'obj_statue_foot',name:''},'25,12':{id:'obj_chest_item',name:'宝箱（商都の秘宝）'}},
+            {'4,3':{id:'npc_priest',name:'神父'},'21,3':{id:'npc_inn_baz',name:'宿屋'},'4,10':{id:'npc_weapon_shop_baz',name:'武器屋'},'21,10':{id:'npc_item_shop_baz',name:'道具屋'},'13,5':{id:'npc_bazaar_chief',name:'商会長'},'7,5':{id:'npc_bazaar_merchant_a',name:'行商人A'},'19,5':{id:'npc_bazaar_merchant_b',name:'行商人B'},'5,16':{id:'npc_bazaar_thief',name:'怪しい商人'},'21,16':{id:'npc_bazaar_info',name:'情報屋'},'13,16':{id:'npc_poker_dealer',name:'賭場の胴元'},'9,11':{id:'obj_statue',name:'バザールの石像'},'9,12':{id:'obj_statue_foot',name:''},'25,12':{id:'obj_chest_item',name:'宝箱（商都の秘宝）'}},
             []);
     }
     // エストリア城下町
@@ -10870,6 +10870,10 @@ function drawMap() {
                 const _pSprite = externalImages['guard'] || externalImages['oldMan'];
                 if (_pSprite) { ctx.save(); ctx.filter = 'hue-rotate(200deg) saturate(1.8) brightness(0.85)'; drawSpriteLocal(ctx, _pSprite, px, py, 48); ctx.restore(); }
                 else { ctx.font = '28px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🏴‍☠️', px+12, py+12); }
+            } else if (npc.id.includes('poker') || npc.id.includes('dealer')) {
+                const _pkSprite = externalImages['oldMan'] || externalImages['guard'];
+                if (_pkSprite) { ctx.save(); ctx.filter = 'hue-rotate(270deg) saturate(1.7) brightness(1.0)'; drawSpriteLocal(ctx, _pkSprite, px, py, 48); ctx.restore(); }
+                else { ctx.font = '26px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🃏', px+12, py+10); }
             // ===== 追加キャラクター種別 =====
             } else if (npc.id.includes('gar_woman')) {
                 // 見た目の多様化: 全員メイド姿にならないよう、村ではメイドスプライトを使わない
@@ -14304,6 +14308,7 @@ ${_sns[_ri(_sns.length)]}
                 else if (extDef.type === "church" || npc.id.includes('priest') || npc.id.includes('church') || (npc.name && (npc.name.includes('神父') || npc.name.includes('神官') || npc.name.includes('司教')))) { await eventPriest(); }
                 else if (extDef.type === "inn" || npc.id.includes('inn') || (npc.name && npc.name.includes('宿屋'))) { await eventInn(npc.id); }
                 else if (extDef.type === "casino" || npc.id.includes('casino') || npc.id.includes('bunny')) { await eventCasino(); }
+                else if (npc.id.includes('poker')) { await eventPoker(); }
                 else {
                     if (extDef.dialogues && extDef.dialogues.length > 0) {
                         let activeDialogue = null; for (let i = 0; i < extDef.dialogues.length; i++) { let d = extDef.dialogues[i]; if (d.requires_flag === "none" || partyData.flags[d.requires_flag]) { activeDialogue = d; break; } }
@@ -14587,6 +14592,7 @@ ${_sns[_ri(_sns.length)]}
                 else if(npc.id.includes('priest') || npc.id.includes('church') || (npc.name && (npc.name.includes('神父') || npc.name.includes('神官')))) await eventPriest();
                 else if(npc.id.includes('inn') || (npc.name && (npc.name.includes('宿屋') || npc.name.includes('旅の宿')))) await eventInn(npc.id);
                 else if(npc.id.includes('casino') || npc.id.includes('bunny')) await eventCasino();
+                else if(npc.id.includes('poker')) await eventPoker();
                 else {
                     let _nName = npc.name || npc.id;
                     // 偽王討伐編: 魔王城クリア後・偽王未討伐 → 「平和が来たのに何か不安」の個別ニュアンス
@@ -14708,6 +14714,109 @@ async function eventCasino() {
         AudioManager.stopBGM();
         iframe.onload = () => { setTimeout(() => { if(iframe.contentWindow) iframe.contentWindow.postMessage({ type: 'initCasino', gold: partyData.gold }, '*'); }, 500); };
     });
+}
+
+// ===== 賭けポーカー館（ジャックス・オア・ベター方式のドローポーカー）=====
+function _pokerNewDeck() {
+    const deck = [];
+    for (let s = 0; s < 4; s++) for (let r = 2; r <= 14; r++) deck.push({ r, s });
+    for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+    return deck;
+}
+function _pokerCardStr(c) {
+    const rmap = { 11: 'J', 12: 'Q', 13: 'K', 14: 'A' };
+    const smap = ['♠', '♥', '♦', '♣'];
+    return (rmap[c.r] || c.r) + smap[c.s];
+}
+function _pokerEvaluateHand(cards) {
+    const ranks = cards.map(c => c.r).sort((a, b) => a - b);
+    const suits = cards.map(c => c.s);
+    const isFlush = suits.every(s => s === suits[0]);
+    const uniq = [...new Set(ranks)];
+    let isStraight = false, loAceStraight = false;
+    if (uniq.length === 5) {
+        if (ranks[4] - ranks[0] === 4) isStraight = true;
+        else if (ranks[0] === 2 && ranks[1] === 3 && ranks[2] === 4 && ranks[3] === 5 && ranks[4] === 14) { isStraight = true; loAceStraight = true; }
+    }
+    const counts = {};
+    ranks.forEach(r => counts[r] = (counts[r] || 0) + 1);
+    const countVals = Object.values(counts).sort((a, b) => b - a);
+    const pairRankHigh = Object.keys(counts).filter(r => counts[r] === 2).map(Number).some(r => r >= 11);
+    if (isFlush && isStraight && !loAceStraight && ranks[0] === 10) return { name: 'ロイヤルフラッシュ', mult: 250 };
+    if (isFlush && isStraight) return { name: 'ストレートフラッシュ', mult: 50 };
+    if (countVals[0] === 4) return { name: 'フォーカード', mult: 25 };
+    if (countVals[0] === 3 && countVals[1] === 2) return { name: 'フルハウス', mult: 9 };
+    if (isFlush) return { name: 'フラッシュ', mult: 6 };
+    if (isStraight) return { name: 'ストレート', mult: 4 };
+    if (countVals[0] === 3) return { name: 'スリーカード', mult: 3 };
+    if (countVals[0] === 2 && countVals[1] === 2) return { name: 'ツーペア', mult: 2 };
+    if (countVals[0] === 2 && pairRankHigh) return { name: 'ジャックス・オア・ベター', mult: 1 };
+    return { name: '役なし', mult: 0 };
+}
+async function _pokerHoldSelect(cards, held) {
+    const el = document.getElementById('cmd-window');
+    el.style.display = 'block';
+    return new Promise(resolve => {
+        let cursor = 0; // 0-4: カード, 5: ひく！ボタン
+        const render = () => {
+            let html = '<div style="text-align:center;font-size:11px;color:#ffe;margin-bottom:6px;">◀▶で えらび、Enterで ホールド/かいじょ<br>「ひく！」で Enterすると こうかん</div>';
+            html += '<div style="display:flex;justify-content:center;gap:6px;margin-bottom:8px;">';
+            cards.forEach((c, i) => {
+                const isRed = (c.s === 1 || c.s === 2);
+                const sel = cursor === i ? 'border:2px solid #ff0;' : 'border:2px solid #556;';
+                const hold = held[i] ? 'background:rgba(255,80,80,0.35);' : 'background:rgba(0,0,0,0.3);';
+                html += `<div style="${sel}${hold}border-radius:5px;padding:8px 2px;width:42px;text-align:center;font-size:16px;font-weight:bold;color:${isRed ? '#f66' : '#eee'};">${_pokerCardStr(c)}<div style="font-size:9px;color:#ff8;margin-top:3px;min-height:11px;">${held[i] ? 'HOLD' : ''}</div></div>`;
+            });
+            html += '</div>';
+            html += `<div style="text-align:center;">${cursor === 5 ? '<span class="blink">▶</span>' : '&nbsp;&nbsp;'}<span style="padding:4px 14px;border-radius:4px;${cursor === 5 ? 'background:rgba(255,255,0,0.25);' : ''}">ひく！</span></div>`;
+            el.innerHTML = html;
+        };
+        render();
+        inputCallback = (key) => {
+            let moved = false;
+            if (key === 'ArrowLeft') { cursor = (cursor + 5) % 6; moved = true; }
+            if (key === 'ArrowRight') { cursor = (cursor + 1) % 6; moved = true; }
+            if (moved) AudioManager.playSE('cursor');
+            if (key === 'Enter') {
+                if (cursor === 5) { AudioManager.playSE('decision'); inputCallback = null; el.style.display = 'none'; resolve(held); return; }
+                held[cursor] = !held[cursor]; AudioManager.playSE('cursor');
+            }
+            render();
+        };
+    });
+}
+async function eventPoker() {
+    await typeMessage("【賭場の 胴元】\nようこそ、ポーカー館へ。\n「ジャックス・オア・ベター」の\nドローポーカーで 勝負しませんか？\n(Jペア 以上で 掛け金が 戻ります)");
+    while (true) {
+        let yn = await selectMenu(["あそぶ", "やめる"], 'cmd-window', 1, true);
+        if (yn !== 0) { await typeMessage("【賭場の 胴元】\nまたの お越しを。"); break; }
+        const betOptions = [10, 50, 200, 1000];
+        const betLabels = betOptions.map(b => `${b}G 賭ける`).concat(['やめる']);
+        let bi = await selectMenu(betLabels, 'cmd-window', 1, true);
+        if (bi === -1 || bi === betOptions.length) continue;
+        const bet = betOptions[bi];
+        if (partyData.gold < bet) { await typeMessage("【賭場の 胴元】\nおや、おかねが 足りないようですね。"); continue; }
+        partyData.gold -= bet; updateGoldWindow();
+        AudioManager.playSE('decision');
+        const deck = _pokerNewDeck();
+        let cards = deck.splice(0, 5);
+        let held = [false, false, false, false, false];
+        await typeMessage(`【賭場の 胴元】\n${bet}G 賭けましたね。\nカードを 5まい くばります！`);
+        held = await _pokerHoldSelect(cards, held);
+        for (let i = 0; i < 5; i++) if (!held[i]) cards[i] = deck.shift();
+        const result = _pokerEvaluateHand(cards);
+        const handText = cards.map(_pokerCardStr).join(' ');
+        if (result.mult >= 1) {
+            const win = bet * result.mult;
+            partyData.gold += win; updateGoldWindow();
+            AudioManager.playSE(result.mult >= 9 ? 'level_up' : 'item_get');
+            if (result.mult === 1) await typeMessage(`${handText}\n「${result.name}」！\n掛け金の ${win}G が 戻ってきました。`);
+            else await typeMessage(`${handText}\n「${result.name}」！！\n${win}G を 獲得した！`);
+        } else {
+            AudioManager.playSE('cancel');
+            await typeMessage(`${handText}\n残念、役なし……\n${bet}G を 失った。`);
+        }
+    }
 }
 
 async function eventInn(npcId) {
