@@ -4873,16 +4873,20 @@ function generateFieldMapsForGravityQuest() {
     fillEll(362, 82, 16, 12, 11); // 東岸 (コーラル)
     fillEllCond(302, 74, 18, 12, 19); // 森
     fillEllCond(350, 32, 12,  8, 19);
+    fillEllCond(295, 90, 14, 10, 19); // 世界地図で森林地帯とした大陸中核の森を拡充
     fillEllCond(308, 52, 14, 10, 20); // 山
     fillEllCond(308, 50,  8,  6, 25); // 高山
 
-    // ■ 東大陸「エストリア大陸」(field 7-8, 3-5) — 東の王国
+    // ■ 東大陸「エストリア大陸」(field 7-8, 3-5) — 東の王国（木宮エストリア=森の王国のため森を多めに）
     fillEll(368, 192, 32, 38, 11); // 大陸核心
     fillEll(348, 152, 24, 20, 11); // 北部 (バザール方面)
     fillEll(375, 242, 20, 16, 11); // 南延伸 (エストリア城下)
     fillEll(340, 118, 20, 14, 11); // バザール島基部
     fillEllCond(368, 198, 10,  7, 12); // 草地
     fillEllCond(368, 190, 12,  8, 20); // 山
+    fillEllCond(370, 230, 16, 12, 19); // エストリア城周辺の深い森
+    fillEllCond(345, 200, 14, 10, 19); // 大陸中央の森
+    fillEllCond(360, 165, 12,  9, 19); // バザール北方の森
 
     // ■ 東南群島 (field 7-8, 6-8) — 深淵の地
     fillEll(372, 350, 26, 22, 11); // 深淵島
@@ -9639,8 +9643,10 @@ function drawMap() {
     const _mapId = partyData.pos.map;
     const isCastle = _mapId.includes('castle') || _mapId.includes('gramani') || _mapId.includes('grakue') || _mapId.includes('palace'); const isTown = _mapId.includes('town') || _mapId.includes('market') || _mapId.includes('village'); const isCave = _mapId.includes('dungeon') || _mapId.includes('cave') || _mapId.includes('ruin') || _mapId.includes('fortress') || _mapId.includes('abyss'); const isMountain = _mapId === 'map_field_north_2';
     const _isDesertMap = _mapId.includes('desert') || _mapId.includes('oasis') || _mapId.includes('sand');
-    // 雪原の村フロスト(map_field_1_6)周辺のフィールドは雪原として地域差を出す
-    const _isSnowMap = ['field_0_5','field_0_6','field_0_7','field_0_8','field_1_5','field_1_6','field_1_7','field_1_8','field_2_5','field_2_6','field_2_7','field_2_8'].some(s => _mapId.includes(s));
+    // 雪原の村フロスト(map_field_1_6)周辺、および世界地図で氷雪地帯とした北部
+    // (氷結城ノルド・ザーモの氷墓・白鋼城カガネ・冒険者の港ノルド周辺)は雪原として地域差を出す
+    const _isSnowMap = ['field_0_5','field_0_6','field_0_7','field_0_8','field_1_5','field_1_6','field_1_7','field_1_8','field_2_5','field_2_6','field_2_7','field_2_8',
+        'field_0_0','field_0_1','field_1_0','field_5_0','field_6_0','field_6_1','field_7_0','field_7_1','field_8_0','field_8_1'].some(s => _mapId.includes(s));
     // 都市規模による壁材の違い: 小規模集落は木の柵、首都(城下町エニシア)は最も重厚な石壁、
     // それ以外の町は中間の煉瓦壁(既存)のまま。
     const _SMALL_TOWN_IDS = ['map_fishing_village_nw','map_fishing_village_harbor','map_town_port','map_market_east','map_village_border','map_waypoint_village','map_frontier_village','map_abandoned_house'];
