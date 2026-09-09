@@ -15057,8 +15057,23 @@ async function eventWeaponShop(npcId) {
                 // 強化武器屋（特定NPC）: 高級品のみ
                 shopIds = allEquip.filter(i => i.price >= 3000).map(i => i.id).slice(-6);
             } else if (_pm.includes('town_01') || _pm.includes('castle_01')) {
-                // エニシア城下町: 序盤品
-                shopIds = allEquip.filter(i => i.price < 500).map(i => i.id).slice(0, 6);
+                // エニシア城下町: 何度も戻ってくる本拠地のため、物語の進行フラグに応じて
+                // 品揃えの上限価格が上がっていく（以前は永久に500G未満のままだった）
+                const _f = partyData.flags || {};
+                let _ceil = 500;
+                if (_f.last_boss_defeated) _ceil = Infinity;
+                else if (_f.flag_2nd_maou_cleared) _ceil = 20000;
+                else if (_f.flag_mage_trial_cleared) _ceil = 12000;
+                else if (_f.flag_weapon_forged) _ceil = 7000;
+                else if (_f.flag_tower_cleared) _ceil = 4000;
+                else if (_f.flag_dungeon_cleared) _ceil = 1500;
+                shopIds = allEquip.filter(i => i.price < _ceil).map(i => i.id).slice(-6);
+            } else if (_pm.includes('town_02')) {
+                // ガルド村（伝説の鍛冶屋の村・船を得た後の中盤で訪れる）: 中級品
+                shopIds = allEquip.filter(i => i.price >= 500 && i.price <= 3000).map(i => i.id).slice(0, 6);
+            } else if (_pm.includes('town_03')) {
+                // 東の市場バルカ（大魔導士ラムダスの島・終盤手前で訪れる）: 中〜上級品
+                shopIds = allEquip.filter(i => i.price >= 2000 && i.price <= 8000).map(i => i.id).slice(0, 6);
             } else if (_pm.includes('bazaar') || _pm.includes('market')) {
                 // バザール/バルカ: 中級品
                 shopIds = allEquip.filter(i => i.price >= 300 && i.price <= 3000).map(i => i.id).slice(0, 7);
@@ -15113,9 +15128,23 @@ async function eventShop(npcId) {
         let mainChoice = await selectMenu(["かう", "うる", "やめる"], 'cmd-window', 1, true);
         if (mainChoice === -1 || mainChoice === 2) { await typeMessage("またの おこしを おまちしております！"); break; }
         if (mainChoice === 0) {
-            let allTools = Object.values(masterData.items).filter(i => i.price > 0 && !_SQ_EXCL.has(i.id) && i.type === 'tool').sort((a, b) => a.price - b.price);
+            // モンスターのドロップ専用素材（竜の鱗・魔将の角など）は、討伐報酬としての
+            // 価値を保つため道具屋では販売しない
+            const _dropOnlyIds = new Set((window.MONSTER_DATABASE || []).map(m => m.drop_item_id).filter(Boolean));
+            let allTools = Object.values(masterData.items).filter(i => i.price > 0 && !_SQ_EXCL.has(i.id) && !_dropOnlyIds.has(i.id) && i.type === 'tool').sort((a, b) => a.price - b.price);
             let shopIds = [];
-            if (partyData.pos.map.includes('town_01') || partyData.pos.map.includes('castle_01')) { shopIds = allTools.slice(0, 5).map(i => i.id); }
+            if (partyData.pos.map.includes('town_01') || partyData.pos.map.includes('castle_01')) {
+                // エニシア城下町: 物語の進行フラグに応じて品揃えの上限価格が上がっていく
+                const _f = partyData.flags || {};
+                let _ceil = 250;
+                if (_f.last_boss_defeated) _ceil = Infinity;
+                else if (_f.flag_2nd_maou_cleared) _ceil = 5000;
+                else if (_f.flag_mage_trial_cleared) _ceil = 2000;
+                else if (_f.flag_weapon_forged) _ceil = 1000;
+                else if (_f.flag_tower_cleared) _ceil = 600;
+                else if (_f.flag_dungeon_cleared) _ceil = 350;
+                shopIds = allTools.filter(i => i.price < _ceil).map(i => i.id).slice(-5);
+            }
             else { let maxP = Math.max(100, partyData.gold / 1.5); let cands = allTools.filter(i => i.price <= maxP); if (cands.length === 0) cands = allTools; shopIds = cands.slice(-6).map(i => i.id); }
             if (shopIds.length === 0) shopIds = allTools.slice(0, 3).map(i => i.id);
             shopIds = shopIds.filter(id => masterData.items[id]);
