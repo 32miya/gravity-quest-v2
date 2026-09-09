@@ -417,12 +417,12 @@
 <script>
 window.MONSTER_DATABASE = [
             // --- 序盤の10体 ---
-            { id: "slime", name: "スライム", hp: 12, attack: 6, defense: 4, speed: 7, exp: 3, gold: 2, drop_item_id: "yakusou", drop_rate: 0.15, traits: ["weak_fire"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/520e55ad7e7a650298dc12a6f71f15d3_1775632645199981160.png" },
+            { id: "slime", name: "スライム", hp: 12, attack: 6, defense: 4, speed: 7, exp: 3, gold: 2, drop_item_id: "i01", drop_rate: 0.15, traits: ["weak_fire"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/520e55ad7e7a650298dc12a6f71f15d3_1775632645199981160.png" },
             { id: "goblin", name: "ゴブリン", hp: 20, attack: 12, defense: 7, speed: 10, exp: 8, gold: 5, drop_item_id: "bronze_sword", drop_rate: 0.05, traits: [], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/9ef51e2da833adb0371ca0646d4307ee_1775632650216237557.png" },
             { id: "giant_bat", name: "大コウモリ", hp: 15, attack: 9, defense: 5, speed: 18, exp: 6, gold: 4, drop_item_id: null, drop_rate: 0, traits: ["flying", "weak_wind"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/62e7fdfb836ad4acac1ff7177b22411e_1775632645478559784.png" },
-            { id: "ghost_mushroom", name: "お化けキノコ", hp: 25, attack: 10, defense: 8, speed: 6, exp: 10, gold: 6, drop_item_id: "poison_antidote", drop_rate: 0.20, traits: ["poison_attack", "weak_fire"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/b0272e225fc9fcb62c77847fc6a08557_1775632736160117446.png" },
+            { id: "ghost_mushroom", name: "お化けキノコ", hp: 25, attack: 10, defense: 8, speed: 6, exp: 10, gold: 6, drop_item_id: "i02", drop_rate: 0.20, traits: ["poison_attack", "weak_fire"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/b0272e225fc9fcb62c77847fc6a08557_1775632736160117446.png" },
             { id: "wild_wolf", name: "ワイルドウルフ", hp: 35, attack: 18, defense: 10, speed: 22, exp: 15, gold: 8, drop_item_id: "beast_fang", drop_rate: 0.10, traits: ["beast"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/68eaf4a4ad12d363ea0c6892e2b2cccd_1775632645625407863.png" },
-            { id: "ghost", name: "ゴースト", hp: 28, attack: 15, defense: 25, speed: 12, exp: 18, gold: 10, drop_item_id: "magic_water", drop_rate: 0.08, traits: ["undead", "floating", "high_evasion"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/cd725e8e2c41ebdfab36af0927a1494f_1775632863499714921.png" },
+            { id: "ghost", name: "ゴースト", hp: 28, attack: 15, defense: 25, speed: 12, exp: 18, gold: 10, drop_item_id: "i03", drop_rate: 0.08, traits: ["undead", "floating", "high_evasion"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/cd725e8e2c41ebdfab36af0927a1494f_1775632863499714921.png" },
             { id: "skeleton", name: "スケルトン", hp: 45, attack: 25, defense: 18, speed: 15, exp: 25, gold: 15, drop_item_id: "bone_sword", drop_rate: 0.05, traits: ["undead", "weak_fire", "weak_light"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/3a4696c0928a7da857785cc1a1863503_1775632997696389937.png" },
             { id: "orc", name: "オーク", hp: 80, attack: 35, defense: 22, speed: 8, exp: 40, gold: 25, drop_item_id: "iron_spear", drop_rate: 0.08, traits: ["beast_man"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/d2d890562cbfc5978c7abc142f9a9b1b_1775632936666133685.png" },
             { id: "golem", name: "ゴーレム", hp: 120, attack: 45, defense: 50, speed: 4, exp: 65, gold: 30, drop_item_id: "stone_fragment", drop_rate: 1.0, traits: ["construct", "high_defense", "weak_magic"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/fc505291262c089775b53284ff67feee_1775632863854164049.png" },
@@ -430,7 +430,7 @@ window.MONSTER_DATABASE = [
             
             // --- 中盤の10体 ---
             { id: "killer_mantis", name: "キラーマンティス", hp: 95, attack: 75, defense: 45, speed: 80, exp: 95, gold: 40, drop_item_id: "sharp_claw", drop_rate: 0.15, traits: ["double_attack", "high_critical", "weak_fire"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/5d6d97bedc7f0a26405f5e2b3f1ccae3_1775637547776388496.png" },
-            { id: "dark_mage", name: "ダークメイジ", hp: 80, attack: 30, defense: 35, speed: 45, exp: 110, gold: 75, drop_item_id: "magic_water", drop_rate: 0.20, traits: ["magic_attack", "weak_physical"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/1d550e44af88a8c7ca5d4d8377d8b660_1775637547255814281.png" },
+            { id: "dark_mage", name: "ダークメイジ", hp: 80, attack: 30, defense: 35, speed: 45, exp: 110, gold: 75, drop_item_id: "i03", drop_rate: 0.20, traits: ["magic_attack", "weak_physical"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/1d550e44af88a8c7ca5d4d8377d8b660_1775637547255814281.png" },
             { id: "dullahan", name: "デュラハン", hp: 140, attack: 65, defense: 85, speed: 40, exp: 130, gold: 60, drop_item_id: "iron_armor", drop_rate: 0.05, traits: ["undead", "high_defense", "weak_light"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/835788c4614c9430037992baa153a296_1775635695669079168.png" },
             { id: "cockatrice", name: "コカトリス", hp: 110, attack: 55, defense: 45, speed: 65, exp: 140, gold: 50, drop_item_id: "petrify_cure", drop_rate: 0.10, traits: ["petrify_attack", "flying", "weak_wind"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/e52e5d9b01656e0ab007f96deebf7e48_1775637548297302988.png" },
             { id: "minotaur", name: "ミノタウロス", hp: 200, attack: 90, defense: 55, speed: 35, exp: 180, gold: 90, drop_item_id: "battle_axe", drop_rate: 0.05, traits: ["beast_man", "critical_hit", "weak_confusion"], image: "https://aigcap.cdn.sfmji.com/tti-img/segment/synclut_pulsar_mcp/image/c5b62ed7b09a08f48775424bf8c4594a_1775638524656168024.png" },
@@ -889,6 +889,26 @@ const _GQ_KANA64 = 'あいうえおかきくけこさしすせそたちつてと
 //      8=パラディン,9=サムライ,10=魔剣士,11=踊り子,12=召喚士,13=魔法戦士,14=モンク,15=商人
 const _GQ_JOBS = ['勇者','戦士','魔法使い','僧侶','賢者','パンダ','忍者','ネコ',
                   'パラディン','サムライ','魔剣士','踊り子','召喚士','魔法戦士','モンク','商人'];
+
+// 各ダンジョン固有の宝箱ID → そのダンジョンでしか手に入らないレアアイテムID の対応表。
+// これらのアイテムはショップで売っておらず(price:0)、通常の宝箱抽選プールにも入らないため、
+// 各ダンジョンの特定の宝箱に固定で割り当てることで確実に入手できるようにする。
+const _GQ_RARE_CHEST_TABLE = {
+    'obj_chest_ice_a': 'w12', 'obj_chest_ice_b': 'h07', 'obj_chest_ice_deep': 's16',
+    'obj_chest_lava_a': 'w25', 'obj_chest_lava_b': 'a23', 'obj_chest_lava_deep': 'w_staff_14',
+    'obj_chest_ancient_a': 'w22', 'obj_chest_ancient_b': 'h13',
+    'obj_chest_east_a': 'w_spear_12', 'obj_chest_east_b': 'a20',
+    'obj_chest_shadow_a': 'w31', 'obj_chest_shadow_b': 's_grav_01',
+    'obj_chest_ruin_a': 'w_spear_16', 'obj_chest_ruin_b': 'a22',
+    'obj_chest_sea_a': 'w_fan_05', 'obj_chest_sea_b': 'x07',
+    'obj_chest_dark_a': 'w_staff_09', 'obj_chest_dark_b': 'h15',
+    'obj_chest_crystal_a': 'w14', 'obj_chest_crystal_b': 'x11',
+    'obj_chest_abyss_a': 'w35', 'obj_chest_abyss_b': 's15',
+    'obj_chest_magic_1f': 'h10', 'obj_chest_magic_2f': 's12', 'obj_chest_magic_2f_b': 'x06',
+    'obj_chest_magic_3f': 'h14', 'obj_chest_magic_3f_b': 'x10',
+    'obj_chest_darkspire_1f': 'w_grav_01', 'obj_chest_darkspire_2f': 'a_grav_01',
+    'obj_chest_darkspire_3f': 'h_grav_01', 'obj_chest_darkspire_3f_b': 'x08',
+};
 // マップIDテーブル（6ビット=64種）
 const _GQ_MAPS = ['map_town_01','map_castle_01','map_dungeon_1f','map_dungeon_b1f','map_dungeon_b2f','map_dungeon_b3f','map_tower_1f','map_tower_2f','map_tower_3f','map_shrine_warp','map_demon_castle_1f','map_demon_castle_2f','map_demon_castle_3f','map_demon_castle_4f','map_town_02','map_town_03','map_dharma_temple','map_fishing_village_nw','map_frontier_village','map_pirate_cave','map_sage_shrine','map_field_0_0','map_field_1_0','map_field_2_0','map_field_3_0','map_field_4_0','map_field_0_1','map_field_1_1','map_field_2_1','map_field_3_1','map_field_4_1','map_field_0_2','map_field_1_2','map_field_2_2','map_field_3_2','map_field_4_2','map_field_0_3','map_field_1_3','map_field_2_3','map_field_3_3','map_field_4_3','map_field_0_4','map_field_1_4','map_field_2_4','map_field_3_4','map_field_4_4','map_eden',
     'map_castle_zarmo','map_castle_estoria','map_castle_deserta','map_castle_north',
@@ -1143,9 +1163,12 @@ function packSaveData(pData) {
     const _rd = f.rura_destinations || {};
     const _rdNorm = new Set(Object.keys(_rd).map(k => k.startsWith('map_') ? k.slice(4) : k));
     for (const _rt of _GQ_RULA_TOWNS) fields.push([_rdNorm.has(_rt) ? 1 : 0, 1]);
+    // 後半追加SQ5個(sq_11〜sq_15、各4bit、計20bit) — 既存パスワードとの後方互換のため必ず末尾に追加する
+    // 901+20=921ビット→ceil(921/6)=154文字+チェックサム1文字=155文字
+    for (let _sqE=11; _sqE<=15; _sqE++) { const _sqK='sq_'+_sqE; const _sv=f[_sqK]||0; fields.push([_sv>=99?15:Math.min(_sv,14), 4]); }
     const payload = _gqBitPack(fields);
     const cs = payload.reduce((a,b)=>a+b,0)%64;
-    const bytes = [cs, ...payload.slice(0,151)]; // 1+151=152文字
+    const bytes = [cs, ...payload.slice(0,154)]; // 1+154=155文字
     return bytes.map(b=>_GQ_KANA64[b%64]).join('');
 }
 
@@ -1184,6 +1207,7 @@ function unpackSaveData(pwd) {
         const _hasSQ = pwd.length >= 120; // SQ旧形式(1bit)有無
         const _hasFullSQ = pwd.length >= 147; // SQ新形式(4bit)+宝箱フラグ有無
         const _hasRulaTowns = pwd.length >= 152; // ルーラ行き先フラグ(町ごとに1bit)有無
+        const _hasBackHalfSQ = pwd.length >= 155; // 後半追加SQ(sq_11〜sq_15、各4bit)有無
         const _minLen = _eb === 8 ? 109 : 100;
         if ([...pwd].every(c => _GQ_KANA64.includes(c)) && pwd.length >= _minLen) {
             const bytes = [...pwd].map(c => _GQ_KANA64.indexOf(c));
@@ -1245,6 +1269,10 @@ function unpackSaveData(pwd) {
                     _rd[_rk] = { x:_pos.x, y:_pos.y, name: _rm.name || getMapDisplayName(_rk) };
                 }
                 flags.rura_destinations = _rd;
+            }
+            // 後半追加SQ5個(sq_11〜sq_15)の進行度
+            if (_hasBackHalfSQ) {
+                for (let _sqE=11; _sqE<=15; _sqE++) { const _sqK='sq_'+_sqE; const _sv=read(4); if(_sv===15) flags[_sqK]=99; else if(_sv>0) flags[_sqK]=_sv; }
             }
             const data={gold,steps_to_encounter:15,tohero_steps:0,tramana_steps:0,members,flags,pos:{map:mapId,x:px,y:py},dir:2};
             return {type: isClr?'clear':'normal', data};
@@ -1343,6 +1371,33 @@ function injectSubStoryData() {
     masterData.items["w_silver_tree"]    = { id:"w_silver_tree",    name:"銀樹の剣（剣）",     type:"weapon", price:0, power:145, desc:"カガネの鋼にエストリアの若木を鍛え込んだ複合武器。斧を捨てたカガネの鍛冶師と木工師の意地がぶつかってできた一振り。" };
     masterData.items["w_ice_flame"]      = { id:"w_ice_flame",      name:"氷炎の杖（杖）",     type:"weapon", price:0, power:100, effect:"mp_regen", desc:"デセルタの炎とノルドの氷、どちらも譲らなかった末に、杖の中で溶け合わずに共存する術を見つけた複合武器。" };
     masterData.items["meteorite_fragment"] = { id: "meteorite_fragment", name: "いんせきのかけら", type: "tool", price: 5000, desc: "はぐれグラちゃんから手に入る超レアなかけら。ガルドの鍛冶屋に持参すると最強の鎧を作れるという。" };
+    // モンスター固有ドロップ品(drop_item_id)用の素材/トロフィーアイテム
+    masterData.items["bronze_sword"]   = { id: "bronze_sword",   name: "青銅の剣の欠片", type: "tool", price: 15,   desc: "ゴブリンが持っていた粗末な剣の欠片。売るぐらいしか使い道がない。" };
+    masterData.items["beast_fang"]     = { id: "beast_fang",     name: "獣の牙",         type: "tool", price: 25,   desc: "ワイルドウルフの鋭い牙。武具の材料として重宝される。" };
+    masterData.items["bone_sword"]     = { id: "bone_sword",     name: "骨の剣",         type: "tool", price: 40,   desc: "スケルトンが振るっていた不気味な骨の剣。" };
+    masterData.items["iron_spear"]     = { id: "iron_spear",     name: "鉄の穂先",       type: "tool", price: 60,   desc: "オークが使っていた槍の穂先。まだ十分に鋭い。" };
+    masterData.items["stone_fragment"] = { id: "stone_fragment", name: "石の欠片",       type: "tool", price: 5,    desc: "ゴーレムの体から崩れ落ちた石の欠片。ありふれた材料。" };
+    masterData.items["dragon_scale"]   = { id: "dragon_scale",   name: "竜の鱗",         type: "tool", price: 800,  desc: "レッドドラゴンから剥がれ落ちた硬い鱗。高値で取引される。" };
+    masterData.items["sharp_claw"]     = { id: "sharp_claw",     name: "鋭い鎌爪",       type: "tool", price: 300,  desc: "キラーマンティスの鎌のように鋭い爪。" };
+    masterData.items["iron_armor"]     = { id: "iron_armor",     name: "さびた鎧",       type: "tool", price: 350,  desc: "デュラハンが纏っていた古い鎧の残骸。" };
+    masterData.items["petrify_cure"]   = { id: "petrify_cure",   name: "石化解除の粉",   type: "tool", price: 250,  desc: "コカトリスの羽根から作られる不思議な粉。石のように硬い。" };
+    masterData.items["battle_axe"]     = { id: "battle_axe",     name: "闘斧の刃",       type: "tool", price: 700,  desc: "ミノタウロスが振るっていた巨大な斧の刃。" };
+    masterData.items["charm_whip"]     = { id: "charm_whip",     name: "魅惑の鞭",       type: "tool", price: 550,  desc: "サキュバスが操っていた妖しく光る鞭。" };
+    masterData.items["giant_club"]     = { id: "giant_club",     name: "巨大なこん棒",   type: "tool", price: 900,  desc: "トロールが振り回していた丸太のようなこん棒。" };
+    masterData.items["fire_crystal"]   = { id: "fire_crystal",   name: "火の結晶",       type: "tool", price: 650,  desc: "フレイムの中心にあった、燃え続ける結晶。" };
+    masterData.items["stone_statue"]   = { id: "stone_statue",   name: "石像のかけら",   type: "tool", price: 700,  desc: "ガーゴイルの体の一部だった石のかけら。" };
+    masterData.items["chimera_wing"]   = { id: "chimera_wing",   name: "キメラの翼",     type: "tool", price: 1100, desc: "キメラの背から生えていた大きな翼の一部。" };
+    masterData.items["dragon_gem"]     = { id: "dragon_gem",     name: "竜の宝玉",       type: "tool", price: 3500, desc: "エンシェントドラゴンの体内にあった神秘の宝玉。" };
+    masterData.items["giant_eye"]      = { id: "giant_eye",      name: "巨人の眼",       type: "tool", price: 3000, desc: "サイクロプスの巨大な眼球。今もこちらを見ているようだ。" };
+    masterData.items["vampire_cape"]   = { id: "vampire_cape",   name: "吸血鬼のマント", type: "tool", price: 3800, desc: "ヴァンパイアロードが纏っていた漆黒のマント。" };
+    masterData.items["dark_sword"]     = { id: "dark_sword",     name: "漆黒の剣",       type: "tool", price: 4000, desc: "デスナイトが振るっていた、闇を纏う剣。" };
+    masterData.items["ocean_scale"]    = { id: "ocean_scale",    name: "深海竜の鱗",     type: "tool", price: 4200, desc: "リヴァイアサンから剥がれた、深海の圧力にも耐える鱗。" };
+    masterData.items["demon_horn"]     = { id: "demon_horn",     name: "魔将の角",       type: "tool", price: 4800, desc: "アークデーモンの額から折り取られた禍々しい角。" };
+    masterData.items["beast_hide"]     = { id: "beast_hide",     name: "魔獣の皮",       type: "tool", price: 5000, desc: "ベヒモスの分厚い皮。あらゆる武器を弾き返す硬さを持つ。" };
+    masterData.items["riddle_book"]    = { id: "riddle_book",    name: "謎かけの書",     type: "tool", price: 4500, desc: "スフィンクスが抱えていた、謎かけが記された古書。" };
+    masterData.items["death_staff"]    = { id: "death_staff",    name: "死霊の杖",       type: "tool", price: 5500, desc: "リッチが握っていた、死者を操る呪いの杖。" };
+    masterData.items["meteor_fragment"]= { id: "meteor_fragment",name: "隕鉄のかけら",   type: "tool", price: 8000, desc: "バハムートの咆哮と共に降り注いだ、天より来た鉄の欠片。" };
+    masterData.items["royal_crown"]    = { id: "royal_crown",    name: "王家の冠",       type: "tool", price: 15000,desc: "グラ王が被っていた黄金の冠。倒した証として必ず手に入る。" };
     masterData.items["dragon_scale_red"]  = { id: "dragon_scale_red",  name: "赤竜の鱗", type: "tool", price: 0, desc: "赤く燃える竜の鱗。試練の洞窟の最奥に眠っていた。竜霊グラドスの呪いを解く三枚の鱗のひとつ。" };
     masterData.items["dragon_scale_blue"] = { id: "dragon_scale_blue", name: "蒼竜の鱗", type: "tool", price: 0, desc: "深海のような蒼い竜の鱗。天空の頂に隠されていた。竜霊グラドスの呪いを解く三枚の鱗のひとつ。" };
     masterData.items["dragon_scale_gold"] = { id: "dragon_scale_gold", name: "金竜の鱗", type: "tool", price: 0, desc: "黄金色に輝く竜の鱗。魔王城の深部に封印されていた。竜霊グラドスの呪いを解く三枚の鱗のひとつ。" };
@@ -6072,17 +6127,27 @@ function generateDQStyleMaps() {
         mkTower3F('map_tower_darkspire','map_field_2_6',7,22,'boss_demon_avatar','魔王の化身',encM1,encM2,'闇の尖塔1F','闇の尖塔2F','闇の尖塔3F');
 
     // 塔NPCの上書き（闇の尖塔用）
+    // ※mkTower3F()はprefixに関わらずNPC/宝箱IDを'magic'系で固定生成するため、
+    // 闇の尖塔が魔法使いの塔と同じ宝箱ID(obj_chest_magic_*)を共有してしまっていた。
+    // ここでNPC名だけでなく宝箱IDも闇の尖塔専用のものに置き換える。
     if(externalMapData['map_tower_darkspire_1f']){
-        externalMapData['map_tower_darkspire_1f'].npcs['6,11']={id:'npc_darkspire_guard',name:'闇の衛兵'};
-        externalMapData['map_tower_darkspire_1f'].npcs['3,5']={id:'npc_darkspire_spirit',name:'幽閉された魂'};
-        delete externalMapData['map_tower_darkspire_1f'].npcs['6,8'];
+        const _td1n = externalMapData['map_tower_darkspire_1f'].npcs;
+        _td1n['6,11']={id:'npc_darkspire_guard',name:'闇の衛兵'};
+        _td1n['3,5']={id:'npc_darkspire_spirit',name:'幽閉された魂'};
+        if(_td1n['3,9']) _td1n['3,9']={id:'obj_chest_darkspire_1f',name:'宝箱'};
+        delete _td1n['6,8'];
     }
     if(externalMapData['map_tower_darkspire_2f']){
-        externalMapData['map_tower_darkspire_2f'].npcs['3,4']={id:'npc_darkspire_prisoner',name:'囚われの騎士'};
-        delete externalMapData['map_tower_darkspire_2f'].npcs['6,8'];
+        const _td2n = externalMapData['map_tower_darkspire_2f'].npcs;
+        _td2n['3,4']={id:'npc_darkspire_prisoner',name:'囚われの騎士'};
+        if(_td2n['8,8']) _td2n['8,8']={id:'obj_chest_darkspire_2f',name:'宝箱'};
+        delete _td2n['6,8'];
     }
     if(externalMapData['map_tower_darkspire_3f']){
-        externalMapData['map_tower_darkspire_3f'].npcs['8,3']={id:'npc_darkspire_spirit',name:'幽閉された魂'};
+        const _td3n = externalMapData['map_tower_darkspire_3f'].npcs;
+        _td3n['8,3']={id:'npc_darkspire_spirit',name:'幽閉された魂'};
+        if(_td3n['3,8']) _td3n['3,8']={id:'obj_chest_darkspire_3f',name:'宝箱'};
+        if(_td3n['8,8']) _td3n['8,8']={id:'obj_chest_darkspire_3f_b',name:'黒の宝珠台座'};
     }
 
     // ===== 廃屋 (map_abandoned_house) =====
@@ -6417,7 +6482,7 @@ function generateDQStyleMaps() {
             '#..................#',
             '#########@##########',
         ], {'9,17':{map:'map_field_3_6',x:22,y:23},'10,17':{map:'map_field_3_6',x:22,y:23}},
-           {'8,4':{id:'npc_desert_spirit',name:'砂漠の亡霊'},'4,4':{id:'obj_chest_ruin_a',name:'砂の宝箱'},'7,9':{id:'boss_desert_mummy',name:'砂漠のミイラ王'}},
+           {'8,4':{id:'npc_desert_spirit',name:'砂漠の亡霊'},'4,4':{id:'obj_chest_ruin_a',name:'砂の宝箱'},'15,6':{id:'obj_chest_ruin_b',name:'砂の宝箱'},'7,9':{id:'boss_desert_mummy',name:'砂漠のミイラ王'}},
            encD3,'砂漠の遺跡');
         externalMapData['map_ruin_desert_1f']=_rd;
     }
@@ -14243,6 +14308,22 @@ ${_sns[_ri(_sns.length)]}
                         }
                     }
                 }
+                else if (_GQ_RARE_CHEST_TABLE[npc.id]) {
+                    let _cf = `chest_${partyData.pos.map}_${tx}_${ty}`;
+                    if (partyData.flags[_cf]) { delete currentMap.npcs[key]; state='FIELD'; hideAllWindows(); drawMap(); return; }
+                    partyData.flags[_cf] = true;
+                    const _rareId = _GQ_RARE_CHEST_TABLE[npc.id];
+                    const _rareIt = masterData.items[_rareId];
+                    AudioManager.playSE('item_get');
+                    if (_rareIt) {
+                        await typeMessage(`たからばこを あけた！\nこの ダンジョンでしか 手に入らない\nめずらしい アイテムのようだ……`);
+                        await typeMessage(`『${_rareIt.name}』を てにいれた！`);
+                        let _rareTgt = partyData.members.find(m => m.inventory.length < 8 && m.hp > 0) || partyData.members[0];
+                        if (_rareTgt && _rareTgt.inventory.length < 8) _rareTgt.inventory.push(_rareId); else await typeMessage("しかし もちものが いっぱいだ！");
+                    }
+                    delete currentMap.npcs[key];
+                    state='FIELD'; hideAllWindows(); drawMap(); return;
+                }
                 else if (npc.id.includes('chest')) {
                     let _cf = `chest_${partyData.pos.map}_${tx}_${ty}`;
                     if (partyData.flags[_cf]) { delete currentMap.npcs[key]; state='FIELD'; hideAllWindows(); drawMap(); return; }
@@ -14634,7 +14715,7 @@ async function eventPriest() {
             localStorage.setItem('gravity_quest_save', JSON.stringify(partyData)); await typeMessage("スマホに データーを きろくしました。\n（※ブラウザ履歴を消すと消える場合があります）");
             let encoded = packSaveData(partyData);
             const _hasKanji=partyData.members.some(m=>_hasUnsupportedNameChars(m.name));
-            const _pwdNote="念のため「ふっかつのじゅもん」も\nコピーしておくことを お勧めします。\n（5文字区切り・152文字）"+(_hasKanji?"\n\n※名前に漢字が含まれています。\n漢字は呪文では継承されないため\nひらがな・カタカナ・英数字に\n変更することをお勧めします。":"");
+            const _pwdNote="念のため「ふっかつのじゅもん」も\nコピーしておくことを お勧めします。\n（5文字区切り・155文字）"+(_hasKanji?"\n\n※名前に漢字が含まれています。\n漢字は呪文では継承されないため\nひらがな・カタカナ・英数字に\n変更することをお勧めします。":"");
             await showCustomDialog('copy', _pwdNote, _gqFormatPwd(encoded));
             if (partyData.flags && partyData.flags.flag_2nd_maou_cleared) { await typeMessage("しかし まだ せかいのどこかに\nふおんな けはいが のこっております...\nきをつけて おすすみください。"); }
         } else if (choice === 1) {
@@ -14643,7 +14724,7 @@ async function eventPriest() {
             const _hasK2=partyData.members.some(m=>_hasUnsupportedNameChars(m.name));
             await typeMessage("あなたの これまでの ぼうけんを\nひらがなの じゅもんに して おしえましょう。");
             if(_hasK2) await typeMessage("【注意】名前に漢字が含まれています。\n漢字は「ふっかつのじゅもん」では\n引き継がれません。\nひらがな・カタカナ・英数字（A-Z・0-9）\nをお使いください。");
-            await showCustomDialog('copy', "ふっかつのじゅもん\n（5文字区切り・152文字）\n枠内を長押しでコピーできます", _gqFormatPwd(encoded)); await typeMessage("じゅもんを ともだちに おしえれば\nおなじ ところから ぼうけんできますよ。");
+            await showCustomDialog('copy', "ふっかつのじゅもん\n（5文字区切り・155文字）\n枠内を長押しでコピーできます", _gqFormatPwd(encoded)); await typeMessage("じゅもんを ともだちに おしえれば\nおなじ ところから ぼうけんできますよ。");
         } else if (choice === 2) {
             let deadMembers = partyData.members.filter(m => m.hp <= 0);
             if(deadMembers.length === 0) await typeMessage("しんでいる なかまは いませんよ。");
@@ -15387,8 +15468,8 @@ async function executeBattle(fixedEnemies = null) {
         await typeMessage(`パーティー ぜんいんの こうげきりょくが\nさがってしまった！`);
     }
     
-    let escaped = false; let totalExp = 0; let totalGold = 0; let killedEnemyIds = [];
-    const addReward = (eRef) => { if(eRef) { let eExp = parseInt(eRef.exp); if(isNaN(eExp) || eExp <= 0) eExp = 1; let eGold = parseInt(eRef.gold); if(isNaN(eGold) || eGold < 0) eGold = 1; totalExp += eExp; totalGold += eGold; if(eRef.id) killedEnemyIds.push(eRef.id); } };
+    let escaped = false; let totalExp = 0; let totalGold = 0; let killedEnemyIds = []; let materialDrops = [];
+    const addReward = (eRef) => { if(eRef) { let eExp = parseInt(eRef.exp); if(isNaN(eExp) || eExp <= 0) eExp = 1; let eGold = parseInt(eRef.gold); if(isNaN(eGold) || eGold < 0) eGold = 1; totalExp += eExp; totalGold += eGold; if(eRef.id) killedEnemyIds.push(eRef.id); if(eRef.drop_item_id && masterData.items[eRef.drop_item_id] && Math.random() < (eRef.drop_rate||0)) materialDrops.push(eRef.drop_item_id); } };
 
     while(enemies.length > 0 && partyData.members.some(m=>m.hp>0) && !escaped) {
         if (window._autoBattleCancelPending) {
@@ -16541,6 +16622,14 @@ ${act.actor.name}の ちからが すいとられた！`); }
             if (_sq5Tgt && _sq5Tgt.inventory.length < 8) { _sq5Tgt.inventory.push('meteorite_fragment'); AudioManager.playSE('item_get'); await typeMessage("はぐれグラちゃんが 珍しいものを\nおとしていった……！\nいんせきのかけら を てにいれた！\nガルドの 鍛冶屋に 持参してみよう。"); advanceSQ('sq_05', 2); }
         }
 
+        // モンスター固有ドロップ(drop_item_id/drop_rate): たおした敵ごとに抽選済みのmaterialDropsを付与
+        for (const _mdId of materialDrops) {
+            const _mdItem = masterData.items[_mdId]; if (!_mdItem) continue;
+            let _mdTgt = partyData.members.find(m => m.inventory.length < 8 && m.hp > 0) || partyData.members.find(m => m.inventory.length < 8);
+            if (_mdTgt) { _mdTgt.inventory.push(_mdId); AudioManager.playSE('item_get'); await typeMessage(`まものが『${_mdItem.name}』を おとした！`); }
+            else { await typeMessage(`『${_mdItem.name}』を てにいれかけたが\nもちものが いっぱいだ！`); }
+        }
+
         const _isEquipDrop = totalExp >= 50 && Math.random() < 0.35;
         if (Math.random() < 0.18) {
             let dropPool = Object.values(masterData.items).filter(i => i.price > 0 && !_SQ_EXCL.has(i.id) && (_isEquipDrop ? i.type !== 'tool' : i.type === 'tool'));
@@ -16938,7 +17027,7 @@ async function init() {
     // モンスターDB
     if (window.MONSTER_DATABASE) {
         window.MONSTER_DATABASE.forEach(m => {
-            masterData.monsters[m.id] = {name:m.name,max_hp:m.hp,atk:m.attack,def:m.defense,spd:m.speed,exp:m.exp,gold:m.gold,traits:m.traits||[]};
+            masterData.monsters[m.id] = {name:m.name,max_hp:m.hp,atk:m.attack,def:m.defense,spd:m.speed,exp:m.exp,gold:m.gold,traits:m.traits||[],drop_item_id:m.drop_item_id||null,drop_rate:m.drop_rate||0};
             if (m.image && m.image.startsWith('http')) {
                 let img = new Image(); img.crossOrigin = "Anonymous"; img.src = m.image;
                 externalImages['enemy_' + m.id] = img;
