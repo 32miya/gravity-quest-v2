@@ -985,6 +985,8 @@ const _GQ_EQUIP = [
 // SQ専用アイテム（ドロップ・宝箱・ショップから除外）
 const _SQ_EXCL = new Set(['meteorite_fragment','dragon_scale_red','dragon_scale_blue','dragon_scale_gold',
     'w_star_sword','acc_star_bracelet','a_sea_armor','acc_sea_ring','i_star_frag']);
+// マジックBOXの容量: パーティー4人分の所持数(8個×4人)の2倍
+const MAGIC_BOX_CAPACITY = 64;
 
 const _GQ_FLAGS = ['last_boss_defeated','is_second_loop','is_second_loop_unlocked','has_ship','flag_dungeon_cleared','flag_tower_cleared','flag_sky_truth_known','flag_2nd_maou_cleared','flag_king_met','flag_pirate_king_cleared','flag_weapon_forged','flag_has_star_fragment','flag_saved_richman','flag_mage_trial_cleared','flag_dragon_spirit_cleared','flag_beaten_secret_boss','2nd_mem_maou','2nd_mem_shrine','2nd_mem_village','2nd_mem_tower','2nd_mem_dungeon','2nd_mem_town','2nd_final_spawned','shrine_healed','flag_wedding','flag_casino_won','flag_dharma_north_visited','flag_dark_general_cleared','chest_haiya_axe',
     'flag_zarmo_lich_cleared','chest_zarmo_key','flag_ice_dragon_cleared','flag_lava_titan_cleared',
@@ -15212,10 +15214,42 @@ async function openSubstoryLedger() {
     hideWindow('status-window');
 }
 
+// マジックBOX: パーティーの所持数を超えたアイテムを預けておける共有倉庫。
+// 「いれる」はどうぐ→キャラ→アイテムの操作メニューから行い、ここでは
+// 預けたアイテムを一覧から選んで誰に渡すかを決める「だす」操作のみ扱う。
+async function eventMagicBox() {
+    partyData.magicBox = partyData.magicBox || [];
+    while (true) {
+        const box = partyData.magicBox;
+        if (box.length === 0) {
+            await typeMessage(`【マジックBOX】\n持ちきれない 道具を あずけられる\n不思議な箱だ。（0/${MAGIC_BOX_CAPACITY}）\nいまは なにも 入っていない。`);
+            break;
+        }
+        const optLabels = box.map(id => {
+            if (!masterData.items[id]) masterData.items[id] = { id: id, name: "なぞのアイテム", type: 'tool', price: 0 };
+            return `${masterData.items[id].name}`;
+        });
+        await typeMessage(`【マジックBOX】（${box.length}/${MAGIC_BOX_CAPACITY}）\nだす アイテムを えらんでください。`);
+        const itemIdx = await selectMenuPaged(optLabels, 'cmd-window', 8, true);
+        if (itemIdx === -1) break;
+        const itemId = box[itemIdx];
+        const itemData = masterData.items[itemId];
+        await typeMessage("だれに わたす？");
+        const tIdx = await selectMenu(partyData.members.map(m => m.name), 'cmd-window', 1, true);
+        if (tIdx === -1) continue;
+        const target = partyData.members[tIdx];
+        if (target.inventory.length >= 8) { await typeMessage("もちものが いっぱいだ！"); continue; }
+        box.splice(itemIdx, 1);
+        target.inventory.push(itemId);
+        AudioManager.playSE('item_get');
+        await typeMessage(`${target.name}は マジックBOXから\n${itemData.name}を うけとった。`);
+    }
+}
+
 async function openMainMenu() {
     state = 'MENU'; showWindow('party-status'); updatePartyStatus(); showGoldWindow();
     while(true) {
-        let cmd = await selectMenu(['はなす', 'じゅもん', 'どうぐ', 'つよさ', 'ちず', 'ふしぎな台帳'], 'cmd-window', 1, true); if(cmd === -1) break;
+        let cmd = await selectMenu(['はなす', 'じゅもん', 'どうぐ', 'つよさ', 'ちず', 'ふしぎな台帳', 'マジックBOX'], 'cmd-window', 1, true); if(cmd === -1) break;
         if(cmd === 0) { hideAllWindows(); await checkAction(); break; } 
         else if(cmd === 1) {
             await typeMessage("だれの じゅもん？"); let charIdx = await selectMenu(partyData.members.map(m=>m.name), 'cmd-window', 1, true); if(charIdx === -1) continue; let char = partyData.members[charIdx];
@@ -15323,7 +15357,7 @@ async function openMainMenu() {
             await typeMessage("だれの どうぐ？"); let charIdx = await selectMenu(partyData.members.map(m=>m.name), 'cmd-window', 1, true); if(charIdx === -1) continue; let char = partyData.members[charIdx];
             if(char.inventory.length === 0) { await typeMessage("なにも もっていない！"); continue; }
             let itemIdx = await selectMenu(char.inventory.map(id => { if(!masterData.items[id]) { masterData.items[id] = { id: id, name: "なぞのアイテム", type: 'tool', price: 0 }; } const _it = masterData.items[id]; const _eq = ['weapon','armor','shield','helmet','accessory'].includes(_it.type); return (_eq && !canEquip(char, _it) ? '× ' : '') + _it.name; }), 'cmd-window', 1, true); if(itemIdx === -1) continue;
-            let itemData = masterData.items[char.inventory[itemIdx]]; let actIdx = await selectMenu(['つかう', 'わたす', 'そうび', 'すてる'], 'cmd-window', 1, true);
+            let itemData = masterData.items[char.inventory[itemIdx]]; let actIdx = await selectMenu(['つかう', 'わたす', 'そうび', 'すてる', 'マジックBOXへ'], 'cmd-window', 1, true);
             if(actIdx === 0) {
                 if(itemData.type === 'tool') {
                     if(itemData.id === 'i_star_frag' || itemData.id === 'acc_star_bracelet' || itemData.id === 'w_star_sword') { await typeMessage("しかし なにも おこらなかった。"); continue; }
@@ -15384,6 +15418,12 @@ async function openMainMenu() {
             } else if(actIdx === 1) { await typeMessage("だれに わたす？"); let tIdx = await selectMenu(partyData.members.map(m=>m.name), 'cmd-window', 1, true); if(tIdx !== -1) { let target = partyData.members[tIdx]; if(target.inventory.length >= 8) { await typeMessage("もちものが いっぱいだ！"); } else { target.inventory.push(itemData.id); char.inventory.splice(itemIdx, 1); await typeMessage(`${target.name}に わたした。`); } } } 
             else if(actIdx === 2) { if(char.hp <= 0) { await typeMessage(`${char.name}は しんでいる！`); continue; } if (['weapon', 'armor', 'shield', 'helmet', 'accessory'].includes(itemData.type)) { if (!canEquip(char, itemData)) { await typeMessage(`${char.name}には そうびできない！\n${char.job}は この そうびひんを\nつかいこなせない。`); } else { const _atkBef=getAtk(char),_defBef=getDef(char),_spdBef=getSpd(char); let oldEqId = char.equipment[itemData.type]; char.equipment[itemData.type] = itemData.id; char.inventory.splice(itemIdx, 1); if (oldEqId) char.inventory.push(oldEqId); const _atkAft=getAtk(char),_defAft=getDef(char),_spdAft=getSpd(char); let _chg=[]; if(_atkAft!==_atkBef)_chg.push(`こうげき力　${_atkBef} → ${_atkAft}　(${_atkAft>_atkBef?'+':''}${_atkAft-_atkBef})`); if(_defAft!==_defBef)_chg.push(`しゅびりょく　${_defBef} → ${_defAft}　(${_defAft>_defBef?'+':''}${_defAft-_defBef})`); if(_spdAft!==_spdBef)_chg.push(`すばやさ　${_spdBef} → ${_spdAft}　(${_spdAft>_spdBef?'+':''}${_spdAft-_spdBef})`); const _fxMap={'speed_up':'すばやさが 大きく あがる！','speed_double':'すばやさが 2倍に なる！','agi_double':'すばやさが 2倍に なる！','agi_up':'すばやさが あがる！','str_up':'こうげき力が 大幅に あがる！','atk_up_crit':'守備力が 0になるが\n会心の一撃が 出やすくなる！','regen_hp':'歩くたびに HPが 回復する！','hp_regen_walk':'歩くたびに HPが 回復する！','resist_death':'即死攻撃に 強くなる！','mp_recovery_use':'道具として 使うと MPが 回復する！','reset_battle':'戦闘を やり直すことが できる！'}; let _msg=`${char.name}は ${itemData.name}を\nそうびした！`; if(_chg.length>0)_msg+='\n'+_chg.join('\n'); await typeMessage(_msg); const _eff=itemData.effect&&_fxMap[itemData.effect]; if(_eff)await typeMessage(`【特殊効果】\n${_eff}`); updatePartyStatus(); } } else { await typeMessage("それは そうびできない！"); } } 
             else if(actIdx === 3) { char.inventory.splice(itemIdx, 1); await typeMessage("すてました。"); }
+            else if(actIdx === 4) {
+                partyData.magicBox = partyData.magicBox || [];
+                if (partyData.magicBox.length >= MAGIC_BOX_CAPACITY) { await typeMessage("マジックBOXは いっぱいだ！"); continue; }
+                partyData.magicBox.push(itemData.id); char.inventory.splice(itemIdx, 1);
+                AudioManager.playSE('item_get'); await typeMessage(`${itemData.name}を マジックBOXに あずけた。\n（マジックBOX：${partyData.magicBox.length}/${MAGIC_BOX_CAPACITY}）`);
+            }
         } else if(cmd === 3) {
             // つよさ: ◀/▶でメンバーを切り替えながら確認
             let _stIdx = 0;
@@ -15454,6 +15494,7 @@ async function openMainMenu() {
             }
         } else if(cmd === 4) { await showWorldMap(); }
         else if(cmd === 5) { await openSubstoryLedger(); }
+        else if(cmd === 6) { await eventMagicBox(); }
     }
     hideAllWindows(); state = 'FIELD'; drawMap();
 }
