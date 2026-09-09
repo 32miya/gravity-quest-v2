@@ -980,6 +980,13 @@ const _GQ_EQUIP = [
     // サブストーリー報酬アイテム
     'acc_zarmo_crown','w_estoria_blade','a_deserta_robe',
     'w_arc_staff','acc_arc_grimoire','acc_chaos_eye',
+    // モンスター交友ドロップ素材（マジックBOXに預けても正しく符号化されるよう追加）
+    'bronze_sword','beast_fang','bone_sword','iron_spear','stone_fragment',
+    'dragon_scale','sharp_claw','iron_armor','petrify_cure','battle_axe',
+    'charm_whip','giant_club','fire_crystal','stone_statue','chimera_wing',
+    'dragon_gem','giant_eye','vampire_cape','dark_sword','ocean_scale',
+    'demon_horn','beast_hide','riddle_book','death_staff','meteor_fragment',
+    'royal_crown',
 ];
 // フラグリスト（27ビット固定順）
 // SQ専用アイテム（ドロップ・宝箱・ショップから除外）
@@ -1177,9 +1184,9 @@ function packSaveData(pData) {
     for (const _ck of _GQ_CHESTS) fields.push([f['chest_'+_ck]?1:0, 1]);
     // メンバー×4: 名前(32=8×4)+職業(4)+Lv(6)+EXP(14)+装備5本(8×5=40)+所持8個(8×8=64) = 160ビット×4=640ビット
     // 合計: 37+53+40+104+640=874ビット → ceil(874/6)=146文字 + チェックサム1文字 = 147文字
+    const _slot = (id) => { const idx=_GQ_EQUIP.indexOf(id||''); return idx>=0?idx:0; };
     for (let i=0;i<4;i++) {
         const m=(pData.members||[])[i];
-        const _slot = (id) => { const idx=_GQ_EQUIP.indexOf(id||''); return idx>=0?idx:0; };
         if (!m) { for(let j=0;j<160;j++) fields.push([0,1]); continue; }
         fields.push(..._gqEncodeName(m.name)); // 8bit×4=32ビット
         const ji=_GQ_JOBS.indexOf(m.job||'勇者'); fields.push([ji>=0?ji:0,4]); // 4ビット
@@ -1198,9 +1205,14 @@ function packSaveData(pData) {
     // 後半追加SQ5個(sq_11〜sq_15、各4bit、計20bit) — 既存パスワードとの後方互換のため必ず末尾に追加する
     // 901+20=921ビット→ceil(921/6)=154文字+チェックサム1文字=155文字
     for (let _sqE=11; _sqE<=15; _sqE++) { const _sqK='sq_'+_sqE; const _sv=f[_sqK]||0; fields.push([_sv>=99?15:Math.min(_sv,14), 4]); }
+    // マジックBOX（可変長、必ず末尾に追加）: 個数(7bit,0〜64)+その個数分のアイテムIndex(8bit×N)
+    // 空なら+7bit(=155文字のまま)、満杯64個なら+7+64*8=519bit(≒+87文字)
+    const _mb = (pData.magicBox || []).slice(0, MAGIC_BOX_CAPACITY);
+    fields.push([_mb.length, 7]);
+    for (const _mid of _mb) fields.push([_slot(_mid), 8]);
     const payload = _gqBitPack(fields);
     const cs = payload.reduce((a,b)=>a+b,0)%64;
-    const bytes = [cs, ...payload.slice(0,154)]; // 1+154=155文字
+    const bytes = [cs, ...payload]; // 155文字 + マジックBOXの中身に応じて可変長で伸びる
     return bytes.map(b=>_GQ_KANA64[b%64]).join('');
 }
 
@@ -1306,7 +1318,12 @@ function unpackSaveData(pwd) {
             if (_hasBackHalfSQ) {
                 for (let _sqE=11; _sqE<=15; _sqE++) { const _sqK='sq_'+_sqE; const _sv=read(4); if(_sv===15) flags[_sqK]=99; else if(_sv>0) flags[_sqK]=_sv; }
             }
-            const data={gold,steps_to_encounter:15,tohero_steps:0,tramana_steps:0,members,flags,pos:{map:mapId,x:px,y:py},dir:2};
+            // マジックBOX（可変長）: 個数(7bit)+その個数分のアイテムIndex(8bit×N)
+            // この項目を持たない旧パスワードは読み出しが自然に0埋めされ、空の箱になる
+            const magicBox = [];
+            const _mbCount = read(7);
+            for (let _mi=0; _mi<_mbCount; _mi++) { const _mid=_GQ_EQUIP[read(8)]; if(_mid) magicBox.push(_mid); }
+            const data={gold,steps_to_encounter:15,tohero_steps:0,tramana_steps:0,members,flags,pos:{map:mapId,x:px,y:py},dir:2,magicBox};
             return {type: isClr?'clear':'normal', data};
         }
         return null;
@@ -15022,7 +15039,7 @@ async function eventPriest() {
             localStorage.setItem('gravity_quest_save', JSON.stringify(partyData)); await typeMessage("スマホに データーを きろくしました。\n（※ブラウザ履歴を消すと消える場合があります）");
             let encoded = packSaveData(partyData);
             const _hasKanji=partyData.members.some(m=>_hasUnsupportedNameChars(m.name));
-            const _pwdNote="念のため「ふっかつのじゅもん」も\nコピーしておくことを お勧めします。\n（5文字区切り・155文字）"+(_hasKanji?"\n\n※名前に漢字が含まれています。\n漢字は呪文では継承されないため\nひらがな・カタカナ・英数字に\n変更することをお勧めします。":"");
+            const _pwdNote="念のため「ふっかつのじゅもん」も\nコピーしておくことを お勧めします。\n（5文字区切り・"+encoded.length+"文字）"+(_hasKanji?"\n\n※名前に漢字が含まれています。\n漢字は呪文では継承されないため\nひらがな・カタカナ・英数字に\n変更することをお勧めします。":"");
             await showCustomDialog('copy', _pwdNote, _gqFormatPwd(encoded));
             if (partyData.flags && partyData.flags.flag_2nd_maou_cleared) { await typeMessage("しかし まだ せかいのどこかに\nふおんな けはいが のこっております...\nきをつけて おすすみください。"); }
         } else if (choice === 1) {
@@ -15031,7 +15048,7 @@ async function eventPriest() {
             const _hasK2=partyData.members.some(m=>_hasUnsupportedNameChars(m.name));
             await typeMessage("あなたの これまでの ぼうけんを\nひらがなの じゅもんに して おしえましょう。");
             if(_hasK2) await typeMessage("【注意】名前に漢字が含まれています。\n漢字は「ふっかつのじゅもん」では\n引き継がれません。\nひらがな・カタカナ・英数字（A-Z・0-9）\nをお使いください。");
-            await showCustomDialog('copy', "ふっかつのじゅもん\n（5文字区切り・155文字）\n枠内を長押しでコピーできます", _gqFormatPwd(encoded)); await typeMessage("じゅもんを ともだちに おしえれば\nおなじ ところから ぼうけんできますよ。");
+            await showCustomDialog('copy', "ふっかつのじゅもん\n（5文字区切り・"+encoded.length+"文字）\n枠内を長押しでコピーできます", _gqFormatPwd(encoded)); await typeMessage("じゅもんを ともだちに おしえれば\nおなじ ところから ぼうけんできますよ。");
         } else if (choice === 2) {
             let deadMembers = partyData.members.filter(m => m.hp <= 0);
             if(deadMembers.length === 0) await typeMessage("しんでいる なかまは いませんよ。");
