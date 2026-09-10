@@ -711,7 +711,33 @@ window.SOUND_DATABASE = {
             "stair":     "./audio/se_stair.mp3",
             "door_open": "./audio/se_stair.mp3",
             "church":    "./audio/se_church.mp3",
-            "inn":       "./audio/se_inn.mp3"
+            "inn":       "./audio/se_inn.mp3",
+            "cursor":            "./audio/se_cursor.mp3",
+            "decision":          "./audio/se_decision.mp3",
+            "cancel":            "./audio/se_cancel.mp3",
+            "menu_open":         "./audio/se_menu_open.mp3",
+            "window_open":       "./audio/se_window_open.mp3",
+            "magic_fire":        "./audio/se_magic_fire.mp3",
+            "magic_ice_1":       "./audio/se_magic_ice_1.mp3",
+            "magic_ice_2":       "./audio/se_magic_ice_2.mp3",
+            "magic_ice_3":       "./audio/se_magic_ice_3.mp3",
+            "magic_lightning_1": "./audio/se_magic_lightning_1.mp3",
+            "magic_lightning_2": "./audio/se_magic_lightning_2.mp3",
+            "magic_lightning_3": "./audio/se_magic_lightning_3.mp3",
+            "magic_lightning_4": "./audio/se_magic_lightning_4.mp3",
+            "magic_dark":        "./audio/se_magic_dark.mp3",
+            "magic_holy":        "./audio/se_magic_holy.mp3",
+            "magic_wind":        "./audio/se_magic_wind.mp3",
+            "magic_explosion":   "./audio/se_magic_explosion.mp3",
+            "magic_heal_1":      "./audio/se_magic_heal_1.mp3",
+            "magic_heal_2":      "./audio/se_magic_heal_2.mp3",
+            "magic_heal_3":      "./audio/se_magic_heal_3.mp3",
+            "magic_cast":        "./audio/se_magic_cast.mp3",
+            "poison":            "./audio/se_poison.mp3",
+            "status_cure":       "./audio/se_status_cure.mp3",
+            "magic_reflect":     "./audio/se_magic_reflect.mp3",
+            "hp_drain":          "./audio/se_hp_drain.mp3",
+            "buff":              "./audio/se_buff.mp3"
         }
     };
 </script>
@@ -2530,24 +2556,28 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
     // 詠唱魔法陣を一瞬フラッシュ後にゆっくり回転させながら長めに透過表示する専用演出にする
     const isUltimateCast = ['merami', 'hyadain', 'bagis', 'raiden'].includes(sid);
 
-    // 属性別SE（エフェクト開始と同時に再生）
+    // Tier (spell power) detection: 1=weak, 2=medium, 3=strong, 4=ultimate
+    // (属性別SEの強さ分岐で使うため、SE再生より前に計算する)
+    let tier = 1;
+    if (sval >= 200 || (spellData.mp || 0) >= 28 || /zun$|zoma$|mahyado|gon$|kuro$|naz$|zaorn$|deinn$|min$|ultima/.test(sid)) tier = 4;
+    else if (sval >= 100 || (spellData.mp || 0) >= 16 || /ra$|zon$|behoma$|behoima$|begirama$/.test(sid)) tier = 3;
+    else if (sval >= 40 || (spellData.mp || 0) >= 7 || /mi$|ma$|daruko|darko|behoimi$|imi$/.test(sid)) tier = 2;
+
+    // 属性別SE（エフェクト開始と同時に再生。氷/雷/回復は強さに応じて音を変える）
     {
         let _magicSE = null;
         if (elem === 'fire' || sid.includes('mera')) _magicSE = 'magic_fire';
-        else if (elem === 'ice' || sid.includes('hya')) _magicSE = 'magic_ice';
-        else if (elem === 'lightning' || sid.includes('gira') || sid.includes('begi')) _magicSE = 'magic_lightning';
+        else if (elem === 'ice' || sid.includes('hya')) _magicSE = 'magic_ice_' + Math.min(3, tier);
+        else if (elem === 'lightning' || sid.includes('gira') || sid.includes('begi')) _magicSE = 'magic_lightning_' + tier;
         else if (elem === 'wind' || sid.includes('bagi')) _magicSE = 'magic_wind';
         else if (sid.includes('io') || elem === 'explosion') _magicSE = 'magic_explosion';
         else if (sid.includes('doru') || sid.includes('dol') || elem === 'dark') _magicSE = 'magic_dark';
+        else if (stype === 'heal' || /hoi|beho|zaorn|kiari|shana/.test(sid) || (sid.includes('zao') && !sid.includes('zaorn'))) _magicSE = 'magic_heal_' + Math.min(3, tier);
+        else if (elem === 'light' && stype === 'attack') _magicSE = 'magic_holy';
+        else if (stype === 'support' || stype === 'buff') _magicSE = 'buff';
         else if (stype === 'attack' || stype === 'debuff' || stype === 'status') _magicSE = 'magic_cast';
         if (_magicSE) AudioManager.playSE(_magicSE);
     }
-
-    // Tier (spell power) detection: 1=weak, 2=medium, 3=strong, 4=ultimate
-    let tier = 1;
-    if (sval >= 200 || (spellData.mp || 0) >= 28 || /zun$|zoma$|mahyado|gon$|kuro$|naz$|zaorn$|deinn$|min$|ultima/.test(sid)) tier = 4;
-    else if (sval >= 100 || (spellData.mp || 0) >= 16 || /ra$|zon$|don$|behoma$|behoima$|begirama$/.test(sid)) tier = 3;
-    else if (sval >= 40 || (spellData.mp || 0) >= 7 || /mi$|ma$|daruko|darko|behoimi$|imi$/.test(sid)) tier = 2;
     // 詠唱の「溜め」: 強力な魔法ほど発動前に一拍置き、カメラをわずかに寄せて重みを出す
     if (tier >= 3) { await hitStop(tier >= 4 ? 160 : 100); cameraPunch(tier >= 4 ? 1.05 : 1.03, tier >= 4 ? 260 : 180); }
 
@@ -15458,6 +15488,7 @@ async function eventShop(npcId) {
 }
 
 async function openSubstoryLedger() {
+    AudioManager.playSE('window_open');
     // #status-windowはshowWindow()でdisplay:flex(既定row方向)になるため、
     // 内容全体を1個のcolumn方向ラッパーで包んで縦積みを保証する
     let html = `<div style="display:flex;flex-direction:column;width:100%;">`;
@@ -15527,6 +15558,7 @@ async function eventMagicBox() {
 }
 
 async function openMainMenu() {
+    AudioManager.playSE('menu_open');
     state = 'MENU'; showWindow('party-status'); updatePartyStatus(); showGoldWindow();
     while(true) {
         let cmd = await selectMenu(['はなす', 'じゅもん', 'どうぐ', 'つよさ', 'ちず', 'ふしぎな台帳', 'マジックBOX'], 'cmd-window', 1, true); if(cmd === -1) break;
@@ -15654,7 +15686,9 @@ async function openMainMenu() {
                             await typeMessage(`${target.name}は いきかえった！`); updatePartyStatus();
                         } else if(target.hp <= 0) { await typeMessage("しんでいる なかまには きかない！"); }
                         else {
-                            char.inventory.splice(itemIdx, 1); AudioManager.playSE('heal');
+                            char.inventory.splice(itemIdx, 1);
+                            const _isStatusCureItem = itemData.id.includes('antidote') || itemData.effect === 'cure_poison' || itemData.effect === 'cure_paralyze';
+                            AudioManager.playSE(_isStatusCureItem ? 'status_cure' : 'heal');
                             if(itemData.id.includes('antidote') || itemData.effect === 'cure_poison') {
                                 target.isPoisoned = false;
                                 await typeMessage(`${target.name}の どくが きえた！`);
@@ -16426,7 +16460,7 @@ ${act.actor.name}の ちからが すいとられた！`); }
                         // ── 吸血 / 生命吸収
                         const _msg = _eId==='vampire_lord' ? '吸血！' : '生命力を すいとった！';
                         await typeMessage(`${act.actor.displayName}の ${_msg}`);
-                        AudioManager.playSE('damage_hero'); playEnemyAttackEffect(1.2);
+                        AudioManager.playSE('hp_drain'); playEnemyAttackEffect(1.2);
                         const _dd = Math.max(1, Math.floor(act.actor.atk*(0.75+Math.random()*0.3) - _t.def*0.35));
                         _t.hp = Math.max(0,_t.hp-_dd);
                         const _dh = Math.floor(_dd*0.6);
@@ -17308,7 +17342,9 @@ ${act.actor.name}の ちからが すいとられた！`); }
                 }
                 else if(t.hp <= 0) { await typeMessage("しんでいる なかまには きかない！"); }
                 else {
-                    if(act.itemIndex >= 0 && act.itemIndex < act.actor.inventory.length) act.actor.inventory.splice(act.itemIndex, 1); AudioManager.playSE('heal');
+                    if(act.itemIndex >= 0 && act.itemIndex < act.actor.inventory.length) act.actor.inventory.splice(act.itemIndex, 1);
+                    const _isStatusCureItem2 = act.item.id.includes('antidote') || act.item.effect === 'cure_poison' || act.item.effect === 'cure_paralyze';
+                    AudioManager.playSE(_isStatusCureItem2 ? 'status_cure' : 'heal');
                     if(act.item.id.includes('antidote') || act.item.effect === 'cure_poison') { t.isPoisoned = false; await typeMessage(`${t.name}の どくが きえた！`); }
                     else if(act.item.effect === 'cure_paralyze') { t.isParalyzed = false; await typeMessage(`${t.name}の マヒが なおった！`); }
                     else if(act.item.effect === 'mp_recovery') { let mv = parseInt(act.item.value||15); t.mp = Math.min(t.max_mp, t.mp + mv); await typeMessage(`${t.name}の MPが ${mv} かいふくした！`); }
