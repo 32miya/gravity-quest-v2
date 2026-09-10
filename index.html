@@ -5511,25 +5511,32 @@ function fixStuckNpcs() {
 function mazeifyRows(rows, seedStr) {
     const h = rows.length, w = rows[0].length;
     let _seed = 0; for (let i = 0; i < seedStr.length; i++) _seed = (_seed * 31 + seedStr.charCodeAt(i)) >>> 0;
+    // シードを軽くかき混ぜてから使う(似た文字列同士でも系列が早く分岐するように)
+    for (let i = 0; i < 6; i++) _seed = (_seed * 1103515245 + 12345) >>> 0;
     const rng = () => { _seed = (_seed * 1103515245 + 12345) >>> 0; return (_seed >>> 8) / 16777216; };
     const inBounds = (x, y) => x >= 1 && y >= 1 && x < w - 1 && y < h - 1;
     const clampIn = (x, y) => [Math.min(Math.max(x, 1), w - 2), Math.min(Math.max(y, 1), h - 2)];
 
     // 1) 保持すべき特殊マスを収集。
-    //    英字(と_)の連続(2文字以上、またはA単体)はNPC/宝箱/祭壇等のラベル→その位置は必ず床にする。
+    //    英字(と_)の連続(2文字以上、またはA単体)はNPC/宝箱/祭壇等のラベル→そのマス全部を床にする。
+    //    ただし通路網の「接続ノード」としては単語ごとに1点(中央)だけを使う
+    //    (1文字ずつ別ノードにすると、長い単語ほど過剰に通路が生成され、
+    //     大きいマップほどほぼ全面が床になってしまう不具合があったため)。
     //    @ と ! は歩行可能な階段/出入口タイルなので文字そのものを書き戻す。
-    const anchors = []; // {x,y,ch}  ch===null なら床(.)、それ以外は文字を書き戻す
+    const anchorCells = []; // {x,y,ch}  ch===null なら床(.)、それ以外は文字を書き戻す
+    const anchorNodes = []; // 通路網の接続ノード({x,y}) — ラベル/記号ごとに1個ずつ
     for (let y = 0; y < h; y++) {
         let x = 0;
         while (x < w) {
             const ch = rows[y][x];
-            if (ch === 'A') { anchors.push({ x, y, ch: 'A' }); x++; continue; }
+            if (ch === 'A') { anchorCells.push({ x, y, ch: 'A' }); anchorNodes.push({ x, y }); x++; continue; }
             if (/[a-zA-Z]/.test(ch)) {
                 let x2 = x; while (x2 < w && /[a-zA-Z_]/.test(rows[y][x2])) x2++;
-                for (let xx = x; xx < x2; xx++) anchors.push({ x: xx, y, ch: null });
+                for (let xx = x; xx < x2; xx++) anchorCells.push({ x: xx, y, ch: null });
+                anchorNodes.push({ x: x + ((x2 - x) >> 1), y });
                 x = x2; continue;
             }
-            if (ch === '@' || ch === '!') anchors.push({ x, y, ch });
+            if (ch === '@' || ch === '!') { anchorCells.push({ x, y, ch }); anchorNodes.push({ x, y }); }
             x++;
         }
     }
@@ -5541,8 +5548,8 @@ function mazeifyRows(rows, seedStr) {
         rooms.push({ x: rx, y: ry, w: rw, h: rh, cx: rx + (rw >> 1), cy: ry + (rh >> 1) });
     };
 
-    // 2) ランダムな小部屋を非重複で配置
-    const roomCount = Math.max(5, Math.floor((w * h) / 42));
+    // 2) ランダムな小部屋を非重複で配置(マップ面積に対して控えめな数に抑える)
+    const roomCount = Math.max(4, Math.min(7, Math.round((w * h) / 60)));
     let tries = 0;
     while (rooms.length < roomCount && tries < roomCount * 25) {
         tries++;
@@ -5555,9 +5562,10 @@ function mazeifyRows(rows, seedStr) {
         addRoom(rx, ry, rw, rh);
     }
 
-    // 3) 特殊マスのアンカー(境界上なら内側1マスへクランプ)も部屋として登録
-    for (const a of anchors) {
-        const [ax, ay] = clampIn(a.x, a.y);
+    // 3) 特殊ラベルの接続ノード(境界上なら内側1マスへクランプ)も「部屋」として登録
+    //    (1ラベル=1ノードなので、単語の長さに関わらず通路の本数は増えない)
+    for (const n of anchorNodes) {
+        const [ax, ay] = clampIn(n.x, n.y);
         grid[ay][ax] = true;
         rooms.push({ x: ax, y: ay, w: 1, h: 1, cx: ax, cy: ay });
     }
@@ -5570,10 +5578,10 @@ function mazeifyRows(rows, seedStr) {
     const shuffled = [...rooms];
     for (let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1));[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
     for (let i = 1; i < shuffled.length; i++) connect(shuffled[i - 1], shuffled[i]);
-    const extra = Math.min(4, Math.floor(rooms.length / 3));
+    const extra = Math.min(3, Math.floor(rooms.length / 4));
     for (let i = 0; i < extra; i++) { const a = rooms[Math.floor(rng() * rooms.length)], b = rooms[Math.floor(rng() * rooms.length)]; if (a !== b) connect(a, b); }
 
-    // 5) 特殊マスのアンカーが本当に全部つながっているかBFSで確認し、孤立していれば直結
+    // 5) 特殊ラベルの接続ノードが本当に全部つながっているかBFSで確認し、孤立していれば直結
     const bfsReach = (sx, sy) => {
         const vis = new Set([`${sx},${sy}`]); const q = [[sx, sy]]; let head = 0;
         while (head < q.length) {
@@ -5586,29 +5594,34 @@ function mazeifyRows(rows, seedStr) {
         }
         return vis;
     };
-    const [startX, startY] = clampIn(anchors.length ? anchors[0].x : Math.floor(w / 2), anchors.length ? anchors[0].y : Math.floor(h / 2));
+    const [startX, startY] = clampIn(anchorNodes.length ? anchorNodes[0].x : Math.floor(w / 2), anchorNodes.length ? anchorNodes[0].y : Math.floor(h / 2));
     let reach = bfsReach(startX, startY);
-    for (const a of anchors) {
-        const [ax, ay] = clampIn(a.x, a.y);
+    for (const n of anchorNodes) {
+        const [ax, ay] = clampIn(n.x, n.y);
         if (reach.has(`${ax},${ay}`)) continue;
         carveH(startX, ax, startY); carveV(startY, ay, ax);
         reach = bfsReach(startX, startY);
     }
 
-    // 6) 文字配列へ書き戻し(床/壁を確定させた後、特殊記号を上書き)
+    // 6) ラベル文字列が使う全マスは(接続ノードでなくても)必ず床にしておく
+    for (const c of anchorCells) {
+        const [ax, ay] = clampIn(c.x, c.y);
+        grid[ay][ax] = true;
+    }
+
+    // 7) 文字配列へ書き戻し(床/壁を確定させた後、特殊記号を上書き)
     const outRows = [];
     for (let y = 0; y < h; y++) {
         let row = '';
         for (let x = 0; x < w; x++) row += grid[y][x] ? '.' : '#';
         outRows.push(row);
     }
-    for (const a of anchors) {
-        if (a.ch === null) continue; // 単語ラベル部分は床のままでよい
-        const arr = outRows[a.y].split(''); arr[a.x] = a.ch; outRows[a.y] = arr.join('');
+    for (const c of anchorCells) {
+        if (c.ch === null) continue; // 単語ラベル部分は床のままでよい
+        const arr = outRows[c.y].split(''); arr[c.x] = c.ch; outRows[c.y] = arr.join('');
     }
     return outRows;
 }
-
 function generateDQStyleMaps() {
     function mkMap(w, h, rooms, corridors, downstairs, upstairs, exits, npcs, enc, name) {
         let tiles = new Array(w * h).fill(1);
@@ -6451,7 +6464,7 @@ function generateDQStyleMaps() {
     // ===== 新ダンジョン 10箇所 DQ4風リデザイン =====
 
     // 北の氷窟 (20x18, 2F)
-    if (!externalMapData['map_cave_ice_1f']) {
+    {
         externalMapData['map_cave_ice_1f'] = buildQMap(mazeifyRows([
             '####################',
             '#..................#',
@@ -6475,7 +6488,7 @@ function generateDQStyleMaps() {
            {'5,5':{id:'npc_cave_ice_guide',name:'氷窟の霊'},'4,8':{id:'obj_chest_ice_a',name:'宝箱'},'12,8':{id:'obj_chest_ice_b',name:'光る台座'}},
            encD2,'北の氷窟1F');
     }
-    if (!externalMapData['map_cave_ice_b1f']) {
+    {
         externalMapData['map_cave_ice_b1f'] = buildQMap(mazeifyRows([
             '####################',
             '#..................#',
@@ -6501,7 +6514,7 @@ function generateDQStyleMaps() {
     }
 
     // 東の溶岩洞窟 (20x18, 2F)
-    if (!externalMapData['map_cave_lava_1f']) {
+    {
         externalMapData['map_cave_lava_1f'] = buildQMap(mazeifyRows([
             '####################',
             '#..................#',
@@ -6525,7 +6538,7 @@ function generateDQStyleMaps() {
            {'5,5':{id:'npc_lava_spirit',name:'炎の精霊'},'4,8':{id:'obj_chest_lava_a',name:'宝箱'},'12,8':{id:'obj_chest_lava_b',name:'光る台座'}},
            encD3,'東の溶岩洞窟1F');
     }
-    if (!externalMapData['map_cave_lava_b1f']) {
+    {
         externalMapData['map_cave_lava_b1f'] = buildQMap(mazeifyRows([
             '####################',
             '#..................#',
@@ -6578,7 +6591,7 @@ function generateDQStyleMaps() {
     }
 
     // 東の地下迷宮 (20x18, 1F)
-    if (!externalMapData['map_dungeon_east_1f']) {
+    {
         externalMapData['map_dungeon_east_1f'] = buildQMap(mazeifyRows([
             '####################',
             '#..................#',
@@ -6604,7 +6617,7 @@ function generateDQStyleMaps() {
     }
 
     // 南の影の洞窟 (20x18, 1F)
-    if (!externalMapData['map_cave_shadow_1f']) {
+    {
         let _cs = buildQMap(mazeifyRows([
             '####################',
             '#...~~~~~~~~~~~~~~~~#',
@@ -6658,7 +6671,7 @@ function generateDQStyleMaps() {
     }
 
     // 海底神殿 (20x18, 1F)
-    if (!externalMapData['map_temple_sea_1f']) {
+    {
         let _ts2 = buildQMap(mazeifyRows([
             '####################',
             '#.P....A......P....#',
@@ -6685,7 +6698,7 @@ function generateDQStyleMaps() {
     }
 
     // 深南の闇の要塞 (20x18, 1F)
-    if (!externalMapData['map_fortress_dark_1f']) {
+    {
         let _fd = buildQMap(mazeifyRows([
             '####################',
             '#...~~~~~~~~~~~~~~~~#',
@@ -6712,7 +6725,7 @@ function generateDQStyleMaps() {
     }
 
     // 西の水晶洞窟 (20x18, 1F)
-    if (!externalMapData['map_cave_crystal_1f']) {
+    {
         let _cc = buildQMap(mazeifyRows([
             '####################',
             '#.P....A......P....#',
@@ -6768,7 +6781,7 @@ function generateDQStyleMaps() {
     // ===== 新塔 2箇所 (各3F) DQ4塔風 =====
 
     // 魔法使いの塔 1F (16x20)
-    if (!externalMapData['map_tower_magic_1f']) {
+    {
         let _tm1 = buildQMap(mazeifyRows([
             '################',
             '#..P........P..#',
@@ -6796,7 +6809,7 @@ function generateDQStyleMaps() {
         [],'魔法使いの塔1F');
         externalMapData['map_tower_magic_1f']=_tm1;
     }
-    if (!externalMapData['map_tower_magic_2f']) {
+    {
         let _tm2 = buildQMap(mazeifyRows([
             '################',
             '#..P........P..#',
@@ -6824,7 +6837,7 @@ function generateDQStyleMaps() {
         [],'魔法使いの塔2F');
         externalMapData['map_tower_magic_2f']=_tm2;
     }
-    if (!externalMapData['map_tower_magic_3f']) {
+    {
         let _tm3 = buildQMap(mazeifyRows([
             '################',
             '#..P........P..#',
@@ -6854,7 +6867,7 @@ function generateDQStyleMaps() {
     }
 
     // 闇の尖塔 1F-3F (16x20)
-    if (!externalMapData['map_tower_darkspire_1f']) {
+    {
         let _td1 = buildQMap(mazeifyRows([
             '################',
             '#..P........P..#',
@@ -6882,7 +6895,7 @@ function generateDQStyleMaps() {
         encM1,'闇の尖塔1F');
         externalMapData['map_tower_darkspire_1f']=_td1;
     }
-    if (!externalMapData['map_tower_darkspire_2f']) {
+    {
         let _td2 = buildQMap(mazeifyRows([
             '################',
             '#..P........P..#',
@@ -6910,7 +6923,7 @@ function generateDQStyleMaps() {
         encM1,'闇の尖塔2F');
         externalMapData['map_tower_darkspire_2f']=_td2;
     }
-    if (!externalMapData['map_tower_darkspire_3f']) {
+    {
         let _td3 = buildQMap(mazeifyRows([
             '################',
             '#..P........P..#',
@@ -6940,7 +6953,7 @@ function generateDQStyleMaps() {
     }
 
     // ===== 廃屋 (14x12) =====
-    if (!externalMapData['map_abandoned_house']) {
+    {
         let _ah = buildQMap(mazeifyRows([
             '##############',
             '#.P........P.#',
@@ -17406,6 +17419,10 @@ async function showTitleScreen() {
     }
     // maps_override.js/CDNデータを局所的な正確なマップで強制上書き（常に最後に適用）
     if (externalMapData) {
+        // ダンジョン/塔19マップ(mazeifyRowsで迷路化済み)もmaps_override.jsの古いスナップショットに
+        // 上書きされてしまうため、ここで再生成して確実にこちらを勝たせる(全ブロックのif guardは
+        // 削除済みなので2回目の呼び出しでも正しく再構築される)。
+        generateDQStyleMaps();
         externalMapData['map_castle_zarmo']   = buildZarmoCastle();
         externalMapData['map_castle_estoria'] = buildEstoriaCastle();
         externalMapData['map_castle_deserta'] = buildDesertaCastle();
