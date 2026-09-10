@@ -17391,6 +17391,16 @@ async function showTitleScreen() {
         new URLSearchParams(window.location.search).get('data') || null;
     _loadPct = 5;
     await fetchExternalMap(_customDataUrl || "https://www.gravity.place/share/ugcGame?id=36783");
+    // CDN取得(街・城下町のレイアウト等)が失敗すると externalMapData が null のままとなり、
+    // 以降の再適用・ダンジョン生成ブロックが軒並みスキップされてゲーム世界が丸ごと生成されない
+    // という重大な不具合があったため、ここで確実にローカル生成へフォールバックする。
+    // (フィールド/ダンジョン/塔/城は元々すべてローカルの手続き生成なので、CDNは本来
+    // 「更新確認」程度の役割にすぎず、失敗しても支障が出ないようにする)
+    if (!externalMapData) {
+        console.warn('[Fallback] 外部マップ取得に失敗したため、ローカル生成のみで世界を構築します');
+        externalMapData = {};
+        generateFieldMapsForGravityQuest();
+    }
     // fetchExternalMap 後にエディタのオーバーライドを再適用（城・城下町も含む）
     if (window._GQ_PENDING_OVERRIDES && externalMapData) {
         Object.entries(window._GQ_PENDING_OVERRIDES).forEach(([k, v]) => {
