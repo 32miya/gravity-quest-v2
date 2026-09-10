@@ -2548,6 +2548,8 @@ async function playSpellEffect(spellData, targetObj, screenPos) {
     if (sval >= 200 || (spellData.mp || 0) >= 28 || /zun$|zoma$|mahyado|gon$|kuro$|naz$|zaorn$|deinn$|min$|ultima/.test(sid)) tier = 4;
     else if (sval >= 100 || (spellData.mp || 0) >= 16 || /ra$|zon$|don$|behoma$|behoima$|begirama$/.test(sid)) tier = 3;
     else if (sval >= 40 || (spellData.mp || 0) >= 7 || /mi$|ma$|daruko|darko|behoimi$|imi$/.test(sid)) tier = 2;
+    // 詠唱の「溜め」: 強力な魔法ほど発動前に一拍置き、カメラをわずかに寄せて重みを出す
+    if (tier >= 3) { await hitStop(tier >= 4 ? 160 : 100); cameraPunch(tier >= 4 ? 1.05 : 1.03, tier >= 4 ? 260 : 180); }
 
     // Element detection
     let etype = 'generic';
@@ -8409,6 +8411,7 @@ function playCriticalEffect(colorStr = 'brightness(3)') {
     container.style.transition = 'none';
     container.style.filter = colorStr.includes('brightness') ? colorStr : `drop-shadow(0 0 20px ${colorStr}) invert(1)`;
     setTimeout(() => { container.style.transition = 'filter 0.1s'; container.style.filter = 'brightness(1)'; }, 150);
+    cameraPunch(1.05, 200);
 }
 
 // Item 1: 敵攻撃 → 画面揺れ＋赤フラッシュ
@@ -8437,6 +8440,43 @@ function playEnemyAttackEffect(intensity = 1) {
     requestAnimationFrame(shake);
 }
 
+// カメラパンチズーム: 強打・重要魔法の着弾に「溜め」の重みを足す
+function cameraPunch(scale = 1.07, dur = 220) {
+    const container = document.getElementById('game-container');
+    const prevTransition = container.style.transition;
+    container.style.transition = `transform ${Math.round(dur * 0.35)}ms ease-out`;
+    container.style.transform = `scale(${scale})`;
+    setTimeout(() => {
+        container.style.transition = `transform ${Math.round(dur * 0.65)}ms ease-in`;
+        container.style.transform = 'scale(1)';
+        setTimeout(() => { container.style.transition = prevTransition; }, Math.round(dur * 0.65) + 20);
+    }, Math.round(dur * 0.35));
+}
+// ヒットストップ: 一瞬の間を置いて攻撃の「重さ」を演出する(呼び出し側でawaitして使う)
+function hitStop(ms = 90) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+// シネマティックバー: ストーリーの節目で画面上下を黒帯で挟み込み、演出に緩急をつける
+let _cinematicBarsOn = false;
+function showCinematicBars(on, dur = 380) {
+    if (on === _cinematicBarsOn) return;
+    _cinematicBarsOn = on;
+    let topBar = document.getElementById('cinematic-bar-top');
+    let botBar = document.getElementById('cinematic-bar-bottom');
+    if (!topBar) {
+        const gc = document.getElementById('game-container');
+        topBar = document.createElement('div'); topBar.id = 'cinematic-bar-top';
+        botBar = document.createElement('div'); botBar.id = 'cinematic-bar-bottom';
+        [topBar, botBar].forEach(b => Object.assign(b.style, {
+            position: 'absolute', left: '0', right: '0', height: '0px', background: '#000',
+            zIndex: '40', pointerEvents: 'none', transition: `height ${dur}ms ease-out`
+        }));
+        topBar.style.top = '0'; botBar.style.bottom = '0';
+        (gc || document.body).appendChild(topBar); (gc || document.body).appendChild(botBar);
+    }
+    const h = on ? '9%' : '0px';
+    requestAnimationFrame(() => { topBar.style.height = h; botBar.style.height = h; });
+}
 // Item 2: ボス登場演出
 async function playBossEntranceEffect(bossName, isFinal = false) {
     const container = document.getElementById('game-container');
@@ -12487,13 +12527,17 @@ async function checkAction() {
                 await typeMessage(`（ふしぎな台帳：第${_tNum}の断章を 発見！ ${_tNum}/4）`);
                 const _allTaken = partyData.flags.tome_arc_1_taken && partyData.flags.tome_arc_2_taken && partyData.flags.tome_arc_3_taken && partyData.flags.tome_arc_4_taken;
                 if (_allTaken && !isSQDone('sq_08')) {
+                    showCinematicBars(true);
+                    await hitStop(300);
                     await typeMessage("全ての 断章が 揃った……！\nその 瞬間、古い 声が 響いてきた——");
+                    cameraPunch(1.04, 500);
                     await typeMessage("【ラムダスの声】\n……よく 集めてくれた。\nわしが ラムダスだ。\nアーク師の 言葉を この 断章に 遺したのは わしじゃ。\n百年間……誰かが 読んでくれるのを 待っていた。");
                     await typeMessage("【ラムダスの声】\nアーク師は 気づいていた——\n「王の 旅は 出来レースだ」と。\n英雄を 使い捨てにし\n自分は 安全な 場所で 支配し続ける……\nその 仕組みを 告発しようとして\n王に 消された。");
                     await typeMessage("【ラムダスの声】\nわしも 同じ 道を 歩みかけた。\nだが……ある 若者に 出会い 生き延びた。\n海賊と 呼ばれていたが\n本物の 勇気を 持つ 男じゃった。\n名は バルゴ——\n君たちも 会ったことが あるかもしれぬ。");
                     await typeMessage("【ラムダスの声】\nバルゴも かつて 君たちと 同じ 旅をした。\n「英雄」と 呼ばれ 使い捨てられそうに なり……\n自らの 力で 運命を 塗り替えた。\nその 話を 聞いてから わしは 悟った。\n出来レースの 旅でも\n本物の 絆は 本物だと。");
                     await typeMessage("【ラムダスの声】\nこれが 大賢者アークの 遺訓じゃ——\n「自分の 足で 歩け。\n誰かの 筋書きに 乗るな。\n汝が 感じた 絆が 汝の 真実だ」\n……この 断章を 集めた 君たちなら\nその 意味が わかるはずだ。");
                     await typeMessage("大賢者アークの 遺訓が 解き明かされた……！\n（ふしぎな台帳：「大賢者アークの遺訓」完了！）");
+                    showCinematicBars(false);
                     await grantSQReward('sq_08');
                 }
                 checkSQ10Unlock();
@@ -12793,10 +12837,12 @@ async function checkAction() {
             if (npc.id === "npc_sub_2ndloop") {
                 if (!partyData.flags.flag_beaten_secret_boss) {
                     if(getSQ('sq_10')===3) { await typeMessage("（ふしぎな台帳に 「旅人の 目撃情報を 全て 集めた（3/3）」が 記録された）"); }
+                    showCinematicBars(true);
                     await typeMessage("【異世界の旅人】\n……来たか。\nわしは 別の 世界から ここに 流れ着いた 旅人だ。\n各地の 噂を 辿って わしを 見つけられたか。\n大した 執念じゃ。");
                     await typeMessage("【異世界の旅人】\nその 仕組みは もう 知っておろう。\nわしが 見てきたのは その 先じゃ——\n仕組みに 気づいた 英雄の 末路は\n世界ごとに 違った。\n黙って 従った 者、自ら 王に なった 者、\nそして 全てを 壊して 歩き出した 者……\n君たちが どの 道を 選ぶか、\nそれを この 目で 見届けたい。");
                     await typeMessage("【異世界の旅人】\nだが この 世界には 違うものが あった。\n使い捨てられながら 生き延びた 者たちが\n次の 世代に 真実を 伝えていた。\nバルゴも ラムダスも そうだ。\n君たちを ここまで 導いたのは\nその 連鎖じゃ。");
                     await typeMessage("【異世界の旅人】\nわしは その 強さを 確かめに 来た。\n六つの 物語を 歩んだ 者だけが\nわしを 見つけられる……\nそれを 証明した 君たちの 覚悟\n最後に 試させてもらおう！");
+                    showCinematicBars(false);
                     let yesno = await selectMenu(["はい", "いいえ"], 'cmd-window', 1, true);
                     if(yesno === 0) {
                         hideGoldWindow();
