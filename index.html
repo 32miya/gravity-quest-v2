@@ -5504,6 +5504,111 @@ function fixStuckNpcs() {
     if (!externalMapData) return;
     for (const m of Object.values(externalMapData)) _fixStuckNpcsInMap(m);
 }
+// ダンジョン/塔の単純な「一室のみの箱」レイアウトを、既存のNPC/宝箱/階段配置を
+// 保ったまま複数の部屋+通路+分岐からなる探索しがいのある構造へ変換するヘルパー。
+// rows: buildQMap用のASCII配列(壁=#, 床=., 特殊記号=@!Aなど, 英字の連続=NPC/宝箱等のラベル)
+// seedStr: マップごとに異なる決定論的乱数シード(同じ文字列なら毎回同じ迷路になる)
+function mazeifyRows(rows, seedStr) {
+    const h = rows.length, w = rows[0].length;
+    let _seed = 0; for (let i = 0; i < seedStr.length; i++) _seed = (_seed * 31 + seedStr.charCodeAt(i)) >>> 0;
+    const rng = () => { _seed = (_seed * 1103515245 + 12345) >>> 0; return (_seed >>> 8) / 16777216; };
+    const inBounds = (x, y) => x >= 1 && y >= 1 && x < w - 1 && y < h - 1;
+    const clampIn = (x, y) => [Math.min(Math.max(x, 1), w - 2), Math.min(Math.max(y, 1), h - 2)];
+
+    // 1) 保持すべき特殊マスを収集。
+    //    英字(と_)の連続(2文字以上、またはA単体)はNPC/宝箱/祭壇等のラベル→その位置は必ず床にする。
+    //    @ と ! は歩行可能な階段/出入口タイルなので文字そのものを書き戻す。
+    const anchors = []; // {x,y,ch}  ch===null なら床(.)、それ以外は文字を書き戻す
+    for (let y = 0; y < h; y++) {
+        let x = 0;
+        while (x < w) {
+            const ch = rows[y][x];
+            if (ch === 'A') { anchors.push({ x, y, ch: 'A' }); x++; continue; }
+            if (/[a-zA-Z]/.test(ch)) {
+                let x2 = x; while (x2 < w && /[a-zA-Z_]/.test(rows[y][x2])) x2++;
+                for (let xx = x; xx < x2; xx++) anchors.push({ x: xx, y, ch: null });
+                x = x2; continue;
+            }
+            if (ch === '@' || ch === '!') anchors.push({ x, y, ch });
+            x++;
+        }
+    }
+
+    const grid = Array.from({ length: h }, () => new Array(w).fill(false));
+    const rooms = [];
+    const addRoom = (rx, ry, rw, rh) => {
+        for (let yy = ry; yy < ry + rh; yy++) for (let xx = rx; xx < rx + rw; xx++) if (inBounds(xx, yy)) grid[yy][xx] = true;
+        rooms.push({ x: rx, y: ry, w: rw, h: rh, cx: rx + (rw >> 1), cy: ry + (rh >> 1) });
+    };
+
+    // 2) ランダムな小部屋を非重複で配置
+    const roomCount = Math.max(5, Math.floor((w * h) / 42));
+    let tries = 0;
+    while (rooms.length < roomCount && tries < roomCount * 25) {
+        tries++;
+        const rw = 2 + Math.floor(rng() * 3), rh = 2 + Math.floor(rng() * 3);
+        const rx = 1 + Math.floor(rng() * Math.max(1, w - rw - 2));
+        const ry = 1 + Math.floor(rng() * Math.max(1, h - rh - 2));
+        let overlap = false;
+        for (const r of rooms) { if (rx < r.x + r.w + 1 && rx + rw + 1 > r.x && ry < r.y + r.h + 1 && ry + rh + 1 > r.y) { overlap = true; break; } }
+        if (overlap) continue;
+        addRoom(rx, ry, rw, rh);
+    }
+
+    // 3) 特殊マスのアンカー(境界上なら内側1マスへクランプ)も部屋として登録
+    for (const a of anchors) {
+        const [ax, ay] = clampIn(a.x, a.y);
+        grid[ay][ax] = true;
+        rooms.push({ x: ax, y: ay, w: 1, h: 1, cx: ax, cy: ay });
+    }
+    if (rooms.length === 0) { const [cx, cy] = clampIn(Math.floor(w / 2), Math.floor(h / 2)); addRoom(cx, cy, 1, 1); }
+
+    // 4) 部屋をシャッフルしてL字通路でスパニング接続 + ループ用の余分な接続を数本
+    const carveH = (x1, x2, y) => { for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) if (inBounds(x, y)) grid[y][x] = true; };
+    const carveV = (y1, y2, x) => { for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) if (inBounds(x, y)) grid[y][x] = true; };
+    const connect = (a, b) => { if (rng() < 0.5) { carveH(a.cx, b.cx, a.cy); carveV(a.cy, b.cy, b.cx); } else { carveV(a.cy, b.cy, a.cx); carveH(a.cx, b.cx, b.cy); } };
+    const shuffled = [...rooms];
+    for (let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1));[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
+    for (let i = 1; i < shuffled.length; i++) connect(shuffled[i - 1], shuffled[i]);
+    const extra = Math.min(4, Math.floor(rooms.length / 3));
+    for (let i = 0; i < extra; i++) { const a = rooms[Math.floor(rng() * rooms.length)], b = rooms[Math.floor(rng() * rooms.length)]; if (a !== b) connect(a, b); }
+
+    // 5) 特殊マスのアンカーが本当に全部つながっているかBFSで確認し、孤立していれば直結
+    const bfsReach = (sx, sy) => {
+        const vis = new Set([`${sx},${sy}`]); const q = [[sx, sy]]; let head = 0;
+        while (head < q.length) {
+            const [cx, cy] = q[head++];
+            for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+                const nx = cx + dx, ny = cy + dy, k = `${nx},${ny}`;
+                if (vis.has(k) || !inBounds(nx, ny) || !grid[ny][nx]) continue;
+                vis.add(k); q.push([nx, ny]);
+            }
+        }
+        return vis;
+    };
+    const [startX, startY] = clampIn(anchors.length ? anchors[0].x : Math.floor(w / 2), anchors.length ? anchors[0].y : Math.floor(h / 2));
+    let reach = bfsReach(startX, startY);
+    for (const a of anchors) {
+        const [ax, ay] = clampIn(a.x, a.y);
+        if (reach.has(`${ax},${ay}`)) continue;
+        carveH(startX, ax, startY); carveV(startY, ay, ax);
+        reach = bfsReach(startX, startY);
+    }
+
+    // 6) 文字配列へ書き戻し(床/壁を確定させた後、特殊記号を上書き)
+    const outRows = [];
+    for (let y = 0; y < h; y++) {
+        let row = '';
+        for (let x = 0; x < w; x++) row += grid[y][x] ? '.' : '#';
+        outRows.push(row);
+    }
+    for (const a of anchors) {
+        if (a.ch === null) continue; // 単語ラベル部分は床のままでよい
+        const arr = outRows[a.y].split(''); arr[a.x] = a.ch; outRows[a.y] = arr.join('');
+    }
+    return outRows;
+}
+
 function generateDQStyleMaps() {
     function mkMap(w, h, rooms, corridors, downstairs, upstairs, exits, npcs, enc, name) {
         let tiles = new Array(w * h).fill(1);
@@ -6347,7 +6452,7 @@ function generateDQStyleMaps() {
 
     // 北の氷窟 (20x18, 2F)
     if (!externalMapData['map_cave_ice_1f']) {
-        externalMapData['map_cave_ice_1f'] = buildQMap([
+        externalMapData['map_cave_ice_1f'] = buildQMap(mazeifyRows([
             '####################',
             '#..................#',
             '#....A.............#',
@@ -6366,12 +6471,12 @@ function generateDQStyleMaps() {
             '#..................#',
             '#..................#',
             '#########@##########',
-        ], {'9,17':{map:'map_field_5_1',x:22,y:23},'10,17':{map:'map_field_5_1',x:22,y:23},'3,10':{map:'map_cave_ice_b1f',x:3,y:2}},
+        ], 'maze_seed_19'), {'9,17':{map:'map_field_5_1',x:22,y:23},'10,17':{map:'map_field_5_1',x:22,y:23},'3,10':{map:'map_cave_ice_b1f',x:3,y:2}},
            {'5,5':{id:'npc_cave_ice_guide',name:'氷窟の霊'},'4,8':{id:'obj_chest_ice_a',name:'宝箱'},'12,8':{id:'obj_chest_ice_b',name:'光る台座'}},
            encD2,'北の氷窟1F');
     }
     if (!externalMapData['map_cave_ice_b1f']) {
-        externalMapData['map_cave_ice_b1f'] = buildQMap([
+        externalMapData['map_cave_ice_b1f'] = buildQMap(mazeifyRows([
             '####################',
             '#..................#',
             '#@.................#',
@@ -6390,14 +6495,14 @@ function generateDQStyleMaps() {
             '#..................#',
             '#..................#',
             '####################',
-        ], {'2,2':{map:'map_cave_ice_1f',x:3,y:10}},
+        ], 'maze_seed_18'), {'2,2':{map:'map_cave_ice_1f',x:3,y:10}},
            {'5,4':{id:'boss_ice_dragon',name:'氷竜アイスフロスト'},'5,8':{id:'obj_chest_ice_deep',name:'凍った宝箱'}},
            encD2,'北の氷窟B1F');
     }
 
     // 東の溶岩洞窟 (20x18, 2F)
     if (!externalMapData['map_cave_lava_1f']) {
-        externalMapData['map_cave_lava_1f'] = buildQMap([
+        externalMapData['map_cave_lava_1f'] = buildQMap(mazeifyRows([
             '####################',
             '#..................#',
             '#....A.............#',
@@ -6416,12 +6521,12 @@ function generateDQStyleMaps() {
             '#..................#',
             '#..................#',
             '#########@##########',
-        ], {'9,17':{map:'map_field_7_2',x:22,y:23},'10,17':{map:'map_field_7_2',x:22,y:23},'3,10':{map:'map_cave_lava_b1f',x:3,y:2}},
+        ], 'maze_seed_17'), {'9,17':{map:'map_field_7_2',x:22,y:23},'10,17':{map:'map_field_7_2',x:22,y:23},'3,10':{map:'map_cave_lava_b1f',x:3,y:2}},
            {'5,5':{id:'npc_lava_spirit',name:'炎の精霊'},'4,8':{id:'obj_chest_lava_a',name:'宝箱'},'12,8':{id:'obj_chest_lava_b',name:'光る台座'}},
            encD3,'東の溶岩洞窟1F');
     }
     if (!externalMapData['map_cave_lava_b1f']) {
-        externalMapData['map_cave_lava_b1f'] = buildQMap([
+        externalMapData['map_cave_lava_b1f'] = buildQMap(mazeifyRows([
             '####################',
             '#..................#',
             '#@.................#',
@@ -6440,14 +6545,14 @@ function generateDQStyleMaps() {
             '#..................#',
             '#..................#',
             '####################',
-        ], {'2,2':{map:'map_cave_lava_1f',x:3,y:10}},
+        ], 'maze_seed_16'), {'2,2':{map:'map_cave_lava_1f',x:3,y:10}},
            {'5,4':{id:'boss_lava_titan',name:'溶岩大魔神'},'5,8':{id:'obj_chest_lava_deep',name:'溶岩の宝箱'}},
            encD3,'東の溶岩洞窟B1F');
     }
 
     // 北海の古代遺跡 (20x18, 1F)
     {
-        let _ra = buildQMap([
+        let _ra = buildQMap(mazeifyRows([
             '####################',
             '#.P....A......P....#',
             '#..................#',
@@ -6466,7 +6571,7 @@ function generateDQStyleMaps() {
             '#..................#',
             '#..................#',
             '#########@##########',
-        ], {'9,17':{map:'map_field_8_0',x:22,y:24},'10,17':{map:'map_field_8_0',x:22,y:24}},
+        ], 'maze_seed_15'), {'9,17':{map:'map_field_8_0',x:22,y:24},'10,17':{map:'map_field_8_0',x:22,y:24}},
            {'7,4':{id:'boss_ancient_guardian',name:'古代の守護者'},'3,7':{id:'obj_chest_ancient_a',name:'遺跡の宝箱'},'14,7':{id:'obj_chest_ancient_b',name:'石碑'}},
            encD2,'北海の古代遺跡');
         externalMapData['map_ruin_ancient_1f']=_ra;
@@ -6474,7 +6579,7 @@ function generateDQStyleMaps() {
 
     // 東の地下迷宮 (20x18, 1F)
     if (!externalMapData['map_dungeon_east_1f']) {
-        externalMapData['map_dungeon_east_1f'] = buildQMap([
+        externalMapData['map_dungeon_east_1f'] = buildQMap(mazeifyRows([
             '####################',
             '#..................#',
             '#..####.boss.####..#',
@@ -6493,14 +6598,14 @@ function generateDQStyleMaps() {
             '#..................#',
             '#..................#',
             '#########@##########',
-        ], {'9,17':{map:'map_field_8_3',x:22,y:23},'10,17':{map:'map_field_8_3',x:22,y:23}},
+        ], 'maze_seed_14'), {'9,17':{map:'map_field_8_3',x:22,y:23},'10,17':{map:'map_field_8_3',x:22,y:23}},
            {'7,2':{id:'boss_dungeon_lord',name:'迷宮の覇者'},'4,8':{id:'obj_chest_east_a',name:'宝箱'},'12,8':{id:'obj_chest_east_b',name:'宝箱'}},
            encD3,'東の地下迷宮');
     }
 
     // 南の影の洞窟 (20x18, 1F)
     if (!externalMapData['map_cave_shadow_1f']) {
-        let _cs = buildQMap([
+        let _cs = buildQMap(mazeifyRows([
             '####################',
             '#...~~~~~~~~~~~~~~~~#',
             '#...~~~~~~~~~~~~~~~~#',
@@ -6519,7 +6624,7 @@ function generateDQStyleMaps() {
             '#...~~~~~~~~~~~~~~~~#',
             '#...~~~~~~~~~~~~~~~~#',
             '#########@##########',
-        ], {'9,17':{map:'map_field_5_5',x:22,y:23},'10,17':{map:'map_field_5_5',x:22,y:23}},
+        ], 'maze_seed_13'), {'9,17':{map:'map_field_5_5',x:22,y:23},'10,17':{map:'map_field_5_5',x:22,y:23}},
            {'10,3':{id:'boss_shadow_knight',name:'影の騎士'},'4,8':{id:'obj_chest_shadow_a',name:'宝箱'},'12,8':{id:'obj_chest_shadow_b',name:'宝箱'}},
            encM1,'南の影の洞窟');
         externalMapData['map_cave_shadow_1f']=_cs;
@@ -6527,7 +6632,7 @@ function generateDQStyleMaps() {
 
     // 砂漠の遺跡 (20x18, 1F)
     {
-        let _rd = buildQMap([
+        let _rd = buildQMap(mazeifyRows([
             '####################',
             '#.P....A......P....#',
             '#..................#',
@@ -6546,7 +6651,7 @@ function generateDQStyleMaps() {
             '#..................#',
             '#..................#',
             '#########@##########',
-        ], {'9,17':{map:'map_field_3_6',x:22,y:23},'10,17':{map:'map_field_3_6',x:22,y:23}},
+        ], 'maze_seed_12'), {'9,17':{map:'map_field_3_6',x:22,y:23},'10,17':{map:'map_field_3_6',x:22,y:23}},
            {'8,4':{id:'npc_desert_spirit',name:'砂漠の亡霊'},'4,4':{id:'obj_chest_ruin_a',name:'砂の宝箱'},'15,6':{id:'obj_chest_ruin_b',name:'砂の宝箱'},'7,9':{id:'boss_desert_mummy',name:'砂漠のミイラ王'}},
            encD3,'砂漠の遺跡');
         externalMapData['map_ruin_desert_1f']=_rd;
@@ -6554,7 +6659,7 @@ function generateDQStyleMaps() {
 
     // 海底神殿 (20x18, 1F)
     if (!externalMapData['map_temple_sea_1f']) {
-        let _ts2 = buildQMap([
+        let _ts2 = buildQMap(mazeifyRows([
             '####################',
             '#.P....A......P....#',
             '#....boss..........#',
@@ -6573,7 +6678,7 @@ function generateDQStyleMaps() {
             '#..................#',
             '#..................#',
             '#########@##########',
-        ], {'9,17':{map:'map_field_5_7',x:22,y:23},'10,17':{map:'map_field_5_7',x:22,y:23}},
+        ], 'maze_seed_11'), {'9,17':{map:'map_field_5_7',x:22,y:23},'10,17':{map:'map_field_5_7',x:22,y:23}},
            {'6,2':{id:'boss_sea_god_statue',name:'海神像'},'4,8':{id:'npc_sea_spirit',name:'海の精霊'},'12,8':{id:'obj_chest_sea_a',name:'宝箱'}},
            encM1,'海底神殿');
         externalMapData['map_temple_sea_1f']=_ts2;
@@ -6581,7 +6686,7 @@ function generateDQStyleMaps() {
 
     // 深南の闇の要塞 (20x18, 1F)
     if (!externalMapData['map_fortress_dark_1f']) {
-        let _fd = buildQMap([
+        let _fd = buildQMap(mazeifyRows([
             '####################',
             '#...~~~~~~~~~~~~~~~~#',
             '#...~~~~boss~~~~~~~~#',
@@ -6600,7 +6705,7 @@ function generateDQStyleMaps() {
             '#...~~~~~~~~~~~~~~~~#',
             '#...~~~~~~~~~~~~~~~~#',
             '#########@##########',
-        ], {'9,17':{map:'map_field_1_8',x:22,y:23},'10,17':{map:'map_field_1_8',x:22,y:23}},
+        ], 'maze_seed_10'), {'9,17':{map:'map_field_1_8',x:22,y:23},'10,17':{map:'map_field_1_8',x:22,y:23}},
            {'8,2':{id:'boss_dark_disciple',name:'魔将の使徒'},'4,8':{id:'obj_chest_dark_a',name:'宝箱'},'12,8':{id:'obj_chest_dark_b',name:'宝箱'}},
            encM2,'深南の闇の要塞');
         externalMapData['map_fortress_dark_1f']=_fd;
@@ -6608,7 +6713,7 @@ function generateDQStyleMaps() {
 
     // 西の水晶洞窟 (20x18, 1F)
     if (!externalMapData['map_cave_crystal_1f']) {
-        let _cc = buildQMap([
+        let _cc = buildQMap(mazeifyRows([
             '####################',
             '#.P....A......P....#',
             '#...boss...........#',
@@ -6627,7 +6732,7 @@ function generateDQStyleMaps() {
             '#..................#',
             '#..................#',
             '#########@##########',
-        ], {'9,17':{map:'map_field_0_6',x:22,y:23},'10,17':{map:'map_field_0_6',x:22,y:23}},
+        ], 'maze_seed_9'), {'9,17':{map:'map_field_0_6',x:22,y:23},'10,17':{map:'map_field_0_6',x:22,y:23}},
            {'4,2':{id:'boss_crystal_golem',name:'水晶ゴーレム'},'4,5':{id:'obj_chest_crystal_a',name:'水晶の宝箱'},'12,5':{id:'obj_chest_crystal_b',name:'水晶の祭壇'}},
            encM1,'西の水晶洞窟');
         externalMapData['map_cave_crystal_1f']=_cc;
@@ -6635,7 +6740,7 @@ function generateDQStyleMaps() {
 
     // 深淵の迷宮 (20x18, 1F)
     {
-        let _da = buildQMap([
+        let _da = buildQMap(mazeifyRows([
             '####################',
             '#.P....A......P....#',
             '#..................#',
@@ -6654,7 +6759,7 @@ function generateDQStyleMaps() {
             '#..................#',
             '#..................#',
             '#########@##########',
-        ], {'9,17':{map:'map_field_8_8',x:22,y:23},'10,17':{map:'map_field_8_8',x:22,y:23}},
+        ], 'maze_seed_8'), {'9,17':{map:'map_field_8_8',x:22,y:23},'10,17':{map:'map_field_8_8',x:22,y:23}},
            {'7,4':{id:'boss_chaos_dragon',name:'混沌竜カオスドレイク'},'4,11':{id:'obj_chest_abyss_a',name:'深淵の宝箱'},'12,11':{id:'obj_chest_abyss_b',name:'深淵の祭壇'}},
            encM2,'深淵の迷宮');
         externalMapData['map_dungeon_abyss_1f']=_da;
@@ -6664,7 +6769,7 @@ function generateDQStyleMaps() {
 
     // 魔法使いの塔 1F (16x20)
     if (!externalMapData['map_tower_magic_1f']) {
-        let _tm1 = buildQMap([
+        let _tm1 = buildQMap(mazeifyRows([
             '################',
             '#..P........P..#',
             '#..............#',
@@ -6685,14 +6790,14 @@ function generateDQStyleMaps() {
             '#..............#',
             '#######uu#######',
             '################',
-        ],
+        ], 'maze_seed_7'),
         {'7,18':{map:'map_field_5_3',x:22,y:23},'8,18':{map:'map_field_5_3',x:22,y:23},'7,0':{map:'map_tower_magic_2f',x:7,y:17},'8,0':{map:'map_tower_magic_2f',x:7,y:17}},
         {'7,16':{id:'npc_magic_tower_keeper',name:'塔の番人'},'6,4':{id:'npc_magic_tower_mage_a',name:'魔法使い研究生'},'6,8':{id:'npc_magic_tower_mage_b',name:'高位魔術師'},'5,13':{id:'obj_chest_magic_1f',name:'宝箱'}},
         [],'魔法使いの塔1F');
         externalMapData['map_tower_magic_1f']=_tm1;
     }
     if (!externalMapData['map_tower_magic_2f']) {
-        let _tm2 = buildQMap([
+        let _tm2 = buildQMap(mazeifyRows([
             '################',
             '#..P........P..#',
             '#..............#',
@@ -6713,14 +6818,14 @@ function generateDQStyleMaps() {
             '#######uu#######',
             '################',
             '################',
-        ],
+        ], 'maze_seed_6'),
         {'7,17':{map:'map_tower_magic_1f',x:7,y:0},'7,0':{map:'map_tower_magic_3f',x:7,y:17},'8,0':{map:'map_tower_magic_3f',x:7,y:17}},
         {'7,11':{id:'npc_magic_tower_archmage',name:'大魔導士'},'5,4':{id:'obj_chest_magic_2f',name:'宝箱'},'5,8':{id:'obj_chest_magic_2f_b',name:'宝箱'}},
         [],'魔法使いの塔2F');
         externalMapData['map_tower_magic_2f']=_tm2;
     }
     if (!externalMapData['map_tower_magic_3f']) {
-        let _tm3 = buildQMap([
+        let _tm3 = buildQMap(mazeifyRows([
             '################',
             '#..P........P..#',
             '#..............#',
@@ -6741,7 +6846,7 @@ function generateDQStyleMaps() {
             '#######uu#######',
             '################',
             '################',
-        ],
+        ], 'maze_seed_5'),
         {'7,17':{map:'map_tower_magic_2f',x:7,y:0}},
         {'7,4':{id:'boss_archmage',name:'魔法王アルカノス'},'5,13':{id:'obj_chest_magic_3f',name:'宝箱'},'9,13':{id:'obj_chest_magic_3f_b',name:'光の宝珠台座'}},
         [],'魔法使いの塔3F');
@@ -6750,7 +6855,7 @@ function generateDQStyleMaps() {
 
     // 闇の尖塔 1F-3F (16x20)
     if (!externalMapData['map_tower_darkspire_1f']) {
-        let _td1 = buildQMap([
+        let _td1 = buildQMap(mazeifyRows([
             '################',
             '#..P........P..#',
             '#...~~~~~~~~~~~#',
@@ -6771,14 +6876,14 @@ function generateDQStyleMaps() {
             '#..............#',
             '#######uu#######',
             '################',
-        ],
+        ], 'maze_seed_4'),
         {'7,18':{map:'map_field_2_6',x:22,y:23},'8,18':{map:'map_field_2_6',x:22,y:23},'7,0':{map:'map_tower_darkspire_2f',x:7,y:17},'8,0':{map:'map_tower_darkspire_2f',x:7,y:17}},
         {'7,12':{id:'npc_darkspire_guard',name:'闇の衛兵'},'6,4':{id:'npc_darkspire_spirit',name:'幽閉された魂'},'5,9':{id:'obj_chest_darkspire_1f',name:'宝箱'}},
         encM1,'闇の尖塔1F');
         externalMapData['map_tower_darkspire_1f']=_td1;
     }
     if (!externalMapData['map_tower_darkspire_2f']) {
-        let _td2 = buildQMap([
+        let _td2 = buildQMap(mazeifyRows([
             '################',
             '#..P........P..#',
             '#...~~~~~~~~~~~#',
@@ -6799,14 +6904,14 @@ function generateDQStyleMaps() {
             '#######uu#######',
             '################',
             '################',
-        ],
+        ], 'maze_seed_3'),
         {'7,17':{map:'map_tower_darkspire_1f',x:7,y:0},'7,0':{map:'map_tower_darkspire_3f',x:7,y:17},'8,0':{map:'map_tower_darkspire_3f',x:7,y:17}},
         {'7,4':{id:'npc_darkspire_prisoner',name:'囚われの騎士'},'5,9':{id:'obj_chest_darkspire_2f',name:'宝箱'}},
         encM1,'闇の尖塔2F');
         externalMapData['map_tower_darkspire_2f']=_td2;
     }
     if (!externalMapData['map_tower_darkspire_3f']) {
-        let _td3 = buildQMap([
+        let _td3 = buildQMap(mazeifyRows([
             '################',
             '#..P........P..#',
             '#...~~~~~~~~~~~#',
@@ -6827,7 +6932,7 @@ function generateDQStyleMaps() {
             '#######uu#######',
             '################',
             '################',
-        ],
+        ], 'maze_seed_2'),
         {'7,17':{map:'map_tower_darkspire_2f',x:7,y:0}},
         {'7,3':{id:'boss_demon_avatar',name:'魔王の化身'},'5,13':{id:'obj_chest_darkspire_3f',name:'宝箱'},'9,13':{id:'obj_chest_darkspire_3f_b',name:'黒の宝珠台座'}},
         encM2,'闇の尖塔3F');
@@ -6836,7 +6941,7 @@ function generateDQStyleMaps() {
 
     // ===== 廃屋 (14x12) =====
     if (!externalMapData['map_abandoned_house']) {
-        let _ah = buildQMap([
+        let _ah = buildQMap(mazeifyRows([
             '##############',
             '#.P........P.#',
             '#....boss....#',
@@ -6849,7 +6954,7 @@ function generateDQStyleMaps() {
             '#............#',
             '#............#',
             '#######uu#####',
-        ],
+        ], 'maze_seed_1'),
         {'7,11':{map:'map_field_3_0',x:25,y:39},'8,11':{map:'map_field_3_0',x:25,y:39}},
         {'6,2':{id:'boss_dark_general',name:'暗黒の魔将'},'4,6':{id:'obj_chest_haiya_axe',name:'古びた宝箱'}},
         [],'廃屋');
