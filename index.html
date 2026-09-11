@@ -46,7 +46,9 @@
     #map-name-window { top: 55px; left: 5px; min-width: 80px; text-align: center; z-index: 15; }
     /* max-heightは、フィールド上部のパーティーステータス(50px)+マップ名ウィンドウと
        重ならないように、bottom:0起点で伸びる高さの上限を確保する(スマホでの重なり対策) */
-    #msg-window { bottom: 0; left: 0; width: 100%; min-height: 100px; max-height: calc(100% - 100px); border-bottom: none; border-left: none; border-right: none; border-radius: 0; }
+    /* z-indexはmap-name-window/gold-window(15)より高くし、稀に重なった際もメッセージが
+       常に最前面に表示され読めなくなることがないようにする */
+    #msg-window { bottom: 0; left: 0; width: 100%; min-height: 100px; max-height: calc(100% - 100px); border-bottom: none; border-left: none; border-right: none; border-radius: 0; z-index: 16; }
     /* バトル中は画面端に余白を作り、その余白にも戦闘背景が透けて見えるように浮かせて配置。
        コマンドウィンドウを右側に同じ高さで並べる(以前は上に積んでいたため下部UI全体が
        縦に長くなり、敵の表示が不必要に高い位置に押し上げられて浮いて見えていた) */
@@ -1837,7 +1839,11 @@ volumeSlider.addEventListener('input', (e) => {
 });
 
 const unlockAudio = () => { AudioManager.init(); if (!AudioManager.isMuted && AudioManager.currentBgmKey && (!AudioManager.bgmAudio || AudioManager.bgmAudio.paused)) { AudioManager.playBGM(AudioManager.currentBgmKey); } };
-document.addEventListener('click', unlockAudio, { once: true }); document.addEventListener('touchstart', unlockAudio, { once: true });
+// { once: true }だと、BGM再生要求(playBGM呼び出し)より前に発生した最初のタップ/クリックで
+// リスナーが消費されてしまい、その後に実際にBGMが必要になった時点で自動再開する手段が
+// 無くなっていた(モバイルでのオートプレイ制限によりBGMが鳴らない/戦闘だけ鳴らない等の
+// 不具合の主因)。毎回のタップ/クリックで再チェックするようonceを外して常時リスナー化する。
+document.addEventListener('click', unlockAudio); document.addEventListener('touchstart', unlockAudio);
 
 let state = 'INIT'; let masterData = {}; let partyData = {}; let currentMap = {}; let moveHistory = []; let inputCallback = null; const TILE_SIZE = 24; let externalMapData = null; let externalImages = {}; let externalEntitiesData = {};
 // boss_dungeon フィールドスプライト（背景除去済みPNG）
@@ -16056,6 +16062,17 @@ async function executeBattle(fixedEnemies = null) {
             const rowTotalW = muls.reduce((s, m) => s + bW * m, 0) + rowGap * (cnt - 1);
             const availW = Math.max(60, _areaW - 12);
             if (rowTotalW > availW) { const shrink = availW / rowTotalW; bW = Math.round(bW * shrink); bH = Math.round(bH * shrink); rowGap = Math.round(rowGap * shrink); }
+            // 敵単体(特に1体)の時、パーティーステータス欄(#battle-screenのpadding-topで確保している
+            // 領域)に敵グラフィックが重なってしまう不具合対策: 実際に使える縦方向の余白を超える
+            // 場合は、名前ラベル分も差し引いた上で高さ基準でも縮小する
+            const _bsEl = document.getElementById('battle-screen');
+            const _bsH = (_bsEl && _bsEl.clientHeight) || 0;
+            if (_bsH > 0) {
+                const _nameH = S(13) * 1.2 + 4;
+                const availH = Math.max(50, _bsH - 168 - 112 - _nameH);
+                const maxMul = Math.max(...muls);
+                if (bH * maxMul > availH) { const shrinkH = availH / (bH * maxMul); bW = Math.round(bW * shrinkH); bH = Math.round(bH * shrinkH); rowGap = Math.round(rowGap * shrinkH); }
+            }
             area.style.gap = rowGap + 'px';
             area.innerHTML = enemies.map((e, i) => {
                 const eW = Math.round(bW * muls[i]), eH = Math.round(bH * muls[i]);
