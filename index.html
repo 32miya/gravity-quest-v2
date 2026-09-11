@@ -28,7 +28,9 @@
     #game-wrapper { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 100%; box-sizing: border-box; }
     #game-container { position: relative; width: 100vw; max-width: 600px; flex-grow: 1; background: #000; overflow: hidden; border-bottom: 2px solid #555; display: flex; justify-content: center; align-items: center; transition: filter 0.1s; }
     canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; image-rendering: pixelated; object-fit: fill; }
-    .window { position: absolute; border: 2px solid #fff; border-radius: 4px; background: #000; padding: 8px; box-sizing: border-box; font-size: 16px; line-height: 1.4; display: none; z-index: 10; }
+    /* max-height+overflow-y:autoは安全網: 長文メッセージ等でウィンドウが画面を突き破って
+       他のウィンドウ(パーティーステータス等)に重なってしまうのを防ぐ(スマホ実機で報告あり) */
+    .window { position: absolute; border: 2px solid #fff; border-radius: 4px; background: #000; padding: 8px; box-sizing: border-box; font-size: 16px; line-height: 1.4; display: none; z-index: 10; max-height: calc(100% - 12px); overflow-y: auto; }
     #party-status { top: 0; left: 0; width: 100%; height: 50px; display: flex; justify-content: space-between; align-items: center; flex-direction: row; flex-wrap: nowrap; font-size: min(13px, 3.2vw); text-align: center; border-top: none; border-left: none; border-right: none; border-radius: 0; padding: 0; margin: 0; }
     #party-status > div { flex: 1; border-right: 1px solid #555; padding: 2px 0; overflow: hidden; white-space: nowrap; text-overflow: clip; }
     #party-status > div:last-child { border-right: none; }
@@ -42,11 +44,13 @@
     .dead { color: #f55; }
     #gold-window { top: 55px; right: 5px; min-width: 80px; text-align: right; z-index: 15; }
     #map-name-window { top: 55px; left: 5px; min-width: 80px; text-align: center; z-index: 15; }
-    #msg-window { bottom: 0; left: 0; width: 100%; min-height: 100px; border-bottom: none; border-left: none; border-right: none; border-radius: 0; }
+    /* max-heightは、フィールド上部のパーティーステータス(50px)+マップ名ウィンドウと
+       重ならないように、bottom:0起点で伸びる高さの上限を確保する(スマホでの重なり対策) */
+    #msg-window { bottom: 0; left: 0; width: 100%; min-height: 100px; max-height: calc(100% - 100px); border-bottom: none; border-left: none; border-right: none; border-radius: 0; }
     /* バトル中は画面端に余白を作り、その余白にも戦闘背景が透けて見えるように浮かせて配置。
        コマンドウィンドウを右側に同じ高さで並べる(以前は上に積んでいたため下部UI全体が
        縦に長くなり、敵の表示が不必要に高い位置に押し上げられて浮いて見えていた) */
-    #msg-window.battle-msg { bottom: 14px; left: 14px; width: calc(100% - 186px); min-height: 90px; background: rgba(0,0,0,0.72); border: 1px solid #fff; border-radius: 8px; }
+    #msg-window.battle-msg { bottom: 14px; left: 14px; width: calc(100% - 186px); min-height: 90px; max-height: calc(100% - 195px); background: rgba(0,0,0,0.72); border: 1px solid #fff; border-radius: 8px; }
     #cmd-window { bottom: 105px; right: 5px; min-width: 100px; }
     #cmd-window.battle-cmd { bottom: 14px; right: 14px; width: 150px; min-height: 90px; box-sizing: border-box; background: rgba(0,0,0,0.85); }
     #status-window { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 94%; max-width: 440px; background: rgba(0, 0, 0, 0.95); z-index: 20; padding: 10px 12px; border: 2px solid #fff; border-radius: 8px; }
@@ -1731,21 +1735,29 @@ const AudioManager = {
         // プールから再利用可能なAudioを探す（なければ最大3個まで新規作成）
         if (!_sePool[url]) _sePool[url] = [];
         const pool = _sePool[url];
-        let seAudio = pool.find(a => a.paused || a.ended);
-        if (!seAudio) {
-            if (pool.length >= 3) { seAudio = pool[0]; } // 全員再生中 → 最古を上書き
+        let entry = pool.find(e => e.audio.paused || e.audio.ended);
+        if (!entry) {
+            if (pool.length >= 3) { entry = pool[0]; } // 全員再生中 → 最古を上書き
             else {
-                seAudio = new Audio(url);
-                seAudio.crossOrigin = "anonymous";
-                pool.push(seAudio);
+                const audio = new Audio(url);
+                audio.crossOrigin = "anonymous";
+                entry = { audio, node: null };
+                pool.push(entry);
             }
         }
-        try { seAudio.currentTime = 0; seAudio.volume = this.masterVolume || 0.8; seAudio.play().catch(e => {}); } catch(e) {}
+        try {
+            // BGMと同じAudioContext(masterGainNode)を経由させて1つの音声セッションに統一する。
+            // 個別のHTMLAudioElementをWebAudio経由にせず直接play()していると、
+            // 一部のモバイルブラウザ(iOS Safari等)がSE再生のたびに別セッション扱いして
+            // 既存のBGM(こちらはWebAudio経由)を中断してしまうことがあったための対策。
+            if (!entry.node) { try { entry.node = this.ctx.createMediaElementSource(entry.audio); entry.node.connect(this.masterGainNode); } catch(e) {} }
+            entry.audio.currentTime = 0; entry.audio.volume = this.masterVolume || 0.8; entry.audio.play().catch(e => {});
+        } catch(e) {}
     },
     playTone(freq, type, duration, vol=0.5, slideFreq=null) { if(this.isMuted || !this.ctx) return; this.init(); const osc = this.ctx.createOscillator(); const gainNode = this.ctx.createGain(); osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime); if (slideFreq) osc.frequency.exponentialRampToValueAtTime(slideFreq, this.ctx.currentTime + duration); gainNode.gain.setValueAtTime(vol, this.ctx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration); osc.connect(gainNode); gainNode.connect(this.masterGainNode); osc.onended = () => { try { osc.disconnect(); gainNode.disconnect(); } catch(e) {} }; osc.start(); osc.stop(this.ctx.currentTime + duration); },
     playNoise(duration, vol=0.5) { if(this.isMuted || !this.ctx) return; this.init(); const bufferSize = this.ctx.sampleRate * duration; const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate); const data = buffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1; const noise = this.ctx.createBufferSource(); noise.buffer = buffer; const filter = this.ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 1000; const gainNode = this.ctx.createGain(); gainNode.gain.setValueAtTime(vol, this.ctx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration); noise.connect(filter); filter.connect(gainNode); gainNode.connect(this.masterGainNode); noise.onended = () => { try { noise.disconnect(); filter.disconnect(); gainNode.disconnect(); } catch(e) {} }; noise.start(); },
     // 音声エンジンをリセットしてゾンビノードを一掃
-    gcAudio() { const _bgmKey = this.currentBgmKey; this.stopBGM(); if(this.masterGainNode){try{this.masterGainNode.disconnect();}catch(e){} this.masterGainNode=null;} if(this.ctx){try{this.ctx.close();}catch(e){} this.ctx=null;} setTimeout(()=>{ this.init(); if(_bgmKey && !this.currentBgmKey && (typeof state === 'undefined' || state !== 'BATTLE')) this.playBGM(_bgmKey); }, 150); },
+    gcAudio() { const _bgmKey = this.currentBgmKey; this.stopBGM(); if(this.masterGainNode){try{this.masterGainNode.disconnect();}catch(e){} this.masterGainNode=null;} if(this.ctx){try{this.ctx.close();}catch(e){} this.ctx=null;} for(const _url in _sePool){ for(const _entry of _sePool[_url]){ _entry.node = null; } } setTimeout(()=>{ this.init(); if(_bgmKey && !this.currentBgmKey && (typeof state === 'undefined' || state !== 'BATTLE')) this.playBGM(_bgmKey); }, 150); },
     playSynthSE(key) { if(this.isMuted) return; switch(key) { case 'cursor': this.playTone(880, 'square', 0.05, 0.2); break; case 'decision': this.playTone(660, 'square', 0.1, 0.2); setTimeout(() => this.playTone(880, 'square', 0.15, 0.2), 100); break; case 'cancel': this.playTone(200, 'sawtooth', 0.2, 0.3); break; case 'attack_hit': this.playNoise(0.1, 0.5); this.playTone(150, 'square', 0.1, 0.3, 50); break; case 'attack_crit': this.playNoise(0.3, 0.8); this.playTone(200, 'sawtooth', 0.3, 0.5, 50); break; case 'damage_hero': this.playTone(100, 'square', 0.2, 0.4, 20); this.playNoise(0.15, 0.4); break; case 'magic_cast': this.playTone(400, 'sine', 0.4, 0.3, 1200); setTimeout(() => this.playTone(600, 'sine', 0.3, 0.2, 1600), 100); break; case 'poison': this.playTone(150, 'sawtooth', 0.1, 0.3, 80); setTimeout(() => this.playTone(120, 'sawtooth', 0.1, 0.3, 60), 150); break; case 'item_get': [440, 554, 659, 880].forEach((f, i) => setTimeout(() => this.playTone(f, 'square', 0.15, 0.2), i * 120)); break; case 'save': this.playTone(440, 'square', 0.1, 0.2); setTimeout(() => this.playTone(880, 'square', 0.15, 0.2), 100); break; case 'inn': const notes = [{f: 440, d: 0.15}, {f: 554, d: 0.15}, {f: 659, d: 0.15}, {f: 880, d: 0.6}]; let delay = 0; notes.forEach(n => { setTimeout(() => this.playTone(n.f, 'square', n.d, 0.2), delay * 1000); delay += n.d; }); break; case 'level_up': [523.25, 523.25, 523.25, 659.25, 783.99, 1046.50].forEach((f, i) => setTimeout(() => this.playTone(f, 'square', i===5?0.4:0.1, 0.2), i * 120)); break;
         case 'heal': [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => setTimeout(() => this.playTone(f, 'sine', 0.18, 0.22), i * 80)); setTimeout(() => this.playTone(1318.51, 'sine', 0.25, 0.28), 340); break;
         case 'travel_gate':
