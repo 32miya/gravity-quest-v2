@@ -15535,12 +15535,14 @@ async function eventWeaponShop(npcId) {
                 m.inventory.forEach((id, idx) => { let it = masterData.items[id]; if (it && it.type !== 'tool' && it.price > 0) sellList.push({ owner: m, itemId: id, invIdx: idx, slot: null, it }); });
                 ['weapon','armor','shield','helmet','accessory'].forEach(slot => { let id = m.equipment[slot]; if (!id) return; let it = masterData.items[id]; if (it && it.price > 0) sellList.push({ owner: m, itemId: id, invIdx: -1, slot, it }); });
             });
+            // マジックBOXに預けている武器・防具も直接売却できるようにする
+            (partyData.magicBox || []).forEach((id, boxIdx) => { let it = masterData.items[id]; if (it && it.type !== 'tool' && it.price > 0) sellList.push({ owner: null, fromBox: true, boxIdx, itemId: id, invIdx: -1, slot: null, it }); });
             if (sellList.length === 0) { await typeMessage("うれるぶき や ぼうぐが ありません。"); continue; }
-            let sellOpts = sellList.map(s => { let half = Math.floor(s.it.price / 2); return `${s.owner.name}: ${s.it.name}${s.slot ? '[装]' : ''}(${half}G)`; });
+            let sellOpts = sellList.map(s => { let half = Math.floor(s.it.price / 2); return `${s.fromBox ? 'マジックBOX' : s.owner.name}: ${s.it.name}${s.slot ? '[装]' : ''}(${half}G)`; });
             let sellIdx = await selectMenuPaged(sellOpts, 'cmd-window', 6, true); if (sellIdx === -1) continue;
             let sel = sellList[sellIdx]; let half = Math.floor(sel.it.price / 2);
             await typeMessage(`${sel.it.name}を ${half}G で うりますか？`); let yn = await selectMenu(["はい", "いいえ"], 'cmd-window', 1, true); if (yn !== 0) continue;
-            if (sel.slot) { sel.owner.equipment[sel.slot] = null; } else { sel.owner.inventory.splice(sel.invIdx, 1); }
+            if (sel.fromBox) { partyData.magicBox.splice(sel.boxIdx, 1); } else if (sel.slot) { sel.owner.equipment[sel.slot] = null; } else { sel.owner.inventory.splice(sel.invIdx, 1); }
             partyData.gold += half; updateGoldWindow(); AudioManager.playSE('item_get'); await typeMessage(`${sel.it.name}を ${half}G で うった。`);
         }
     }
@@ -15602,12 +15604,17 @@ async function eventShop(npcId) {
                     if (it && it.type === 'tool' && it.price > 0) sellList.push({ owner: m, invIdx: idx, it });
                 });
             });
+            // マジックBOXに預けているどうぐも直接売却できるようにする
+            (partyData.magicBox || []).forEach((id, boxIdx) => {
+                let it = masterData.items[id];
+                if (it && it.type === 'tool' && it.price > 0) sellList.push({ owner: null, fromBox: true, boxIdx, it });
+            });
             if (sellList.length === 0) { await typeMessage("うれるどうぐが ありません。"); continue; }
-            let sellOpts = sellList.map(s => { let half = Math.floor(s.it.price / 2); return `${s.owner.name}: ${s.it.name}(${half}G)`; });
+            let sellOpts = sellList.map(s => { let half = Math.floor(s.it.price / 2); return `${s.fromBox ? 'マジックBOX' : s.owner.name}: ${s.it.name}(${half}G)`; });
             let sellIdx = await selectMenuPaged(sellOpts, 'cmd-window', 6, true); if (sellIdx === -1) continue;
             let sel = sellList[sellIdx]; let half = Math.floor(sel.it.price / 2);
             await typeMessage(`${sel.it.name}を ${half}G で うりますか？`); let yn = await selectMenu(["はい", "いいえ"], 'cmd-window', 1, true); if (yn !== 0) continue;
-            sel.owner.inventory.splice(sel.invIdx, 1);
+            if (sel.fromBox) { partyData.magicBox.splice(sel.boxIdx, 1); } else { sel.owner.inventory.splice(sel.invIdx, 1); }
             partyData.gold += half; updateGoldWindow(); AudioManager.playSE('item_get'); await typeMessage(`${sel.it.name}を ${half}G で うった。`);
         }
     }
