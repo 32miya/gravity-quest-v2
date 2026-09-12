@@ -14713,16 +14713,28 @@ ${_sns[_ri(_sns.length)]}
                         await typeMessage(extDef.msg);
                         if (extDef.event.type === "give_gold") { partyData.gold += extDef.event.amount; partyData.flags[chestFlag] = true; updateGoldWindow(); AudioManager.playSE('item_get'); await typeMessage(`${extDef.event.amount}G をてにいれた！`); } 
                         else if (extDef.event.type === "give_item") {
-                            partyData.flags[chestFlag] = true; AudioManager.playSE('item_get'); let itemId = extDef.event.item_id; let itemName = extDef.event.item_name; let itemObj = null;
+                            let itemId = extDef.event.item_id; let itemName = extDef.event.item_name; let itemObj = null;
                             if (itemId && masterData.items[itemId]) itemObj = masterData.items[itemId]; if (!itemObj && itemName) itemObj = Object.values(masterData.items).find(i => i.name === itemName); if (!itemObj && itemId) itemObj = Object.values(masterData.items).find(i => i.id === itemId);
                             if (!itemObj) {
                                 let fallbackId = itemId || ("dummy_item_" + Date.now()); let fallbackName = itemName || "なぞのアイテム"; let type = 'tool';
                                 if(fallbackName.includes('剣') || fallbackName.includes('つるぎ') || fallbackName.includes('ナイフ') || fallbackName.includes('杖')) type = 'weapon'; else if(fallbackName.includes('鎧') || fallbackName.includes('よろい') || fallbackName.includes('服') || fallbackName.includes('ローブ')) type = 'armor'; else if(fallbackName.includes('盾') || fallbackName.includes('たて') || fallbackName.includes('シールド')) type = 'helmet'; else if(fallbackName.includes('兜') || fallbackName.includes('かぶと') || fallbackName.includes('帽子')) type = 'helmet';
                                 itemObj = { id: fallbackId, name: fallbackName, type: type, price: 10, power: 10, value: 30 }; masterData.items[fallbackId] = itemObj;
                             }
-                            await typeMessage(`${itemObj.name} をてにいれた！`);
+                            // 所持品がいっぱいならマジックBOXへ、それも いっぱいなら開封扱いにせず据え置く
                             let target = partyData.members.find(m => m.inventory.length < 8 && m.hp > 0); if (!target) target = partyData.members.find(m => m.inventory.length < 8);
-                            if (target) { target.inventory.push(itemObj.id); await typeMessage(`${target.name}は ${itemObj.name}を ふくろに いれた。`); } else { await typeMessage(`しかし もちものが いっぱいだ！\nなくなく あきらめた。`); partyData.flags[chestFlag] = false; }
+                            partyData.magicBox = partyData.magicBox || [];
+                            if (target) {
+                                partyData.flags[chestFlag] = true; AudioManager.playSE('item_get');
+                                await typeMessage(`${itemObj.name} をてにいれた！`);
+                                target.inventory.push(itemObj.id); await typeMessage(`${target.name}は ${itemObj.name}を ふくろに いれた。`);
+                            } else if (partyData.magicBox.length < MAGIC_BOX_CAPACITY) {
+                                partyData.flags[chestFlag] = true; AudioManager.playSE('item_get');
+                                await typeMessage(`${itemObj.name} をてにいれた！`);
+                                partyData.magicBox.push(itemObj.id);
+                                await typeMessage(`もちものが いっぱいのため\n『${itemObj.name}』は マジックBOXに おくられた。`);
+                            } else {
+                                await typeMessage(`たからばこの 中に 『${itemObj.name}』が 見える……\nしかし もちものも マジックBOXも いっぱいだ！\nなくなく あきらめた。`);
+                            }
                         }
                     }
                 } 
@@ -14845,19 +14857,32 @@ ${_sns[_ri(_sns.length)]}
                     let _cf = `chest_${partyData.pos.map}_${tx}_${ty}`;
                     if (partyData.flags[_cf]) { delete currentMap.npcs[key]; state='FIELD'; hideAllWindows(); drawMap(); return; }
                     else {
-                        partyData.flags[_cf] = true; AudioManager.playSE('item_get');
                         let _pool, _itemId = null;
                         if (npc.id.includes('weapon')) _pool = Object.values(masterData.items).filter(i => i.type !== 'tool' && i.type !== 'armor' && i.type !== 'helmet' && i.type !== 'acc' && i.price > 0 && !_SQ_EXCL.has(i.id));
                         else if (npc.id.includes('armor')) _pool = Object.values(masterData.items).filter(i => (i.type === 'armor' || i.type === 'helmet' || i.type === 'acc') && i.price > 0 && !_SQ_EXCL.has(i.id));
                         else _pool = Object.values(masterData.items).filter(i => i.type === 'tool' && i.price > 0 && !_SQ_EXCL.has(i.id));
                         if (_pool && _pool.length > 0) { let _it = _pool[Math.floor(Math.random() * _pool.length)]; _itemId = _it.id; }
                         if (_itemId && masterData.items[_itemId]) {
+                            // 所持品がいっぱいならマジックBOXへ、それも いっぱいなら宝箱は開けず据え置く
+                            // （どちらも いっぱいのまま開封扱いにしてアイテムを消滅させていたのを修正）
                             let _it = masterData.items[_itemId];
-                            await typeMessage(`たからばこを あけた！\n『${_it.name}』を てにいれた！`);
-                            let _tgt = partyData.members.find(m => m.inventory.length < 8 && m.hp > 0) || partyData.members[0];
-                            if (_tgt && _tgt.inventory.length < 8) _tgt.inventory.push(_itemId); else await typeMessage("しかし もちものが いっぱいだ！");
-                        } else { let _g = 50 + Math.floor(Math.random() * 300); partyData.gold += _g; updateGoldWindow(); await typeMessage(`たからばこを あけた！\n${_g}G を てにいれた！`); }
-                        delete currentMap.npcs[key];
+                            let _tgt = partyData.members.find(m => m.inventory.length < 8 && m.hp > 0) || partyData.members.find(m => m.inventory.length < 8);
+                            partyData.magicBox = partyData.magicBox || [];
+                            if (_tgt) {
+                                partyData.flags[_cf] = true; AudioManager.playSE('item_get');
+                                await typeMessage(`たからばこを あけた！\n『${_it.name}』を てにいれた！`);
+                                _tgt.inventory.push(_itemId);
+                                delete currentMap.npcs[key];
+                            } else if (partyData.magicBox.length < MAGIC_BOX_CAPACITY) {
+                                partyData.flags[_cf] = true; AudioManager.playSE('item_get');
+                                await typeMessage(`たからばこを あけた！\n『${_it.name}』を てにいれた！`);
+                                partyData.magicBox.push(_itemId);
+                                await typeMessage(`もちものが いっぱいのため\n『${_it.name}』は マジックBOXに おくられた。`);
+                                delete currentMap.npcs[key];
+                            } else {
+                                await typeMessage(`たからばこの 中に 『${_it.name}』が 見える……\nしかし もちものも マジックBOXも いっぱいだ！\nなくなく あきらめた。`);
+                            }
+                        } else { partyData.flags[_cf] = true; AudioManager.playSE('item_get'); let _g = 50 + Math.floor(Math.random() * 300); partyData.gold += _g; updateGoldWindow(); await typeMessage(`たからばこを あけた！\n${_g}G を てにいれた！`); delete currentMap.npcs[key]; }
                     }
                 }
                 else if (npc.id === 'boss_dungeon' || npc.id === 'boss_sky' || npc.id === 'boss_maou') {
