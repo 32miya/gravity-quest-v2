@@ -1419,6 +1419,10 @@ function injectSubStoryData() {
     masterData.items["i_star_frag"] = { id: "i_star_frag", name: "ほしのカケラ", type: "tool", price: 0, desc: "かつてこの地を治めた慈悲深き王の涙が結晶化したものと言われている。悲しみと愛が宿る幻の鉱石。" };
     masterData.items["w_star_sword"] = { id: "w_star_sword", name: "星砕きの剣", type: "weapon", price: 10000, power: 85, desc: "聖王の涙の結晶から打ち出された剣。神聖な光に見せかけた闇の結界（嘘の衣）を剥ぎ取る唯一の刃と伝わる。" };
     masterData.items["acc_star_bracelet"] = { id: "acc_star_bracelet", name: "星降る腕輪", type: "accessory", price: 5000, power: 0, effect: "speed_up", desc: "エニシアに代々伝わる家宝。夜空の光が宿り素早さが大幅に上がる。かつて若きボルド王が旅人に贈ったものと同じ意匠を持つ。" };
+    // 試練の洞窟ボス。masterData未登録のまま放置されており、戦闘時にHP50/ATK10の
+    // 汎用フォールバック(「謎の敵」)で戦っていたため、ゲーム最初のダンジョンに
+    // ふさわしい強さで新規登録
+    masterData.monsters["boss_dungeon"] = { name: "元・王宮騎士の英霊", max_hp: 280, atk: 32, def: 16, spd: 20, exp: 500, gold: 300, traits: ["boss"] };
     masterData.monsters["boss_desert_killer"] = { name: "デザートキラー", max_hp: 350, atk: 40, def: 15, spd: 30, exp: 800, gold: 500 };
     masterData.monsters["boss_trial_phantom"] = { name: "試練の幻影", max_hp: 450, atk: 55, def: 20, spd: 40, exp: 1500, gold: 1000 };
     masterData.spells["spl_ultima"] = { id: "spl_ultima", name: "アルテマ", type: "attack", target: "enemies", mp: 40, value: 480, desc: "敵全体に究極の光属性ダメージ。いかなる敵にも等しく降り注ぐ", element: "light" };
@@ -4303,18 +4307,19 @@ async function loadExtraMonsters() {
                 if (m.img) { let img = new Image(); img.crossOrigin = "Anonymous"; img.src = m.img; externalImages['enemy_' + mId] = img; }
                 _slIds.push(mId);
             });
-            // フィールドマップの中盤・終盤エンカウントに追加（dist>=2 のマップ）
+            // フィールドマップの中盤・終盤エンカウントに追加
+            // 旧: 城下町からの距離(dist>=2)だけで判定していたため、序盤唯一のダンジョン
+            // 「試練の洞窟」への道中(dist=2〜4、EarlyMid帯)にまでHP1000超/ATK100超級の
+            // 2周目モンスターが出現し、極端に強すぎる状態になっていた。
+            // 距離ではなく「そのマップの元々の出現プールが中盤/終盤級かどうか」で判定し直す
+            const _midLateOnlyIds = ['killer_mantis','minotaur','chimera','dullahan','cockatrice','flame_elemental','gargoyle','hagure_gura','ancient_dragon','cyclops','vampire_lord','death_knight','behemoth','lich','archdemon','bahamut','haou_kishi','troll'];
             if (_slIds.length > 0 && externalMapData) {
                 Object.keys(externalMapData).forEach(mapId => {
                     if (!mapId.includes('field')) return;
                     const map = externalMapData[mapId];
                     if (!map || !map.encounters || map.encounters.length === 0) return;
-                    const _fm = mapId.match(/field_(\d+)_(\d+)$/);
-                    if (!_fm) return;
-                    const gx = parseInt(_fm[1]), gy = parseInt(_fm[2]);
-                    if (Math.abs(gx-2) + Math.abs(gy-2) >= 2) {
-                        _slIds.forEach(id => { if (!map.encounters.includes(id)) map.encounters.push(id); });
-                    }
+                    if (!map.encounters.some(id => _midLateOnlyIds.includes(id))) return;
+                    _slIds.forEach(id => { if (!map.encounters.includes(id)) map.encounters.push(id); });
                 });
             }
         }
@@ -5184,7 +5189,10 @@ if(_bpx+1<x0+45&&world[_bpy*GW+_bpx+1]===5){world[_bpy*GW+_bpx+1]=12;mainComp.ad
         // 深部エリア: 既存魔王周辺 + 拡張南東 + 拡張南西果て
         const isLate=(gx===4&&gy>=3&&gy<=4)||(gx>=3&&gy===4)||(gx>=7&&gy>=5)||(gx>=6&&gy>=7)||(gx<=1&&gy>=7);
         // 中盤: 拡張エリア全体 + 既存中盤
-        const isMid=!isLate&&!isWestSouth&&((gx>=5)||(gy>=5)||(gx===4)||(gy>=3&&gx>=1)||(dist>=3));
+        // 旧: (gy>=3&&gx>=1) は城下町(2,2)から1〜2マスの(1,3)/(2,3)/(3,3)/(2,4)まで
+        // 中盤(troll/dullahan等)扱いにしてしまい、序盤の試練の洞窟へ向かう道中が
+        // 極端に強くなっていたため削除(dist>=3の条件だけで元々遠方は中盤判定される)
+        const isMid=!isLate&&!isWestSouth&&((gx>=5)||(gy>=5)||(gx===4)||(dist>=3));
         const isEarlyMid=!isLate&&!isMid&&(dist===2||isWestSouth);
         let enc;
         if(isLate) enc=["ancient_dragon","cyclops","vampire_lord","death_knight","behemoth","lich","archdemon","bahamut","hagure_gura"].filter(_ef).concat(["haou_kishi"]);
@@ -5690,7 +5698,9 @@ function generateDQStyleMaps() {
     const _ef = id => masterData.monsters && masterData.monsters[id];
     const encD1 = ['ghost','skeleton','giant_bat','ghost_mushroom'].filter(_ef);
     const encD2 = ['ghost','skeleton','golem','dark_mage'].filter(_ef);
-    const encD3 = ['golem','dark_mage','dullahan','troll'].filter(_ef);
+    // 旧: dullahan(atk65)/troll(atk100)は中盤エリア用の強さで、序盤唯一のダンジョンの
+    // 最深部としては明らかに強すぎたため、golem/dark_mageの延長線上のorc/skeletonに変更
+    const encD3 = ['golem','dark_mage','orc','skeleton'].filter(_ef);
     const encT1 = ['killer_mantis','dark_mage','gargoyle','chimera'].filter(_ef);
     const encT2 = ['chimera','dullahan','flame_elemental','gargoyle'].filter(_ef);
     const encM1 = ['death_knight','vampire_lord','cyclops','archdemon'].filter(_ef);
