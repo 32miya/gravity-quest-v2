@@ -1504,23 +1504,26 @@ function injectSubStoryData() {
     masterData.items["w_ice_flame"]      = { id:"w_ice_flame",      name:"氷炎の杖（杖）",     type:"weapon", price:0, power:100, effect:"mp_regen", desc:"デセルタの炎とノルドの氷、どちらも譲らなかった末に、杖の中で溶け合わずに共存する術を見つけた複合武器。" };
     masterData.items["meteorite_fragment"] = { id: "meteorite_fragment", name: "いんせきのかけら", type: "tool", price: 5000, desc: "はぐれグラちゃんから手に入る超レアなかけら。ガルドの鍛冶屋に持参すると最強の鎧を作れるという。" };
     // モンスター固有ドロップ品(drop_item_id)用の素材/トロフィーアイテム
-    masterData.items["bronze_sword"]   = { id: "bronze_sword",   name: "青銅の剣の欠片", type: "tool", price: 15,   desc: "ゴブリンが持っていた粗末な剣の欠片。売るぐらいしか使い道がない。" };
-    masterData.items["beast_fang"]     = { id: "beast_fang",     name: "獣の牙",         type: "tool", price: 25,   desc: "ワイルドウルフの鋭い牙。武具の材料として重宝される。" };
-    masterData.items["bone_sword"]     = { id: "bone_sword",     name: "骨の剣",         type: "tool", price: 40,   desc: "スケルトンが振るっていた不気味な骨の剣。" };
-    masterData.items["iron_spear"]     = { id: "iron_spear",     name: "鉄の穂先",       type: "tool", price: 60,   desc: "オークが使っていた槍の穂先。まだ十分に鋭い。" };
-    masterData.items["stone_fragment"] = { id: "stone_fragment", name: "石の欠片",       type: "tool", price: 5,    desc: "ゴーレムの体から崩れ落ちた石の欠片。ありふれた材料。" };
-    masterData.items["dragon_scale"]   = { id: "dragon_scale",   name: "竜の鱗",         type: "tool", price: 800,  desc: "レッドドラゴンから剥がれ落ちた硬い鱗。高値で取引される。" };
-    masterData.items["sharp_claw"]     = { id: "sharp_claw",     name: "鋭い鎌爪",       type: "tool", price: 300,  desc: "キラーマンティスの鎌のように鋭い爪。" };
-    masterData.items["iron_armor"]     = { id: "iron_armor",     name: "さびた鎧",       type: "tool", price: 350,  desc: "デュラハンが纏っていた古い鎧の残骸。" };
-    masterData.items["petrify_cure"]   = { id: "petrify_cure",   name: "石化解除の粉",   type: "tool", price: 250,  desc: "コカトリスの羽根から作られる不思議な粉。石のように硬い。" };
-    masterData.items["battle_axe"]     = { id: "battle_axe",     name: "闘斧の刃",       type: "tool", price: 700,  desc: "ミノタウロスが振るっていた巨大な斧の刃。" };
-    masterData.items["charm_whip"]     = { id: "charm_whip",     name: "魅惑の鞭",       type: "tool", price: 550,  desc: "サキュバスが操っていた妖しく光る鞭。" };
-    masterData.items["giant_club"]     = { id: "giant_club",     name: "巨大なこん棒",   type: "tool", price: 900,  desc: "トロールが振り回していた丸太のようなこん棒。" };
-    masterData.items["fire_crystal"]   = { id: "fire_crystal",   name: "火の結晶",       type: "tool", price: 650,  desc: "フレイムの中心にあった、燃え続ける結晶。" };
-    masterData.items["stone_statue"]   = { id: "stone_statue",   name: "石像のかけら",   type: "tool", price: 700,  desc: "ガーゴイルの体の一部だった石のかけら。" };
-    masterData.items["chimera_wing"]   = { id: "chimera_wing",   name: "キメラの翼",     type: "tool", price: 1100, desc: "キメラの背から生えていた大きな翼の一部。" };
-    masterData.items["dragon_gem"]     = { id: "dragon_gem",     name: "竜の宝玉",       type: "tool", price: 3500, desc: "エンシェントドラゴンの体内にあった神秘の宝玉。" };
-    masterData.items["giant_eye"]      = { id: "giant_eye",      name: "巨人の眼",       type: "tool", price: 3000, desc: "サイクロプスの巨大な眼球。今もこちらを見ているようだ。" };
+    // 以下はいずれも装備不可・使用不可の換金専用素材(モンスター討伐の証)。
+    // 「〜の剣」「〜の穂先」等の名前から装備品や鍛冶屋への納品物と誤解されやすいため、
+    // 説明文の末尾に「換金専用」である旨を明記して装備品の武器と混同しないようにする
+    masterData.items["bronze_sword"]   = { id: "bronze_sword",   name: "青銅の剣の欠片", type: "tool", price: 15,   desc: "ゴブリンが持っていた粗末な剣の欠片。装備はできず、売るぐらいしか使い道がない。" };
+    masterData.items["beast_fang"]     = { id: "beast_fang",     name: "獣の牙",         type: "tool", price: 25,   desc: "ワイルドウルフの鋭い牙。装備はできない換金アイテムだが、売れば良い値がつくだろう。" };
+    masterData.items["bone_sword"]     = { id: "bone_sword",     name: "骨の剣",         type: "tool", price: 40,   desc: "スケルトンが振るっていた不気味な骨の剣。装備はできず、売るしかなさそうだ。" };
+    masterData.items["iron_spear"]     = { id: "iron_spear",     name: "鉄の穂先",       type: "tool", price: 60,   desc: "オークが使っていた槍の穂先。装備品ではなく、換金アイテムとして売るのがよさそうだ。" };
+    masterData.items["stone_fragment"] = { id: "stone_fragment", name: "石の欠片",       type: "tool", price: 5,    desc: "ゴーレムの体から崩れ落ちた石の欠片。装備や合成には使えず、売るしかなさそうだ。" };
+    masterData.items["dragon_scale"]   = { id: "dragon_scale",   name: "竜の鱗",         type: "tool", price: 800,  desc: "レッドドラゴンから剥がれ落ちた硬い鱗。装備はできないが、高値で取引される。" };
+    masterData.items["sharp_claw"]     = { id: "sharp_claw",     name: "鋭い鎌爪",       type: "tool", price: 300,  desc: "キラーマンティスの鎌のように鋭い爪。装備はできない換金専用アイテムだ。" };
+    masterData.items["iron_armor"]     = { id: "iron_armor",     name: "さびた鎧",       type: "tool", price: 350,  desc: "デュラハンが纏っていた古い鎧の残骸。装備はできず、売るしかなさそうだ。" };
+    masterData.items["petrify_cure"]   = { id: "petrify_cure",   name: "石化した粉",     type: "tool", price: 250,  desc: "コカトリスの羽根が石のように硬く固まったもの。使用効果は無く、換金するしかなさそうだ。" };
+    masterData.items["battle_axe"]     = { id: "battle_axe",     name: "闘斧の刃",       type: "tool", price: 700,  desc: "ミノタウロスが振るっていた巨大な斧の刃。装備はできず、売るしかなさそうだ。" };
+    masterData.items["charm_whip"]     = { id: "charm_whip",     name: "魅惑の鞭",       type: "tool", price: 550,  desc: "サキュバスが操っていた妖しく光る鞭。装備はできない換金アイテムだ。" };
+    masterData.items["giant_club"]     = { id: "giant_club",     name: "巨大なこん棒",   type: "tool", price: 900,  desc: "トロールが振り回していた丸太のようなこん棒。装備はできず、売るしかなさそうだ。" };
+    masterData.items["fire_crystal"]   = { id: "fire_crystal",   name: "火の結晶",       type: "tool", price: 650,  desc: "フレイムの中心にあった、燃え続ける結晶。装備や合成には使えない換金アイテムだ。" };
+    masterData.items["stone_statue"]   = { id: "stone_statue",   name: "石像のかけら",   type: "tool", price: 700,  desc: "ガーゴイルの体の一部だった石のかけら。装備はできず、売るしかなさそうだ。" };
+    masterData.items["chimera_wing"]   = { id: "chimera_wing",   name: "キメラの翼",     type: "tool", price: 1100, desc: "キメラの背から生えていた大きな翼の一部。装備はできない換金アイテムだ。" };
+    masterData.items["dragon_gem"]     = { id: "dragon_gem",     name: "竜の宝玉",       type: "tool", price: 3500, desc: "エンシェントドラゴンの体内にあった神秘の宝玉。装備はできないが、高値で取引される。" };
+    masterData.items["giant_eye"]      = { id: "giant_eye",      name: "巨人の眼",       type: "tool", price: 3000, desc: "サイクロプスの巨大な眼球。装備はできない換金アイテムだ。今もこちらを見ているようだ。" };
     masterData.items["vampire_cape"]   = { id: "vampire_cape",   name: "吸血鬼のマント", type: "tool", price: 3800, desc: "ヴァンパイアロードが纏っていた漆黒のマント。" };
     masterData.items["dark_sword"]     = { id: "dark_sword",     name: "漆黒の剣",       type: "tool", price: 4000, desc: "デスナイトが振るっていた、闇を纏う剣。" };
     masterData.items["ocean_scale"]    = { id: "ocean_scale",    name: "深海竜の鱗",     type: "tool", price: 4200, desc: "リヴァイアサンから剥がれた、深海の圧力にも耐える鱗。" };
@@ -15525,9 +15528,15 @@ async function eventShop(npcId) {
         if (mainChoice === -1 || mainChoice === 2) { await typeMessage("またの おこしを おまちしております！"); break; }
         if (mainChoice === 0) {
             // モンスターのドロップ専用素材（竜の鱗・魔将の角など）は、討伐報酬としての
-            // 価値を保つため道具屋では販売しない
+            // 価値を保つため道具屋では販売しない。ただしi01/i02/i03(やくそう等)は
+            // 一部モンスターのドロップ表にも使い回されている定番消耗品のため除外しない
             const _dropOnlyIds = new Set((window.MONSTER_DATABASE || []).map(m => m.drop_item_id).filter(Boolean));
+            ['i01', 'i02', 'i03'].forEach(id => _dropOnlyIds.delete(id));
             let allTools = Object.values(masterData.items).filter(i => i.price > 0 && !_SQ_EXCL.has(i.id) && !_dropOnlyIds.has(i.id) && i.type === 'tool').sort((a, b) => a.price - b.price);
+            // ちからのたね等のステータス上昇アイテムや世界樹の葉(蘇生)は、単純な
+            // 「価格上位5件」選出だと他のtool系アイテムに埋もれて実質出品されない
+            // ことがあったため、定番品として価格解禁されていれば必ず品揃えに含める
+            const _staples = ['i01', 'i02', 'i03', 'i05', 'i12', 'i13', 'i14', 'i15', 'i16', 'i17'];
             let shopIds = [];
             if (partyData.pos.map.includes('town_01') || partyData.pos.map.includes('castle_01')) {
                 // エニシア城下町: 物語の進行フラグに応じて品揃えの上限価格が上がっていく
@@ -15539,14 +15548,22 @@ async function eventShop(npcId) {
                 else if (_f.flag_weapon_forged) _ceil = 1000;
                 else if (_f.flag_tower_cleared) _ceil = 600;
                 else if (_f.flag_dungeon_cleared) _ceil = 350;
-                shopIds = allTools.filter(i => i.price < _ceil).map(i => i.id).slice(-5);
+                const _avail = allTools.filter(i => i.price < _ceil);
+                const _stapleIds = _avail.filter(i => _staples.includes(i.id)).map(i => i.id);
+                const _rotating = _avail.filter(i => !_staples.includes(i.id)).map(i => i.id).slice(-5);
+                shopIds = [..._stapleIds, ..._rotating];
             }
-            else { let maxP = Math.max(100, partyData.gold / 1.5); let cands = allTools.filter(i => i.price <= maxP); if (cands.length === 0) cands = allTools; shopIds = cands.slice(-6).map(i => i.id); }
+            else {
+                let maxP = Math.max(100, partyData.gold / 1.5); let cands = allTools.filter(i => i.price <= maxP); if (cands.length === 0) cands = allTools;
+                const _stapleIds = cands.filter(i => _staples.includes(i.id)).map(i => i.id);
+                const _rotating = cands.filter(i => !_staples.includes(i.id)).map(i => i.id).slice(-6);
+                shopIds = [..._stapleIds, ..._rotating];
+            }
             if (shopIds.length === 0) shopIds = allTools.slice(0, 3).map(i => i.id);
             shopIds = shopIds.filter(id => masterData.items[id]);
             if (shopIds.length === 0) { await typeMessage("ただいま もちあわせが ございません。"); continue; }
             let options = shopIds.map(id => { let item = masterData.items[id]; return `${item.name}(${item.price}G)`; }); options.push("やめる");
-            let buyIdx = await selectMenu(options, 'cmd-window', 1, true); if (buyIdx === -1 || buyIdx === options.length - 1) continue;
+            let buyIdx = await selectMenuPaged(options, 'cmd-window', 6, true); if (buyIdx === -1 || buyIdx === options.length - 1) continue;
             let itemData = masterData.items[shopIds[buyIdx]]; if (partyData.gold < itemData.price) { await typeMessage("おかねが たりないようです。"); continue; }
             await typeMessage(`${itemData.price}G ですが かいますか？`); let yesno = await selectMenu(["はい", "いいえ"], 'cmd-window', 1, true); if (yesno !== 0) continue;
             await typeMessage("だれが もちますか？"); let targetIdx = await selectMenu(partyData.members.map(m => m.name), 'cmd-window', 1, true); if (targetIdx === -1) continue;
