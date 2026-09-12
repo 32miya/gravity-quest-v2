@@ -7844,27 +7844,41 @@ async function loadExternalData(id) {
             const _castleOv = window._GQ_PENDING_OVERRIDES && (window._GQ_PENDING_OVERRIDES['castle_01'] || window._GQ_PENDING_OVERRIDES['map_castle_01']);
             const _nc2 = (_castleOv && _castleOv.tiles && _castleOv.tiles.length > 0) ? _castleOv : buildGramanCastle01();
             _fixStuckNpcsInMap(_nc2);
-            // maps_override.jsの古いスナップショット(エディタ最新データ)に、装飾(胸像/茂み/柵)が
-            // 兵士NPCの真上に配置され顔がめり込んで見える不具合が複数箇所残っていたため、
-            // 該当の装飾だけをもう1マス離す(茂みは誤って巨大化(scale:4)していたので縮小もする)
+            // maps_override.jsの古いスナップショット(エディタ最新データ)に、装飾(胸像/茂み/柵/石柱等)が
+            // 兵士・衛兵NPCの隣接マスに配置され顔がめり込んで見える不具合が複数箇所残っていたため、
+            // 衛兵系NPCに隣接する「埋め込み риск」の高い装飾を検出し、隣接しない空きマスへ動的に退避させる
+            // (旧実装は座標ペアをハードコードしており、退避先が別の衛兵の隣になる／退避先が別の同種装飾で
+            //  埋まっていて動かせない、といったケースを取りこぼしていた)
             (function _fixOverlappingCastleDecor(m) {
                 if (!m || !m.npcs) return;
-                const _decoAboveGuardCoords = [
-                    ['35,3','35,4'], ['31,3','31,4'], ['35,6','35,7'], ['31,6','31,7'],
-                    ['27,51','27,52'], ['40,51','40,52'],
-                    ['21,45','21,46'], ['23,45','23,46']
-                ];
-                for (const [decoKey, guardKey] of _decoAboveGuardCoords) {
-                    const deco = m.npcs[decoKey];
-                    if (!deco || !m.npcs[guardKey]) continue;
+                const isGuardId = id => /guard|soldier|throne/.test(id) || id === 'king';
+                const isRiskyDeco = id => /statue|bust|fence|pillar|bush|candelabra|torch|lion|angel|stool/.test(id);
+                const guardCoords = Object.keys(m.npcs).filter(k => isGuardId(m.npcs[k].id)).map(k => k.split(',').map(Number));
+                const nearGuard = (x, y) => guardCoords.some(([gx, gy]) => Math.abs(gx - x) <= 1 && Math.abs(gy - y) <= 1);
+                const isFree = (x, y) => {
+                    if (x < 0 || y < 0 || x >= m.width || y >= m.height) return false;
+                    const k = `${x},${y}`;
+                    return !m.npcs[k] && !(m.exits && m.exits[k]);
+                };
+                Object.keys(m.npcs).forEach(key => {
+                    const deco = m.npcs[key];
+                    if (!isRiskyDeco(deco.id)) return;
+                    const [x, y] = key.split(',').map(Number);
+                    if (!nearGuard(x, y)) return;
                     if (deco.scale && deco.scale > 1) deco.scale = 1;
-                    const [dx, dy] = decoKey.split(',').map(Number);
-                    const newKey = `${dx},${dy - 1}`;
-                    if (dy - 1 >= 0 && !m.npcs[newKey] && !(m.exits && m.exits[newKey])) {
-                        delete m.npcs[decoKey];
-                        m.npcs[newKey] = deco;
+                    const candidates = [
+                        [x, y - 1], [x, y + 1], [x - 1, y], [x + 1, y],
+                        [x - 1, y - 1], [x + 1, y - 1], [x - 1, y + 1], [x + 1, y + 1],
+                        [x, y - 2], [x, y + 2], [x - 2, y], [x + 2, y]
+                    ];
+                    for (const [nx, ny] of candidates) {
+                        if (isFree(nx, ny) && !nearGuard(nx, ny)) {
+                            delete m.npcs[key];
+                            m.npcs[`${nx},${ny}`] = deco;
+                            return;
+                        }
                     }
-                }
+                });
             })(_nc2);
             externalMapData[rawId] = _nc2;
             externalMapData['map_castle_01'] = _nc2;
@@ -8732,6 +8746,11 @@ function drawAnimatedNpcSprite(ctx, type, npcId, px, py, h) {
     }
     return true;
 }
+// エディタ(maps_override.js)がキャラクターIDを直接 npcMan/npcSage/npcNobleM 等の
+// スプライト種別名そのもので出力してくる場合があり、下の巨大な npc.id 判定チェーンは
+// npc_で始まる命名しか拾わないため、これらは無音でスプライト無し(透明NPC)になっていた。
+// (賢者/老賢者/貴族(男女)/メイドB等が城内で見えない不具合の原因)
+const _NPC_LITERAL_SPRITE_TYPE = { npcMan:'man', npcWoman:'woman', npcChild:'child', npcTown:'town', npcMaidA:'maidA', npcMaidB:'maidB', npcNoble:'nobleF', npcNobleM:'nobleM', npcSage:'sage', npcVetSage:'vetSage', npcGuard:'guard', npcKing:'king', npcElder:'elder', npcMerchant:'merchant', npcInnkeeper:'innkeeper', npcTownWoman:'townWoman', npcGhostKing:'ghostKing', npcGhostWander:'ghostWander', npcGhostSage:'ghostSage', npcGhostMage:'ghostMage' };
 function _drawFieldBuilding(ctx, bType, px, py) {
     const T = TILE_SIZE, fl = Math.floor;
     ctx.save();
@@ -10373,7 +10392,12 @@ function drawMap() {
                 && partyData.flags['2nd_guard_'+_stripMapPfx(_rMapId)+'_'+key]) {
                 return; // 倒し済み → 描画しない
             }
-            if(npc.id === 'obj_ship_waiting') {
+            if(_NPC_LITERAL_SPRITE_TYPE[npc.id]) {
+                if (!drawAnimatedNpcSprite(ctx, _NPC_LITERAL_SPRITE_TYPE[npc.id], (npc._wk || npc.id), px, py, 48)) {
+                    if (externalImages[npc.id]) drawSpriteLocal(ctx, externalImages[npc.id], px, py, 48);
+                }
+            }
+            else if(npc.id === 'obj_ship_waiting') {
                 // 停泊中の船: 洞窟クリア後に西岸に出現、乗ると has_ship 取得
                 const _shipImg = externalImages['shipSprite'];
                 const _sw = Date.now();
