@@ -8122,7 +8122,10 @@ async function handleFieldInput(key) {
     // (メニューを開くのはAボタン(Enter)。checkAction()が目の前に会話相手がいなければメニューを開く)
 }
 function showWindow(id) { document.getElementById(id).style.display = 'flex'; } function hideWindow(id) { document.getElementById(id).style.display = 'none'; } function hideAllWindows() { hideWindow('msg-window'); hideWindow('cmd-window'); hideWindow('party-status'); hideWindow('status-window'); hideWindow('gold-window'); hideWindow('map-name-window'); document.getElementById('party-status').classList.remove('battle-size'); document.getElementById('msg-window').classList.remove('battle-msg'); document.getElementById('cmd-window').classList.remove('battle-cmd'); document.getElementById('map-name-window').style.top = ''; }
-async function typeMessage(text) {
+async function typeMessage(text, opts) {
+    opts = opts || {};
+    // opts.slow: 重要な独白・回想などで文字送りをゆっくりにし、緩急をつける
+    const _baseDelay = opts.slow ? 42 : 16;
     state = 'MSG';
     const _mw = document.getElementById('msg-window'); _mw.style.display = 'block';
     const msgDiv = document.getElementById('msg-text');
@@ -8136,9 +8139,17 @@ async function typeMessage(text) {
         let _buf = ''; const _chunks = Math.ceil(text.length / 4);
         for (let _ci = 0; _ci < _chunks; _ci++) {
             if (_skipTyping) break;
-            _buf += text.slice(_ci*4, _ci*4+4).replace(/\n/g,'<br>');
+            const _chunkText = text.slice(_ci*4, _ci*4+4);
+            _buf += _chunkText.replace(/\n/g,'<br>');
             msgDiv.innerHTML = _buf;
-            await new Promise(r => setTimeout(r, 16));
+            // 句読点や「……」の直後は一拍余分に間を置き、単調な等速送りに緩急をつける
+            // (オートバトル中はテンポを優先し、この間延びは付けない)
+            let _delay = _baseDelay;
+            if (!window._autoBattleActive) {
+                if (/…/.test(_chunkText)) _delay += opts.slow ? 220 : 100;
+                else if (/[。！？]/.test(_chunkText)) _delay += opts.slow ? 260 : 130;
+            }
+            await new Promise(r => setTimeout(r, _delay));
         }
     }
     msgDiv.innerHTML = _fullHtml + '<span class="blink">▼</span>';
@@ -8603,6 +8614,80 @@ function showCinematicBars(on, dur = 380) {
     }
     const h = on ? '9%' : '0px';
     requestAnimationFrame(() => { topBar.style.height = h; botBar.style.height = h; });
+}
+// 章タイトルカード: ストーリーの節目で暗転+金文字のタイトルを一瞬はさみ、区切りをつける
+async function showChapterTitle(title, subtitle) {
+    let el = document.getElementById('chapter-title-card');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'chapter-title-card';
+        el.style.cssText = `position:absolute;top:0;left:0;width:100%;height:100%;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center, rgba(12,10,6,0.94) 0%, rgba(0,0,0,0.98) 75%);opacity:0;transition:opacity 0.9s ease;pointer-events:none;`;
+        el.innerHTML = `<div id="chapter-title-main" style="font-size:clamp(15px,4.2vw,22px);letter-spacing:0.3em;color:#f0d9a0;text-shadow:0 0 14px rgba(240,200,120,0.55);font-weight:bold;text-align:center;padding:0 12px;"></div><div style="margin:14px 0;width:120px;height:1px;background:linear-gradient(90deg,transparent,#c8a860,transparent);"></div><div id="chapter-title-sub" style="font-size:clamp(10px,2.6vw,13px);letter-spacing:0.15em;color:#c8b088;text-align:center;padding:0 16px;"></div>`;
+        (document.getElementById('game-container') || document.body).appendChild(el);
+    }
+    document.getElementById('chapter-title-main').textContent = title;
+    document.getElementById('chapter-title-sub').textContent = subtitle || '';
+    el.style.opacity = '1';
+    AudioManager.playSE('window_open');
+    await new Promise(resolve => {
+        let done = false;
+        const finish = () => { if (done) return; done = true; inputCallback = null; resolve(); };
+        inputCallback = (key) => { if (key === 'Enter' || key === 'Escape') finish(); };
+        setTimeout(finish, 2400);
+    });
+    el.style.opacity = '0';
+    await new Promise(r => setTimeout(r, 850));
+}
+// 画面ティント: 回想は青、危険な真実は赤紫、感動場面は暖色というように場面の空気を色で伝える
+const _STORY_TINTS = {
+    flashback: 'rgba(40,70,140,0.28)',
+    danger:    'rgba(140,20,20,0.22)',
+    warm:      'rgba(200,140,40,0.16)',
+    dread:     'rgba(60,10,80,0.26)',
+    dim:       'rgba(0,0,0,0.35)'
+};
+function setStoryTint(mode, dur = 700) {
+    let el = document.getElementById('story-tint-overlay');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'story-tint-overlay';
+        el.style.cssText = `position:absolute;top:0;left:0;width:100%;height:100%;z-index:41;pointer-events:none;background:rgba(0,0,0,0);`;
+        (document.getElementById('game-container') || document.body).appendChild(el);
+    }
+    el.style.transition = `background ${dur}ms ease`;
+    el.style.background = _STORY_TINTS[mode] || 'rgba(0,0,0,0)';
+}
+function clearStoryTint(dur) { setStoryTint(null, dur); }
+// 巻物風ナレーションモード: 重要な言い伝え・独白の場面だけメッセージウィンドウを
+// 古びた紙のような見た目に切り替え、単調な黒いウィンドウ+テキストから変化をつける
+let _narrationOn = false;
+function beginNarration(tintMode) {
+    if (_narrationOn) return;
+    _narrationOn = true;
+    const mw = document.getElementById('msg-window');
+    if (mw) {
+        mw._narrOrig = { bg: mw.style.background, color: mw.style.color, font: mw.style.fontFamily, shadow: mw.style.textShadow, border: mw.style.border };
+        mw.style.background = 'radial-gradient(ellipse at 50% 12%, #faf0d2 0%, #dec496 60%, #96764a 100%)';
+        mw.style.color = '#3a2a18';
+        mw.style.fontFamily = "Georgia, 'Hiragino Mincho ProN', serif";
+        mw.style.textShadow = 'none';
+        mw.style.border = '2px solid rgba(120,90,50,0.7)';
+    }
+    setStoryTint(tintMode || 'dim');
+}
+function endNarration() {
+    if (!_narrationOn) return;
+    _narrationOn = false;
+    const mw = document.getElementById('msg-window');
+    if (mw && mw._narrOrig) {
+        mw.style.background = mw._narrOrig.bg || '';
+        mw.style.color = mw._narrOrig.color || '';
+        mw.style.fontFamily = mw._narrOrig.font || '';
+        mw.style.textShadow = mw._narrOrig.shadow || '';
+        mw.style.border = mw._narrOrig.border || '';
+        delete mw._narrOrig;
+    }
+    clearStoryTint();
 }
 // Item 2: ボス登場演出
 async function playBossEntranceEffect(bossName, isFinal = false) {
@@ -12234,19 +12319,22 @@ async function checkAction() {
                 await new Promise(r => setTimeout(r, 600));
                 AudioManager.playBGM('ending');
                 await new Promise(r => setTimeout(r, 800));
-                await typeMessage("……光が 広がっていく……。\n十年間 積み重ねてきた 恐れと 孤独が\n温かい 光に 溶かされていく……！");
-                await typeMessage("澱みの 化身は 静かに 崩れ、消えていった……！\n民の 考える力を 奪い\n諦めさせ 従わせてきた 仕組みが\n完全に 崩れた……！！\n王座には……独り、涙を 流す ボルド王の 姿が あった。");
-                await typeMessage("【ボルド王】\n……境界の 使者よ。\nよくぞ……ここまで 来てくれた。\nわしを……見捨てずに いてくれて。");
-                await typeMessage("【ボルド王】\n十年前……わしは 隣国を 信じ、手を 差し伸べた。\nそして 大切な 者を 喪った。\nその 痛みが 二度と 誰にも 及ばぬようにと……\n国境を 閉ざし、希望を 摘み取ることが\n「正しい 王」だと 信じ 疑わなかった。");
-                await typeMessage("【ボルド王】\nしかし お前たちが 証明してくれた……\n傷つくことを 恐れず、それでも 人を 信じる\n勇気こそが、本当の 強さなのだと。");
-                await typeMessage("【ボルド王】\n完璧な 世界は 来ない。\n混乱も 迷いも あるだろう。\nしかし それが 本物の 始まりじゃ……\n誇りを 持って……共に 歩もう……！");
-                await typeMessage("（どこからか 聞き覚えのある 声が 届く……）");
-                await typeMessage("【海賊王バルゴ】\nよう……やりやがったな。\n（荒っぽい 声だが 確かに 震えていた）\n俺みたいな 捨て駒でも……\n生き延びた 甲斐が あったってもんだ。");
-                await typeMessage("【大魔導士 ラムダス】\nふぉっふぉっ……お主らのような 者が\nこの 世に 現れるとは……。\n百年 生きてきた 甲斐が あったわい。");
-                await typeMessage("【アリア】\n……終わったんですね。\n本当に 終わった。\nこれから どうなるかは 分かりません。\nでも……きっと 大丈夫。\nあなたたちを ずっと 見ていたから そう 思えます。");
-                await typeMessage("────── 完璧な 世界では ない。\nまだ 泥だらけの、不自由な、本物の 世界。\nでも みんなが 自分の 足で\n一歩ずつ 歩み 始めた。");
+                await showChapterTitle("エピローグ", "旅の終わりに");
+                beginNarration('warm');
+                await typeMessage("……光が 広がっていく……。\n十年間 積み重ねてきた 恐れと 孤独が\n温かい 光に 溶かされていく……！", {slow:true});
+                await typeMessage("澱みの 化身は 静かに 崩れ、消えていった……！\n民の 考える力を 奪い\n諦めさせ 従わせてきた 仕組みが\n完全に 崩れた……！！\n王座には……独り、涙を 流す ボルド王の 姿が あった。", {slow:true});
+                await typeMessage("【ボルド王】\n……境界の 使者よ。\nよくぞ……ここまで 来てくれた。\nわしを……見捨てずに いてくれて。", {slow:true});
+                await typeMessage("【ボルド王】\n十年前……わしは 隣国を 信じ、手を 差し伸べた。\nそして 大切な 者を 喪った。\nその 痛みが 二度と 誰にも 及ばぬようにと……\n国境を 閉ざし、希望を 摘み取ることが\n「正しい 王」だと 信じ 疑わなかった。", {slow:true});
+                await typeMessage("【ボルド王】\nしかし お前たちが 証明してくれた……\n傷つくことを 恐れず、それでも 人を 信じる\n勇気こそが、本当の 強さなのだと。", {slow:true});
+                await typeMessage("【ボルド王】\n完璧な 世界は 来ない。\n混乱も 迷いも あるだろう。\nしかし それが 本物の 始まりじゃ……\n誇りを 持って……共に 歩もう……！", {slow:true});
+                await typeMessage("（どこからか 聞き覚えのある 声が 届く……）", {slow:true});
+                await typeMessage("【海賊王バルゴ】\nよう……やりやがったな。\n（荒っぽい 声だが 確かに 震えていた）\n俺みたいな 捨て駒でも……\n生き延びた 甲斐が あったってもんだ。", {slow:true});
+                await typeMessage("【大魔導士 ラムダス】\nふぉっふぉっ……お主らのような 者が\nこの 世に 現れるとは……。\n百年 生きてきた 甲斐が あったわい。", {slow:true});
+                await typeMessage("【アリア】\n……終わったんですね。\n本当に 終わった。\nこれから どうなるかは 分かりません。\nでも……きっと 大丈夫。\nあなたたちを ずっと 見ていたから そう 思えます。", {slow:true});
+                await typeMessage("────── 完璧な 世界では ない。\nまだ 泥だらけの、不自由な、本物の 世界。\nでも みんなが 自分の 足で\n一歩ずつ 歩み 始めた。", {slow:true});
                 const _allN = partyData.members.filter(m => m.name).map(m => m.name).join('、');
-                await typeMessage(`────── ${_allN}の 物語は\nここに 幕を 閉じる。\n彼らの 旅は えいえんに\nエニシアの 真の 歴史に 刻まれた ──────`);
+                await typeMessage(`────── ${_allN}の 物語は\nここに 幕を 閉じる。\n彼らの 旅は えいえんに\nエニシアの 真の 歴史に 刻まれた ──────`, {slow:true});
+                endNarration();
                 partyData.flags.last_boss_defeated = true;
                 localStorage.setItem('gravity_quest_save', JSON.stringify(partyData));
                 await typeMessage("── 引き続き 自由に 冒険できます。\n各地を 巡りながら エニシア城へ。\n王様に 話しかけるとエピローグです！");
@@ -12850,10 +12938,12 @@ async function checkAction() {
                             await typeMessage("【長老ガルドス】\nラムダスという 賢者を 知っていますか……？\nバルゴの 盟友で、大賢者アークの 遺訓を\n各地に 残して 回っていた 人物です。\n最後に 姿を 見せたのは\n『異世界の 旅人』が 目撃されたという\n噂の 地だったと 聞きます……\n今も どこかで 見守っているのかも しれません。");
                         }
                     } else {
-                        await typeMessage("【長老ガルドス】\nここが 「隠れ里 エデン」です。\n王の 心が 閉ざされてから……\n城下町を 逃げ出した 人々が\n力を 合わせて 作った 街です。");
-                        await typeMessage("【長老ガルドス】\n王の 仕組みに 傷つけられ\n消えていった 者たちの 悲しみが\n魔王城に 澱みとなって 集まっています。\nその 澱みを 浄化し\n王の 本当の 姿を 取り戻して ください……！");
-                        await typeMessage("【長老ガルドス】\nこの里には 昔から 伝わる 話がある。\n20年前……バルゴという 男が\n王に 送られた 英雄だったが\n使い捨てられそうに なり 生き延びた。\nその時に 受けた 傷が 今も 深く\n『海賊王』と 呼ばれる 今も\n消えないのだと 聞いています。\nそして ラムダスという 賢者と 出会い\n真実を 広めようとした……。");
-                        await typeMessage("【長老ガルドス】\nその バルゴが この エデンの 地図を\nこっそり 残してくれたんじゃ。\n「次の 使者が 迷ったとき\nここへ 辿り着けるように」と……。\nあなたたちが その 使者たちです！");
+                        beginNarration();
+                        await typeMessage("【長老ガルドス】\nここが 「隠れ里 エデン」です。\n王の 心が 閉ざされてから……\n城下町を 逃げ出した 人々が\n力を 合わせて 作った 街です。", {slow:true});
+                        await typeMessage("【長老ガルドス】\n王の 仕組みに 傷つけられ\n消えていった 者たちの 悲しみが\n魔王城に 澱みとなって 集まっています。\nその 澱みを 浄化し\n王の 本当の 姿を 取り戻して ください……！", {slow:true});
+                        await typeMessage("【長老ガルドス】\nこの里には 昔から 伝わる 話がある。\n20年前……バルゴという 男が\n王に 送られた 英雄だったが\n使い捨てられそうに なり 生き延びた。\nその時に 受けた 傷が 今も 深く\n『海賊王』と 呼ばれる 今も\n消えないのだと 聞いています。\nそして ラムダスという 賢者と 出会い\n真実を 広めようとした……。", {slow:true});
+                        await typeMessage("【長老ガルドス】\nその バルゴが この エデンの 地図を\nこっそり 残してくれたんじゃ。\n「次の 使者が 迷ったとき\nここへ 辿り着けるように」と……。\nあなたたちが その 使者たちです！", {slow:true});
+                        endNarration();
                         if(getSQ('sq_09')===1) { advanceSQ('sq_09', 2); await typeMessage("（ふしぎな台帳に 「隠れ里エデンに到達し、長老ガルドスと話した」が 記録された）"); }
                     }
                     state='FIELD'; hideAllWindows(); drawMap(); return;
@@ -12991,7 +13081,7 @@ async function checkAction() {
                             await typeMessage("【異世界の旅人】\n……見事じゃ。\nこれほどの 強さ、わしも 久しぶりに 感じた。\nこれを 受け取れ——\n「アルテマソード」。\n次元をも 切り裂く 究極の 剣じゃ。"); AudioManager.playSE('item_get');
                             let target = partyData.members[0]; if(target.inventory.length < 8) target.inventory.push("w_star_sword"); else target.inventory[0] = "w_star_sword";
                             await typeMessage("『星砕きの剣』を てにいれた！");
-                            await typeMessage("【異世界の旅人】\n……一つだけ 言おう。\n王を 救っても 終わりでは ない。\n本当の 旅は そこから 始まる。\n「出来レース」の 後を\n自分の 足で 歩き続けるのが\n本当の 英雄じゃ。");
+                            await typeMessage("【異世界の旅人】\n……一つだけ 言おう。\n王を 救っても 終わりでは ない。\n本当の 旅は そこから 始まる。\n「出来レース」の 後を\n自分の 足で 歩き続けるのが\n本当の 英雄じゃ。", {slow:true});
                             partyData.flags.flag_beaten_secret_boss = true;
                             if(!isSQDone('sq_10')) await grantSQReward('sq_10');
                             delete currentMap.npcs[key];
@@ -14931,10 +15021,13 @@ ${_sns[_ri(_sns.length)]}
                                     }
                                 }
                             }
-                            await typeMessage("【元・王宮騎士の英霊】\n……見事じゃ。\nその 剣の 軌跡……\n本音で 戦った 者の 軌跡じゃ。");
-                            await typeMessage("【元・王宮騎士の英霊】\n最後に……ひとつだけ。\nわしは 百年前、王に 遣わされた 騎士じゃった。\nそして この洞窟で 果てた。\n王が 「希望」と 呼んだ 者は……\n全員 こうして 消えてきたのじゃ。\nお前は 消えるな。");
-                            await typeMessage("【元・王宮騎士の英霊】\n……ひとつ、礼を させてくれ。\nこの洞窟の 西、浜辺に\nわしの 主君が 百年 前から 遺した 船がある。\n浜辺へ 行けば 船が 見つかるはずじゃ……\n海を 渡り、真実を 確かめるのだ。");
-                            await typeMessage("守護霊は 静かに 光に 包まれ……\n風の如く 消えていった。");
+                            await showChapterTitle("第一章 完", "試練の洞窟を踏破した");
+                            beginNarration();
+                            await typeMessage("【元・王宮騎士の英霊】\n……見事じゃ。\nその 剣の 軌跡……\n本音で 戦った 者の 軌跡じゃ。", {slow:true});
+                            await typeMessage("【元・王宮騎士の英霊】\n最後に……ひとつだけ。\nわしは 百年前、王に 遣わされた 騎士じゃった。\nそして この洞窟で 果てた。\n王が 「希望」と 呼んだ 者は……\n全員 こうして 消えてきたのじゃ。\nお前は 消えるな。", {slow:true});
+                            await typeMessage("【元・王宮騎士の英霊】\n……ひとつ、礼を させてくれ。\nこの洞窟の 西、浜辺に\nわしの 主君が 百年 前から 遺した 船がある。\n浜辺へ 行けば 船が 見つかるはずじゃ……\n海を 渡り、真実を 確かめるのだ。", {slow:true});
+                            await typeMessage("守護霊は 静かに 光に 包まれ……\n風の如く 消えていった。", {slow:true});
+                            endNarration();
                             if (getSQ('sq_02') >= 1 && !isSQDone('sq_02')) {
                                 advanceSQ('sq_02', 3);
                                 await grantSQReward('sq_02');
@@ -14948,9 +15041,12 @@ ${_sns[_ri(_sns.length)]}
                         } else if (npc.id === 'boss_sky') {
                             partyData.flags.flag_tower_cleared = true;
                             partyData.flags.flag_sky_truth_known = true;
-                            await typeMessage("【天空の王】\n……本物じゃ。\n百年の 時を 越えて\nついに 泥の 中から 歩いてきた 者が 現れた……。");
-                            await typeMessage("【天空の王】\nこの力を 授けよう。\nこれは 敵を 倒すための 力ではない。\n諦めずに 本音で 立ち向かった 者にのみ\n宿る 力じゃ。");
-                            await typeMessage("【天空の王】\n城へ 帰れば……全てが 分かるだろう。\nその時 どうか 自分の 目で 判断してくれ。");
+                            await showChapterTitle("第二章 完", "天空の塔を制した");
+                            beginNarration();
+                            await typeMessage("【天空の王】\n……本物じゃ。\n百年の 時を 越えて\nついに 泥の 中から 歩いてきた 者が 現れた……。", {slow:true});
+                            await typeMessage("【天空の王】\nこの力を 授けよう。\nこれは 敵を 倒すための 力ではない。\n諦めずに 本音で 立ち向かった 者にのみ\n宿る 力じゃ。", {slow:true});
+                            await typeMessage("【天空の王】\n城へ 帰れば……全てが 分かるだろう。\nその時 どうか 自分の 目で 判断してくれ。", {slow:true});
+                            endNarration();
                             await typeMessage(`天空の 力が ${_heroName}たちに 宿った！\n（魔族の 言葉が 理解できるように なった……！）`);
                             if (getSQ('sq_01') >= 1 && !isSQDone('sq_01')) {
                                 advanceSQ('sq_01', 2);
@@ -14991,9 +15087,12 @@ ${_sns[_ri(_sns.length)]}
                             hideGoldWindow(); let _bwFinal = await executeBattle(['boss_maou_final']); showGoldWindow(); updateGoldWindow();
                             if (!_bwFinal) return;
                             // 最終形態撃破 → 偽王決戦フラグへ
-                            await typeMessage("澱みの 化身は 崩れ 溶けていった……！！\nこの城 全体が 静かに 震え……\n黒い 靄が 外へ 流れ出していく……！");
-                            await typeMessage("（……この 澱みは\n王の 仕組みに 傷つけられた 者たちの\n怒りと 悲しみ、そして 王自身の\n十年分の 孤独が 固まったものだった。\nそれが 今……源へ 還っていく……\nエニシア城へ……！）");
-                            await typeMessage("（……急がなければ。\nこの 澱みが 還っていく 先で\nボルド王が 独り、待っている……！）");
+                            await showChapterTitle("真実", "王の孤独が、いま暴かれる");
+                            beginNarration('dread');
+                            await typeMessage("澱みの 化身は 崩れ 溶けていった……！！\nこの城 全体が 静かに 震え……\n黒い 靄が 外へ 流れ出していく……！", {slow:true});
+                            await typeMessage("（……この 澱みは\n王の 仕組みに 傷つけられた 者たちの\n怒りと 悲しみ、そして 王自身の\n十年分の 孤独が 固まったものだった。\nそれが 今……源へ 還っていく……\nエニシア城へ……！）", {slow:true});
+                            await typeMessage("（……急がなければ。\nこの 澱みが 還っていく 先で\nボルド王が 独り、待っている……！）", {slow:true});
+                            endNarration();
                             partyData.flags.flag_2nd_maou_cleared = true;
                             partyData.flags.flag_king_ending_told = false;
                             if (getSQ('sq_04') >= 1 && !isSQDone('sq_04') && !partyData.members.some(m=>m.inventory.includes('dragon_scale_gold'))) {
