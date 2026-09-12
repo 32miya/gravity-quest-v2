@@ -7852,9 +7852,11 @@ async function loadExternalData(id) {
             (function _fixOverlappingCastleDecor(m) {
                 if (!m || !m.npcs) return;
                 const isGuardId = id => /guard|soldier|throne/.test(id) || id === 'king';
-                const isRiskyDeco = id => /statue|bust|fence|pillar|bush|candelabra|torch|lion|angel|stool/.test(id);
+                const isRiskyDeco = id => /statue|bust|fence|pillar|bush|candelabra|torch|lion|angel|stool|bookshelf|fireplace/.test(id);
                 const guardCoords = Object.keys(m.npcs).filter(k => isGuardId(m.npcs[k].id)).map(k => k.split(',').map(Number));
-                const nearGuard = (x, y) => guardCoords.some(([gx, gy]) => Math.abs(gx - x) <= 1 && Math.abs(gy - y) <= 1);
+                // NPCキャラは2マス分(48px)の高さで自分のマスから上方向に描画されるため、
+                // 装飾が衛兵の真上2マスの範囲にあると頭部にめり込んで見える(横方向は1マスで十分)
+                const nearGuard = (x, y) => guardCoords.some(([gx, gy]) => Math.abs(gx - x) <= 1 && (y - gy) >= -2 && (y - gy) <= 1);
                 const isFree = (x, y) => {
                     if (x < 0 || y < 0 || x >= m.width || y >= m.height) return false;
                     const k = `${x},${y}`;
@@ -7878,7 +7880,24 @@ async function loadExternalData(id) {
                             return;
                         }
                     }
+                    // 密集した柵の列など、退避先が1つも見つからない場合のフォールバック:
+                    // 柵は繰り返し模様の一部で1本欠けても目立たないため、埋め込むより間引く
+                    if (/fence/.test(deco.id)) delete m.npcs[key];
                 });
+            })(_nc2);
+            // 衛兵の密度が高すぎるとの指摘を受け、固有の見せ場が無い(セリフ的に代替可能な)
+            // 素の「衛兵」3体を、既存の台詞・ビジュアルが用意されている別キャラに差し替える
+            (function _diversifyCastleGuards(m) {
+                if (!m || !m.npcs) return;
+                const _swap = [
+                    ['35,7', 'npc_court_noble_l', '貴族'],   // 貴族の男(nobleM)。試練の洞窟のヒントを話す
+                    ['31,7', 'npcSage', '賢者'],              // 賢者(sage)
+                    ['13,36', 'npc_gar_woman_01', '宮廷書記官'] // 既存の宮廷書記官と同じ組み合わせ
+                ];
+                for (const [key, id, name] of _swap) {
+                    const n = m.npcs[key];
+                    if (n && n.id === 'guard') { n.id = id; n.name = name; }
+                }
             })(_nc2);
             externalMapData[rawId] = _nc2;
             externalMapData['map_castle_01'] = _nc2;
@@ -10881,7 +10900,8 @@ function drawMap() {
                 const _bshKey = npc.id==='obj_bookshelf2'?'decoBookshelf2':'decoBookshelf';
                 const _bimg = externalImages[_bshKey+'GQ'] || externalImages[_bshKey];
                 const T=TILE_SIZE; const _bsc=npc.scale||1;
-                if(_bimg&&_bimg.complete&&_bimg.naturalHeight>0){drawSpriteLocal(ctx,_bimg,px,py,T*1.1*_bsc);}
+                // NPCキャラ(48px=T*2)を基準にサイズ調整: 従来T*1.1では人物の半分以下で小さすぎたため、本棚は人の背丈と同程度に
+                if(_bimg&&_bimg.complete&&_bimg.naturalHeight>0){drawSpriteLocal(ctx,_bimg,px,py,T*2.0*_bsc);}
                 else{ctx.fillStyle='#6b4226';ctx.fillRect(px+T*0.08,py+T*0.05,T*0.84,T*0.88);ctx.fillStyle='#3a1f0f';[0.28,0.56].forEach(y=>{ctx.fillRect(px,py+T*y,T,2);});['#c8392b','#2980b9','#27ae60','#8e44ad','#d35400'].forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(px+T*(0.1+i*0.17),py+T*0.08,T*0.12,T*0.18);ctx.fillRect(px+T*(0.1+i*0.17),py+T*0.34,T*0.12,T*0.18);ctx.fillRect(px+T*(0.1+i*0.17),py+T*0.6,T*0.12,T*0.16);});}
             } else if(npc.id==='obj_herb_pot') {
                 const _himg = externalImages['decoHerbPot'];
@@ -10891,7 +10911,8 @@ function drawMap() {
             } else if(npc.id==='obj_bed_royal'||npc.id==='obj_bed'||npc.id==='obj_bed_inn') {
                 const _bdimg = externalImages['decoBedGQ'] || externalImages['decoBed'];
                 const T=TILE_SIZE; const _bdsc=npc.scale||1;
-                if(_bdimg&&_bdimg.complete&&_bdimg.naturalHeight>0){drawSpriteLocal(ctx,_bdimg,px,py,T*1.15*_bdsc);}
+                // NPCキャラ(48px=T*2)を基準にサイズ調整: 従来T*1.15では小物のように見えていたため、家具として自然な高さに
+                if(_bdimg&&_bdimg.complete&&_bdimg.naturalHeight>0){drawSpriteLocal(ctx,_bdimg,px,py,T*1.7*_bdsc);}
                 else{
                     // ベッド: 木枠(茶)＋布団(青/白)
                     const _bc=npc.id==='obj_bed_inn'?'#2a4a7a':'#1a4a8a';
