@@ -7885,6 +7885,17 @@ async function loadExternalData(id) {
                     if (/fence/.test(deco.id)) delete m.npcs[key];
                 });
             })(_nc2);
+            // 玉座の王様(33,4)の真正面(x=33の列)に胸像が1体だけ紛れ込んでおり、
+            // パーティーが縦一列に並んで王様の前まで進めなかったため、
+            // 対になるはずの反対側(29,6)と対称な位置(37,6)へ退避させて通路を確保
+            (function _clearKingApproachPath(m) {
+                if (!m || !m.npcs) return;
+                const _blocker = m.npcs['33,6'];
+                if (_blocker && _blocker.id === 'deco_statue_bust' && !m.npcs['37,6']) {
+                    delete m.npcs['33,6'];
+                    m.npcs['37,6'] = _blocker;
+                }
+            })(_nc2);
             // 衛兵の密度が高すぎるとの指摘を受け、固有の見せ場が無い(セリフ的に代替可能な)
             // 素の「衛兵」3体を、既存の台詞・ビジュアルが用意されている別キャラに差し替える
             (function _diversifyCastleGuards(m) {
