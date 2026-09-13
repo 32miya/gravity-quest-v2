@@ -2581,7 +2581,24 @@ async function showWorldMap() {
     await new Promise(resolve=>{ inputCallback=(key)=>{ if(key==='Enter'||key==='Escape'||key===' '){ AudioManager.playSE('decision'); inputCallback=null; resolve(); } }; });
     hideWindow('status-window');
 }
-function resizeCanvas() { const canvas = document.getElementById('screen'); const container = document.getElementById('game-container'); if(!container) return; const cw = container.clientWidth; const ch = container.clientHeight; const baseWidth = 480; canvas.width = baseWidth; const ratio = ch / cw; canvas.height = Math.floor(baseWidth * ratio); if(state === 'FIELD' || state === 'MSG') drawMap(); }
+// 高解像度(Retina等)端末対応: 従来はcanvas.widthを常に480固定にしていたため、
+// devicePixelRatioが2〜3倍のスマホでは表示領域に対して実解像度が足りず、
+// image-rendering:pixelated と相まって画面が粗く見えていた。
+// 論理サイズ(480幅基準、既存の描画コードが前提とする座標系)は変えず、
+// バッキングストアの実解像度だけをdpr倍にし、ctxにその分の拡大変換をかけて
+// 補う。過度なメモリ消費を避けるため上限は2倍に丸める。
+let _canvasDpr = 1;
+function resizeCanvas() {
+    const canvas = document.getElementById('screen'); const container = document.getElementById('game-container'); if(!container) return;
+    const cw = container.clientWidth; const ch = container.clientHeight; const baseWidth = 480;
+    const ratio = ch / cw; const baseHeight = Math.floor(baseWidth * ratio);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    _canvasDpr = dpr;
+    canvas.width = Math.floor(baseWidth * dpr); canvas.height = Math.floor(baseHeight * dpr);
+    const ctx = canvas.getContext('2d', {alpha:false});
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if(state === 'FIELD' || state === 'MSG') drawMap();
+}
 window.addEventListener('resize', resizeCanvas);
 function updateGoldWindow() { document.getElementById('gold-window').innerText = partyData.gold + ' G'; } function showGoldWindow() { updateGoldWindow(); document.getElementById('gold-window').style.display = 'block'; } function hideGoldWindow() { document.getElementById('gold-window').style.display = 'none'; }
 function showCustomDialog(type, message, defaultText = "") { return new Promise(resolve => { const dialog = document.getElementById('custom-dialog'); const msgEl = document.getElementById('dialog-msg'); const inputEl = document.getElementById('dialog-input'); const textEl = document.getElementById('dialog-textarea'); const okBtn = document.getElementById('dialog-ok'); const cancelBtn = document.getElementById('dialog-cancel'); const copyBtn = document.getElementById('dialog-copy'); msgEl.innerText = message; inputEl.style.display = 'none'; textEl.style.display = 'none'; cancelBtn.style.display = 'none'; copyBtn.style.display = 'none'; okBtn.innerText = '決定'; copyBtn.innerText = 'コピー'; if (type === 'prompt') { inputEl.style.display = 'block'; inputEl.value = defaultText; cancelBtn.style.display = 'block'; } else if (type === 'copy') { textEl.style.display = 'block'; textEl.value = defaultText; okBtn.innerText = 'とじる'; copyBtn.style.display = 'block'; copyBtn.onclick = () => { const txt = textEl.value; if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(txt).catch(() => { textEl.select(); document.execCommand('copy'); }); } else { textEl.select(); document.execCommand('copy'); } AudioManager.playSE('decision'); copyBtn.innerText = 'コピー済み✓'; setTimeout(() => { copyBtn.innerText = 'コピー'; }, 2000); }; } else if (type === 'confirm') { cancelBtn.style.display = 'block'; okBtn.innerText = 'はい'; cancelBtn.innerText = 'いいえ'; } else if (type === 'alert') { okBtn.innerText = 'OK'; } dialog.style.display = 'flex'; if (type === 'prompt') inputEl.focus(); const cleanup = () => { dialog.style.display = 'none'; okBtn.onclick = null; cancelBtn.onclick = null; copyBtn.onclick = null; }; okBtn.onclick = () => { AudioManager.playSE('decision'); cleanup(); if (type === 'prompt') resolve(inputEl.value); else resolve(true); }; cancelBtn.onclick = () => { AudioManager.playSE('cancel'); cleanup(); if (type === 'prompt') resolve(null); else resolve(false); }; }); }
@@ -10258,7 +10275,7 @@ function drawMap() {
     npcWanderTick++;
     if (npcWanderTick % 30 === 0) tickNpcWander();
 
-    if (!_cachedCanvas || !_cachedCanvas.isConnected) { _cachedCanvas = document.getElementById('screen'); _cachedCtx = _cachedCanvas.getContext('2d', {alpha:false}); } const canvas = _cachedCanvas; const ctx = _cachedCtx; const cWidth = canvas.width; const cHeight = canvas.height; ctx.clearRect(0, 0, cWidth, cHeight); ctx.fillStyle='#0a0812'; ctx.fillRect(0,0,cWidth,cHeight);
+    if (!_cachedCanvas || !_cachedCanvas.isConnected) { _cachedCanvas = document.getElementById('screen'); _cachedCtx = _cachedCanvas.getContext('2d', {alpha:false}); } const canvas = _cachedCanvas; const ctx = _cachedCtx; const cWidth = canvas.width / _canvasDpr; const cHeight = canvas.height / _canvasDpr; ctx.clearRect(0, 0, cWidth, cHeight); ctx.fillStyle='#0a0812'; ctx.fillRect(0,0,cWidth,cHeight);
     const _dispPos = _getDisplayPartyPos();
     const camX = _dispPos.x * TILE_SIZE - cWidth/2 + TILE_SIZE/2; const camY = _dispPos.y * TILE_SIZE - Math.floor(cHeight * 0.3) + TILE_SIZE/2;
     const _mapId = partyData.pos.map;
