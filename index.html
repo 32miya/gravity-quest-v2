@@ -10543,7 +10543,11 @@ function drawMap() {
 
     for (const { map: _rMap, mapId: _rMapId, offX: _rOX, offY: _rOY } of _mapsToRender) {
     if (_rMap.npcs) {
-        Object.keys(_rMap.npcs).forEach(key => {
+        // NPC/装飾1件分の描画ロジック(以前はforEachの無名コールバックとして
+        // ここに直接ベタ書きされ、drawMap()全体の見通しを悪くしていた巨大な塊。
+        // クロージャで参照している変数(_rMap/_rMapId/_rOX/_rOY/ctx/camX/camY等)は
+        // 一切変更せず、名前を付けて可読性だけを上げるための切り出し)
+        const _drawFieldNpc = (key) => {
             const [nx, ny] = key.split(','); const npc = _rMap.npcs[key]; const _basePx = (parseInt(nx)+_rOX)*TILE_SIZE - camX; const _basePy = (parseInt(ny)+_rOY)*TILE_SIZE - camY;
             const _noAnim = npc.id.includes('chest') || npc.id.includes('obj_') || npc.id.startsWith('deco_') || npc.id.includes('king') || (npc.id.includes('demon') && !npc.id.includes('guide')) || npc.id.includes('dragon');
             const _nBob = _noAnim ? 0 : Math.round(Math.sin(Date.now() / 900 + parseInt(nx) * 2.3 + parseInt(ny) * 1.7) * 1.5);
@@ -11706,7 +11710,8 @@ function drawMap() {
                 drawNpcSign(ctx, _scx, _basePy, '🏰', '天空の塔', '#447');
             else if (npc.id === 'npc_maou_castle_gate')
                 drawNpcSign(ctx, _scx, _basePy, '🔥', '魔王城', '#622');
-        });
+        };
+        Object.keys(_rMap.npcs).forEach(_drawFieldNpc);
     }
     }
 
