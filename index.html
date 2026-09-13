@@ -1607,6 +1607,12 @@ async function grantSQReward(sq) {
     const def = SUBSTORIES.find(s => s.id === sq);
     if (!def) return;
     setSQ(sq, 99);
+    // サブストーリー達成の瞬間が地味だったため、専用の演出(暖色フラッシュ+カメラパンチ+
+    // ファンファーレ調SE)を全13件共通で追加。既存の各報酬メッセージはそのまま活かす。
+    AudioManager.playSE('level_up');
+    cameraPunch(1.03, 260);
+    setStoryTint('warm', 150);
+    setTimeout(() => clearStoryTint(500), 550);
     const _giveItem = async (itemId, memberIdx) => {
         if (!itemId) return;
         const _m = partyData.members[memberIdx || 0] || partyData.members.find(m => m.inventory.length < 8);
@@ -12804,11 +12810,13 @@ async function checkAction() {
                     await hitStop(300);
                     await typeMessage("全ての 断章が 揃った……！\nその 瞬間、古い 声が 響いてきた——");
                     cameraPunch(1.04, 500);
-                    await typeMessage("【ラムダスの声】\n……よく 集めてくれた。\nわしが ラムダスだ。\nアーク師の 言葉を この 断章に 遺したのは わしじゃ。\n百年間……誰かが 読んでくれるのを 待っていた。");
-                    await typeMessage("【ラムダスの声】\nアーク師は 気づいていた——\n「王の 旅は 出来レースだ」と。\n英雄を 使い捨てにし\n自分は 安全な 場所で 支配し続ける……\nその 仕組みを 告発しようとして\n王に 消された。");
-                    await typeMessage("【ラムダスの声】\nわしも 同じ 道を 歩みかけた。\nだが……ある 若者に 出会い 生き延びた。\n海賊と 呼ばれていたが\n本物の 勇気を 持つ 男じゃった。\n名は バルゴ——\n君たちも 会ったことが あるかもしれぬ。");
-                    await typeMessage("【ラムダスの声】\nバルゴも かつて 君たちと 同じ 旅をした。\n「英雄」と 呼ばれ 使い捨てられそうに なり……\n自らの 力で 運命を 塗り替えた。\nその 話を 聞いてから わしは 悟った。\n出来レースの 旅でも\n本物の 絆は 本物だと。");
-                    await typeMessage("【ラムダスの声】\nこれが 大賢者アークの 遺訓じゃ——\n「自分の 足で 歩け。\n誰かの 筋書きに 乗るな。\n汝が 感じた 絆が 汝の 真実だ」\n……この 断章を 集めた 君たちなら\nその 意味が わかるはずだ。");
+                    beginNarration();
+                    await typeMessage("【ラムダスの声】\n……よく 集めてくれた。\nわしが ラムダスだ。\nアーク師の 言葉を この 断章に 遺したのは わしじゃ。\n百年間……誰かが 読んでくれるのを 待っていた。", {slow:true});
+                    await typeMessage("【ラムダスの声】\nアーク師は 気づいていた——\n「王の 旅は 出来レースだ」と。\n英雄を 使い捨てにし\n自分は 安全な 場所で 支配し続ける……\nその 仕組みを 告発しようとして\n王に 消された。", {slow:true});
+                    await typeMessage("【ラムダスの声】\nわしも 同じ 道を 歩みかけた。\nだが……ある 若者に 出会い 生き延びた。\n海賊と 呼ばれていたが\n本物の 勇気を 持つ 男じゃった。\n名は バルゴ——\n君たちも 会ったことが あるかもしれぬ。", {slow:true});
+                    await typeMessage("【ラムダスの声】\nバルゴも かつて 君たちと 同じ 旅をした。\n「英雄」と 呼ばれ 使い捨てられそうに なり……\n自らの 力で 運命を 塗り替えた。\nその 話を 聞いてから わしは 悟った。\n出来レースの 旅でも\n本物の 絆は 本物だと。", {slow:true});
+                    await typeMessage("【ラムダスの声】\nこれが 大賢者アークの 遺訓じゃ——\n「自分の 足で 歩け。\n誰かの 筋書きに 乗るな。\n汝が 感じた 絆が 汝の 真実だ」\n……この 断章を 集めた 君たちなら\nその 意味が わかるはずだ。", {slow:true});
+                    endNarration();
                     await typeMessage("大賢者アークの 遺訓が 解き明かされた……！\n（ふしぎな台帳：「大賢者アークの遺訓」完了！）");
                     showCinematicBars(false);
                     await grantSQReward('sq_08');
@@ -14538,8 +14546,10 @@ ${_sns[_ri(_sns.length)]}
                     await typeMessage("（……漆黒の 気配が 満ちている。\n何か 邪悪な 存在が 奥に 潜んでいる……！\nまだ 立ち向かえる 状態では ない……）");
                     state='FIELD'; hideAllWindows(); drawMap(); return;
                 }
-                await typeMessage("暗い 光が あふれ出し……！\n人影が 現れた！");
-                await typeMessage("【暗黒の魔将】\nくくく……人間ごときが\nこの 廃屋に 踏み込んできたか。\n斧の 呪いを 解こうと……\nそうは させぬ！！");
+                beginNarration('dread');
+                await typeMessage("暗い 光が あふれ出し……！\n人影が 現れた！", {slow:true});
+                await typeMessage("【暗黒の魔将】\nくくく……人間ごときが\nこの 廃屋に 踏み込んできたか。\n斧の 呪いを 解こうと……\nそうは させぬ！！", {slow:true});
+                endNarration();
                 const _dgYn = await selectMenu(["戦う！", "逃げる"], 'cmd-window', 0, true);
                 if (_dgYn === 1) { await typeMessage("（暗黒の 力に 圧倒されて……\n今は まだ 無理だと 判断した）"); state='FIELD'; hideAllWindows(); drawMap(); return; }
                 hideGoldWindow(); let _dgW = await executeBattle(["boss_dark_general"]); showGoldWindow(); updateGoldWindow();
@@ -14568,11 +14578,13 @@ ${_sns[_ri(_sns.length)]}
                 if (_pw) {
                     partyData.flags.flag_pirate_king_cleared = true;
                     AudioManager.playBGM('victory');
-                    await typeMessage("【海賊王バルゴ】\nぐはっ……！ やりやがった……！\n……お前、今 いくつだ？");
-                    await typeMessage("【海賊王バルゴ】\n……俺が お前と 同じ 歳の 時\nエニシアの 王に「選ばれた」んだよ。\n「お前が 希望だ」ってな。\n結果は 見ての とおりだ——\n俺は 死ぬはずだった。\n王の 思惑通りに な。");
-                    await typeMessage("【海賊王バルゴ】\nだが 死ぬのが 嫌で……\n本音で 戦い続けたら 生き延びちまった。\nそれから 王に 頼らず 生きることにした。\nこの 海が 俺の 国だ。");
-                    await typeMessage("【海賊王バルゴ】\nお前もな……\n「王の 期待通り」に 動いたら ダメだぞ。\nあいつは お前を 信じてなんか いない。\n「使えるうちに 使い 捨てる」——\nそれだけだ。 分かるか？");
-                    await typeMessage("【海賊王バルゴ】\n……まあ 今は 信じらんねえよな。\nでも いつか 分かる日が 来る。\nその時 この 海図が 役に立つ。\n……持ってけ。");
+                    beginNarration('dread');
+                    await typeMessage("【海賊王バルゴ】\nぐはっ……！ やりやがった……！\n……お前、今 いくつだ？", {slow:true});
+                    await typeMessage("【海賊王バルゴ】\n……俺が お前と 同じ 歳の 時\nエニシアの 王に「選ばれた」んだよ。\n「お前が 希望だ」ってな。\n結果は 見ての とおりだ——\n俺は 死ぬはずだった。\n王の 思惑通りに な。", {slow:true});
+                    await typeMessage("【海賊王バルゴ】\nだが 死ぬのが 嫌で……\n本音で 戦い続けたら 生き延びちまった。\nそれから 王に 頼らず 生きることにした。\nこの 海が 俺の 国だ。", {slow:true});
+                    await typeMessage("【海賊王バルゴ】\nお前もな……\n「王の 期待通り」に 動いたら ダメだぞ。\nあいつは お前を 信じてなんか いない。\n「使えるうちに 使い 捨てる」——\nそれだけだ。 分かるか？", {slow:true});
+                    await typeMessage("【海賊王バルゴ】\n……まあ 今は 信じらんねえよな。\nでも いつか 分かる日が 来る。\nその時 この 海図が 役に立つ。\n……持ってけ。", {slow:true});
+                    endNarration();
                     AudioManager.playSE('item_get');
                     await typeMessage("海賊王バルゴから 『東の海図』を 受け取った！\n北東の 天空の 塔への 道が 開けた！");
                     let tgt2 = partyData.members[0]; if (tgt2.inventory.length < 8) tgt2.inventory.push("w_trident"); else tgt2.inventory[0] = "w_trident";
