@@ -8691,6 +8691,9 @@ function beginNarration(tintMode) {
         mw.style.border = 'none';
         mw.style.boxShadow = 'none';
     }
+    // 巻物の没入感を削ぐため、地名ラベルは一時的に隠す
+    const mn = document.getElementById('map-name-window');
+    if (mn) { mn._narrPrevDisplay = mn.style.display; mn.style.display = 'none'; }
     setStoryTint(tintMode || 'dim');
 }
 function endNarration() {
@@ -8698,6 +8701,8 @@ function endNarration() {
     _narrationOn = false;
     const page = document.getElementById('narration-page');
     if (page) page.style.opacity = '0';
+    const mn = document.getElementById('map-name-window');
+    if (mn && mn._narrPrevDisplay !== undefined) { mn.style.display = mn._narrPrevDisplay; delete mn._narrPrevDisplay; }
     const mw = document.getElementById('msg-window');
     if (mw && mw._narrOrig) {
         mw.style.top = mw._narrOrig.top || ''; mw.style.bottom = mw._narrOrig.bottom || '';
@@ -18100,16 +18105,19 @@ async function showTitleScreen() {
             await new Promise(r => setTimeout(r, 200));
             _screen.style.transition = 'opacity 1.2s'; _screen.style.opacity = '1';
             await new Promise(r => setTimeout(r, 1000));
-            await typeMessage("────── エニシア王国 ──────");
-            await typeMessage("ボルド王の 治める この国は、高い 城壁と 閉ざされた 国境に 守られ、平穏だった。\n誰も 争いを 望まなかった。\nただ……ひとつだけ 誰も 口に しない ことが あった。");
-            await typeMessage("国境の 外へ 出た 者は、二度と 戻らない。\n何百年も 前、世界は 一つに 繋がっていたと いう。\nだが 大いなる「分断」が 世界を 引き裂いて 以来\n隣国は 敵、外は 死の 世界だと 教えられてきた。");
-            await typeMessage(`${_hero}は 国境の 見張り台の そばで 育った 若者だった。\n旅立ちの 前夜……\n幼い頃から 世話に なった 老いた 門番が 小声で 囁いた。\n「……本当は 見た ことが あるんじゃ。\n壁の 向こうにも、同じように 笑う 人々が いるのを」`);
-            await typeMessage(`「いつか この目で 確かめる。\n────── 壁の 向こうに 何が あるのかを。」`);
-            await typeMessage(`（──争いは、いつも「向こう」から 来ると 教えられて 育った。\nけれど、老いた 門番の 囁きだけが\nずっと 胸の 奥に 引っかかっていた。\nなら、恐れるべきは 向こう側じゃない。\n恐れるべきは、確かめもせずに 心を 閉ざす、\nこちら側の 弱さだ──）`);
-            await typeMessage(`（怖くないと 言えば 嘘になる。\nそれでも──たとえ 幾度 拒まれても、笑われても、傷ついても。\nわたしは、人は 再び 手を 取り合えると、\n信じ続けると 決めた。\nそれが、この 旅で わたしが 持って行ける、\nたったひとつの 武器だから。）`);
-            await typeMessage(`エニシアの 城下町に 戻った ${_hero}。\nボルド王が「境界の 使者」を 選ぶという 知らせが 届いた……`);
-            await typeMessage(`まずは この 城下町の 城へ 向かい、\nボルド王に 会おう。\n（メニューの「ちず」で いつでも 現在地を 確認できる）`);
-            await typeMessage(`────── だが この旅の 果てに\n${_hero}を 待つのは\n世界を もう一度 繋ぎ直す、長い 長い 道のりだった ──────`);
+            await showChapterTitle("プロローグ", "エニシア王国");
+            beginNarration();
+            await typeMessage("────── エニシア王国 ──────", {slow:true});
+            await typeMessage("ボルド王の 治める この国は、高い 城壁と 閉ざされた 国境に 守られ、平穏だった。\n誰も 争いを 望まなかった。\nただ……ひとつだけ 誰も 口に しない ことが あった。", {slow:true});
+            await typeMessage("国境の 外へ 出た 者は、二度と 戻らない。\n何百年も 前、世界は 一つに 繋がっていたと いう。\nだが 大いなる「分断」が 世界を 引き裂いて 以来\n隣国は 敵、外は 死の 世界だと 教えられてきた。", {slow:true});
+            await typeMessage(`${_hero}は 国境の 見張り台の そばで 育った 若者だった。\n旅立ちの 前夜……\n幼い頃から 世話に なった 老いた 門番が 小声で 囁いた。\n「……本当は 見た ことが あるんじゃ。\n壁の 向こうにも、同じように 笑う 人々が いるのを」`, {slow:true});
+            await typeMessage(`「いつか この目で 確かめる。\n────── 壁の 向こうに 何が あるのかを。」`, {slow:true});
+            await typeMessage(`（──争いは、いつも「向こう」から 来ると 教えられて 育った。\nけれど、老いた 門番の 囁きだけが\nずっと 胸の 奥に 引っかかっていた。\nなら、恐れるべきは 向こう側じゃない。\n恐れるべきは、確かめもせずに 心を 閉ざす、\nこちら側の 弱さだ──）`, {slow:true});
+            await typeMessage(`（怖くないと 言えば 嘘になる。\nそれでも──たとえ 幾度 拒まれても、笑われても、傷ついても。\nわたしは、人は 再び 手を 取り合えると、\n信じ続けると 決めた。\nそれが、この 旅で わたしが 持って行ける、\nたったひとつの 武器だから。）`, {slow:true});
+            await typeMessage(`エニシアの 城下町に 戻った ${_hero}。\nボルド王が「境界の 使者」を 選ぶという 知らせが 届いた……`, {slow:true});
+            await typeMessage(`まずは この 城下町の 城へ 向かい、\nボルド王に 会おう。\n（メニューの「ちず」で いつでも 現在地を 確認できる）`, {slow:true});
+            await typeMessage(`────── だが この旅の 果てに\n${_hero}を 待つのは\n世界を もう一度 繋ぎ直す、長い 長い 道のりだった ──────`, {slow:true});
+            endNarration();
             _screen.style.transition = ''; _screen.style.opacity = '1';
             hideAllWindows(); state = 'FIELD'; drawMap(); updateBGM(); updatePartyStatus(); updateGoldWindow(); startFieldLoop();
             return;
