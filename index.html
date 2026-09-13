@@ -13557,11 +13557,14 @@ async function checkAction() {
                 if (!getSQ('sq_11')) {
                     startSQ('sq_11');
                     await typeMessage("【ザーモ王の霊】\nよくぞ……来てくれた……\nここは 水の国ノルドの 分家、ザーモ。\nこの 城は 数百年前……\n暗黒公リッチに 乗っ取られた……");
+                    await typeMessage("【ザーモ王の霊】\n奴は……もとは わしの 宮廷魔導士 だった。\n忠義に 厚い 男だったが……\nある 日 わしが 隣国からの 貢物を\n奴の 進言ではなく 別の 者の 案で\n受け取ったことを、根に 持ったのだ。");
+                    await typeMessage("【ザーモ王の霊】\n『長年 尽くしてきた 私より、\n口先だけの 新参者を 選ぶのか』と……。\n些細な 面子の 傷が、\n奴を 闇へと 変えて しまった。\nわしは 気づく べきだった……");
                     await typeMessage("【ザーモ王の霊】\n地下に 封印の鍵が 眠っている……\nリッチを 倒し……この 城を\n解放してくれ……！\n（ふしぎな台帳に 記録された）");
                 } else if (getSQ('sq_11') === 1) {
                     await typeMessage("【ザーモ王の霊】\n地下に 封印の鍵が あるはずだ……\nリッチに 気をつけてくれ……！");
                 } else if (getSQ('sq_11') >= 3 && !isSQDone('sq_11')) {
                     await typeMessage("【ザーモ王の霊】\nリッチを 倒してくれたか……！\nありがとう……心より 感謝する……");
+                    await typeMessage("【ザーモ王の霊】\n……最期に 奴の 声が 聞こえた 気が した。\n『意固地に なっていた』と……。\nもっと 早くに 一言 声を かけて いれば、\nこんな 結末には ならなかったのかも しれぬ……");
                     advanceSQ('sq_11', 4);
                     await grantSQReward('sq_11');
                     await typeMessage("【ザーモ王の霊】\nこの 王冠を 受け取ってくれ……\n長い 眠りに つく 前に……\nありがとう……\n（「封印の古城ザーモ」達成！）");
@@ -13590,6 +13593,7 @@ async function checkAction() {
                     state='FIELD'; hideAllWindows(); drawMap(); return;
                 }
                 await typeMessage("【暗黒公リッチ】\nぐふふ……！ よくぞ ここまで 来た人間よ！\nこの 城は 永遠に 我が 支配下……\nそなたを 塵にしてくれるわ！！");
+                await typeMessage("【暗黒公リッチ】\n……わしは 何百年も 前から\nこの 王に 尽くしてきた 忠臣 だったのだぞ？\nそれを 一言の 相談も なく\n他の 者の 案を 選びおって……！\nその 屈辱、忘れられると でも 思ったか！");
                 const _yn = await selectMenu(["戦う！","逃げる"],'cmd-window',0,true);
                 if (_yn===1) { await typeMessage("（リッチの 圧倒的な 魔力……\n今は まだ 無理だ……！）"); state='FIELD'; hideAllWindows(); drawMap(); return; }
                 hideGoldWindow(); let _w=await executeBattle(["boss_zarmo_lich"]); showGoldWindow(); updateGoldWindow();
@@ -13597,6 +13601,7 @@ async function checkAction() {
                     partyData.flags.flag_zarmo_lich_cleared = true;
                     AudioManager.playBGM('victory');
                     await typeMessage("【暗黒公リッチ】\nばかな……！ 人間ごときに……\n私が……敗れる……だと……！！");
+                    await typeMessage("【暗黒公リッチ】\n……そうか。\n面子など、とうに 塵と 化して\n何百年も 経っていたのだな……\n王よ……わしは……\n何を 意固地に なっていたのだろうな……");
                     await typeMessage("暗黒公リッチが 消え去った！\n古城に 光が 戻りつつある……！");
                     advanceSQ('sq_11', 3);
                     await typeMessage("（ふしぎな台帳に 記録された）\nザーモ王の 霊に 報告しよう。");
@@ -13623,11 +13628,14 @@ async function checkAction() {
                 if (!getSQ('sq_12')) {
                     startSQ('sq_12');
                     await typeMessage("【エストリア王】\nよくぞ 木の国 エストリアへ。\n我らは 長らく 西の 金の国カガネの 斧を\n恐れて 国境を 固めてきた……\nだが お前のような 者になら\n王国を 託せるやもしれぬ。");
+                    await typeMessage("【エストリア王】\n……正直に 言おう。\n余には 世継ぎが おらぬ。\n先の 遠征で、唯一 見込んでいた 甥を\n地下迷宮で 亡くしてから……\n誰を 信じて 良いのか、\nずっと 分からずに いたのだ。");
+                    await typeMessage("【エストリア王】\n血筋でも、家柄でも ない。\n次に この国を 託す 者は……\n己の 力で 困難に 立ち向かった 者で\nあってほしい。それが 甥の 弔いにも なる。");
                     await typeMessage("【エストリア王】\n余は 真の 覇者を 探しておる。\n東の 地下迷宮と 魔法使いの塔……\nこの 二つを 制した 者こそ\n真の 覇者と 認めよう！\n（ふしぎな台帳に 記録された）");
                 } else if (getSQ('sq_12') === 1) {
                     await typeMessage("【エストリア王】\n東の 地下迷宮と 魔法使いの塔を\n制してくるのじゃ。\n両方を 制した 者にのみ……\n王国の 全権を 与えよう。");
                 } else if (getSQ('sq_12') === 3 && !isSQDone('sq_12')) {
                     await typeMessage("【エストリア王】\nなんと……両方を 制したか！！\nもはや 覇者の 力ではなく、\nお前の 人柄こそを 信じよう……！");
+                    await typeMessage("【エストリア王】\n……あの子も きっと\nこんな 顔を していたのだろうな。\n困難に 挑む ときの、\n迷いの ない、まっすぐな 顔を。");
                     advanceSQ('sq_12', 4);
                     await grantSQReward('sq_12');
                     await typeMessage("【エストリア王】\nエストリアの 剣を 授けよう。\nこれは 王国が 心から 信頼する 者にのみ\n渡す 剣じゃ……\nよく ぞ やり遂げた！\n（「エストリアが託す信頼」達成！）");
@@ -13641,6 +13649,7 @@ async function checkAction() {
             if (npc.id === "npc_estoria_sage") {
                 if (getSQ('sq_14') === 2 && !isSQDone('sq_14')) {
                     await typeMessage("【宮廷賢者】\nおお……カガネの 鋼片を 持ち帰ったか！\nこれを 森の 若木と 鍛え合わせれば……\n木と 金、二つの 意地が ぶつかる 剣に なろう。");
+                    await typeMessage("【宮廷賢者】\nドルバの奴め……合言葉に 気づいたか。\nふふ、修行時代から 意地っ張りな 奴じゃったが\n根は 誰より 律儀で なあ。\nこんな 形で また 話せる日が 来ようとはな。");
                     advanceSQ('sq_14', 3);
                     await grantSQReward('sq_14');
                     await typeMessage("【宮廷賢者】\n『銀樹の剣』の 完成じゃ。\n斧を 捨てた カガネの 鍛冶師と\nうちの 木工師が 意地を 張り合って 作った。\n斬れ味は 保証する……\n何せ、二つの 意地が ぶつかって できた 剣だからな。\n（「エストリアとカガネの停戦」達成！）");
@@ -13651,6 +13660,7 @@ async function checkAction() {
                 } else {
                     await typeMessage("【宮廷賢者】\n東の 地下迷宮には 恐ろしい 覇者が……\n魔法使いの塔には 魔法王が 君臨しておる。\n両方を 倒せた 者こそ\n真の エストリアの 覇者と なれる！");
                     await typeMessage("【宮廷賢者】\n……ところで もう一つ 頼みが ある。\n西の 金の国 カガネへ、この 和解の 手紙を\n届けては くれまいか。\n長年 睨み合ってきた 隣国じゃが……\nそろそろ 変わる 時だと 思うのじゃ。");
+                    await typeMessage("【宮廷賢者】\n実は……あそこの 鍛冶頭ドルバとは\n若い頃、共に 修行した 仲でな。\n国境が 閉ざされてから\n一度も 便りを 交わせずに おった。\nこの 手紙には、あやつにしか 分からぬ\n合言葉を 忍ばせて ある。");
                     startSQ('sq_14');
                     await typeMessage("（ふしぎな台帳に 「エストリアとカガネの停戦」が 記録された）");
                 }
@@ -13662,6 +13672,8 @@ async function checkAction() {
                 if (!getSQ('sq_13')) {
                     startSQ('sq_13');
                     await typeMessage("【デセルタ王】\nようこそ 炎の国 デセルタへ。\nこの 国は 古より 砂嵐の 呪いと\n渇きに 苦しんでいる……。\n北の 水の国ノルドを 頼れぬまま\n長い 年月が 過ぎた。");
+                    await typeMessage("【デセルタ王】\n伝承では……初代の 王が\n『民に 永遠の 水を』と 砂漠の 精霊に\n禁忌の 契約を 持ちかけたのが\n始まりだと いう。\n精霊は 応えたが、代償に\n王の 魂を 求めたそうだ。");
+                    await typeMessage("【デセルタ王】\n以来、初代王は 遺跡の 奥で\n乾いた まま 朽ちることも 死ぬことも できず\n何百年も 彷徨っていると……\nそれが『ミイラ王』の 正体だと\n言い伝えられておる。");
                     await typeMessage("【デセルタ王】\n砂漠の 遺跡に ミイラ王が 眠り\n封印の 宝箱を 守っている……\nミイラ王を 倒し 封印を 解いてくれ！\n（ふしぎな台帳に 記録された）");
                 } else if (getSQ('sq_13') === 2 && !isSQDone('sq_13')) {
                     await typeMessage("【デセルタ王】\nミイラ王を 倒したか……！\n次は 預言者から 封印の印を 受け取り\n砂漠の 封印を 完成させてくれ。");
@@ -13679,7 +13691,9 @@ async function checkAction() {
             }
             if (npc.id === "npc_deserta_oracle") {
                 if (getSQ('sq_13') === 2) {
-                    await typeMessage("【砂漠の預言者】\nミイラ王を 倒した……！\nではこれを……封印の印じゃ。\nデセルタ王に 届けよ。");
+                    await typeMessage("【砂漠の預言者】\nミイラ王を 倒した……！\n……あの方の 魂が、ようやく\n安らかに なられたのですね。");
+                    await typeMessage("【砂漠の預言者】\n私たち 預言者の 血筋は、\n代々 あの 初代王の 血を 引くと\n言い伝えられて おります。\nこの 印を 継ぐ 度に、\n先祖の 過ちを 想わない日は ありません。");
+                    await typeMessage("【砂漠の預言者】\nではこれを……封印の印じゃ。\nデセルタ王に 届けよ。");
                     advanceSQ('sq_13', 3);
                     await typeMessage("（ふしぎな台帳に 記録された）");
                 } else if (getSQ('sq_13') >= 3) {
@@ -13698,6 +13712,7 @@ async function checkAction() {
             if (npc.id === "npc_deserta_soldier") {
                 if (getSQ('sq_15') === 2 && !isSQDone('sq_15')) {
                     await typeMessage("【砂漠の衛兵】\nおお……北の 氷晶を 持ち帰ったか！\nこれは……本当に 水の国が 応えて くれたのか。");
+                    await typeMessage("【砂漠の衛兵】\n……三代前の 誤解が、\nようやく 解ける 日が 来るとはな。\n船長殿の 祖父君の 名誉も、\nこれで 少しは 報われよう。");
                     advanceSQ('sq_15', 3);
                     await grantSQReward('sq_15');
                     await typeMessage("【砂漠の衛兵】\n『氷炎の杖』の 完成だ。\nデセルタの 炎と ノルドの 氷、\nどちらも 譲らなかった 末に……\n杖の 中で 溶け合わずに 共存する 術を 見つけた。\n最も 遠かった 二国が 作ったにしちゃ、\n驚くほど 美しい 杖だ。\n（「デセルタとノルドの雪解け」達成！）");
@@ -13707,7 +13722,8 @@ async function checkAction() {
                     await typeMessage("【砂漠の衛兵】\nデセルタと ノルド……\n最も 遠かった 二国に 雪解けが 来るとはな。\nお前たちの おかげだ。");
                 } else {
                     await typeMessage("【砂漠の衛兵】\nこの 国は 火の 国。\nずっと 北の 水の国 ノルドを\n恐れて 生きてきた……\n灯火を 消される 夢を 見るのだ。");
-                    await typeMessage("【砂漠の衛兵】\n……だが 本当は、ただ 手を 取り合いたい だけなのかも しれん。\nこの「和解の 証」を、北の 港 ノルドの\n船長に 届けては くれないか？");
+                    await typeMessage("【砂漠の衛兵】\n三代前……大津波が この国の 沿岸を 襲った 時、\nノルドの 船団が 略奪に 来たと\n言い伝えられておる。\n本当は 助けに 来ただけだったという 説も あるが……\n真偽は もう 誰にも 分からぬ。");
+                    await typeMessage("【砂漠の衛兵】\n……だが 本当は、ただ 手を 取り合いたい だけなのかも しれん。\n何代も 前の 誤解の ために、\nいつまで 睨み合い続ければ 良いのか。\nこの「和解の 証」を、北の 港 ノルドの\n船長に 届けては くれないか？");
                     startSQ('sq_15');
                     await typeMessage("（ふしぎな台帳に 「デセルタとノルドの雪解け」が 記録された）");
                 }
@@ -13729,7 +13745,9 @@ async function checkAction() {
             if (npc.id === "npc_kagane_smith") {
                 if (getSQ('sq_14') === 1 && !isSQDone('sq_14')) {
                     await typeMessage("【鍛冶頭ドルバ】\n……む？ エストリアの 宮廷賢者からの\n手紙……？");
-                    await typeMessage("【鍛冶頭ドルバ】\n（震える 手で 読み進める……）\n……そうか。 まだ 覚えていて くれたか。\nよし……これを 持って 帰れ。\nカガネ最高の 鋼片じゃ。\n宮廷賢者に 渡してくれ。");
+                    await typeMessage("【鍛冶頭ドルバ】\n（震える 手で 読み進める……）\n最後の 一文に……\n『鋼と 若木、意地の 張り合いは\nそろそろ 終いに せぬか』と ある。\nこれは……あやつと わししか 知らぬ\n修行時代の 合言葉じゃ！");
+                    await typeMessage("【鍛冶頭ドルバ】\n……そうか。 まだ 覚えていて くれたか。\n国境が 閉ざされてから\n何十年も 意地を 張り 続けて きたが……\nもう 潮時 なのかもな。");
+                    await typeMessage("【鍛冶頭ドルバ】\nよし……これを 持って 帰れ。\nカガネ最高の 鋼片じゃ。\n宮廷賢者に 渡してくれ。");
                     advanceSQ('sq_14', 2);
                     await typeMessage("（ふしぎな台帳に 「鍛冶頭ドルバに手紙を届けた」が 記録された）");
                 } else if (getSQ('sq_14') >= 2) {
@@ -13815,10 +13833,11 @@ async function checkAction() {
             if (npc.id === "boss_desert_mummy") {
                 if (partyData.flags.flag_desert_mummy_cleared) { await typeMessage("（ミイラ王は 既に 倒された）"); state='FIELD'; hideAllWindows(); drawMap(); return; }
                 await typeMessage("【砂漠のミイラ王】\nウゴゴ……！ この 遺跡を 荒らす者は……\n我の 呪いで 封印するのだ！！");
+                await typeMessage("【砂漠のミイラ王】\n……民に 水を、と 願っただけだった。\nそれが なぜ……こんな 姿に……\n誰も この 苦しみを 終わらせては くれぬ！");
                 const _yn=await selectMenu(["戦う！","逃げる"],'cmd-window',0,true);
                 if (_yn===1) { state='FIELD'; hideAllWindows(); drawMap(); return; }
                 hideGoldWindow(); let _w=await executeBattle(["boss_desert_mummy"]); showGoldWindow(); updateGoldWindow();
-                if (_w) { partyData.flags.flag_desert_mummy_cleared=true; AudioManager.playBGM('victory'); await typeMessage("砂漠のミイラ王を 倒した！\n砂漠の 呪縛が 弱まった……！"); delete currentMap.npcs[key]; advanceSQ('sq_13',2); await typeMessage("（ふしぎな台帳に 記録された）\n砂漠の 預言者に 報告しよう。"); } else return;
+                if (_w) { partyData.flags.flag_desert_mummy_cleared=true; AudioManager.playBGM('victory'); await typeMessage("砂漠のミイラ王を 倒した！\n砂漠の 呪縛が 弱まった……！"); await typeMessage("【砂漠のミイラ王】\n……ようやく、か……\n民よ、すまなかった……\n渇きを 癒す 良き 王で いたかった……\nそれだけだった……のに……"); delete currentMap.npcs[key]; advanceSQ('sq_13',2); await typeMessage("（ふしぎな台帳に 記録された）\n砂漠の 預言者に 報告しよう。"); } else return;
                 state='FIELD'; hideAllWindows(); drawMap(); return;
             }
             // 海底神殿ボス
@@ -14068,7 +14087,8 @@ async function checkAction() {
             if (npc.id === "npc_nord_captain") {
                 if (getSQ('sq_15') === 1 && !isSQDone('sq_15')) {
                     await typeMessage("【港の船長】\n……デセルタからの 「和解の 証」だと……？\n南の 火の国から、水の国の 我らに……？");
-                    await typeMessage("【港の船長】\n（しばし 黙り込み……やがて 静かに 頷く）\n……受け取ろう。\nこれを 持って行け——北の 氷晶だ。\nデセルタに 届けてくれ。");
+                    await typeMessage("【港の船長】\n我らの 船乗りの 間にも、\n『三代前の 略奪者の 末裔』と\n陰で 呼ばれていると 聞いたことが ある。\n本当は 助けに 向かった 船団だったと、\nわしの 祖父は 言い残して 逝ったが……\n誰も 信じては くれなかった。");
+                    await typeMessage("【港の船長】\n（しばし 黙り込み……やがて 静かに 頷く）\n……受け取ろう。\n祖父の 名誉の ためにも、な。\nこれを 持って行け——北の 氷晶だ。\nデセルタに 届けてくれ。");
                     advanceSQ('sq_15', 2);
                     await typeMessage("（ふしぎな台帳に 「港の船長に和解の証を届けた」が 記録された）");
                     state='FIELD'; hideAllWindows(); drawMap(); return;
